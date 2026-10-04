@@ -1,0 +1,40 @@
+// Cozy Dogs - client side of the community goal, player-to-player trading window and the shared-state helpers.
+'use strict';
+// =============== community goal ===============
+H.goal=m=>{S.goal=m;UI.goalpill();UI.dock();if(modOpen('community'))renderCommunity()};
+const goalReady=()=>S.goal?S.goal.tiers.filter(x=>x.can).length:0;
+UI.goalpill=function(){const g=S.goal,el=$('#goalpill');if(!g){el.classList.add('hidden');return}el.classList.remove('hidden');const pct=Math.min(100,Math.floor(g.total/g.target*100)),c=goalReady();
+ el.innerHTML=`<span class="e">${g.e}</span><div class="gp"><b>${esc(t(g.n))}</b><div class="prog"><i style="width:${pct}%"></i></div></div><span class="pc">${pct}%</span>${c?`<span class="bd">${c}</span>`:''}`}
+DO.community=()=>{send({t:'goal'});renderCommunity()};
+function countdown(ms){const th=S.set.lang=='th',s=Math.max(0,Math.floor((ms-Date.now())/1000)),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?d+(th?' วัน ':'d ')+h+(th?' ชม.':'h'):h+(th?' ชม. ':'h ')+m+(th?' นาที':'m')}
+function renderCommunity(){const g=S.goal,th=S.set.lang=='th';if(!g){modal('community','🌍 '+t('Community'),'<div class="muted center">…</div>','sm');return}
+ const pct=Math.min(100,g.total/g.target*100),done=g.total>=g.target;
+ const marks=g.tiers.map(x=>`<span class="mk ${x.ok?'ok':''}" style="left:${x.at*100}%">🎁</span>`).join('');
+ modal('community','🌍 '+t('Community'),`<div class="goalhead"><span class="ge">${g.e}</span><div style="flex:1"><div class="big" style="font-size:19px">${esc(t(g.n))}</div><div class="muted">${th?'ช่วยกันทำให้ครบทั้งเซิร์ฟเวอร์ — รีเซ็ตทุกวันจันทร์':'The whole server works together — resets every Monday'}</div></div><div class="pill">⏳ ${countdown(g.ends)}</div></div>
+ <div class="gbar"><i style="width:${pct}%"></i>${marks}</div>
+ <div class="center" style="font-weight:900;margin:8px 0 12px">${fmt(g.total)} / ${fmt(g.target)} ${done?'🎉':''} <span class="muted">· ${th?'คุณช่วยไป':'You'}: <b style="color:var(--ink)">${g.me}</b></span></div>
+ <div class="list">${g.tiers.map((x,i)=>`<div class="li" style="${x.ok?'background:#fff3c4':''}"><b style="width:46px;font-size:17px">${Math.round(x.at*100)}%</b><div class="g"><span class="rw" style="display:block">${rewardTxt(x.r)}</span><small>${x.ok?(g.me>=g.min?(th?'พร้อมรับ':'Ready'):(th?'ต้องช่วยอย่างน้อย '+g.min+' ครั้ง':'Contribute at least '+g.min)):(th?'ยังไม่ถึงเป้า':'Not reached yet')}</small></div><button class="btn sm ${x.claimed?'dis':x.can?'mint':'dis'}" data-do="goalclaim" data-i="${i}">${x.claimed?'✔':t('Claim')}</button></div>`).join('')}</div>
+ <h4 style="margin:12px 0 6px">🏅 ${th?'ผู้ช่วยสูงสุด':'Top helpers'}</h4><div class="list">${g.top.map((x,i)=>`<div class="li" style="${x.n==S.name?'background:#fff3c4':''}"><b style="width:30px;font-size:18px;text-align:center">${['🥇','🥈','🥉'][i]||i+1}</b><div class="g"><b>${esc(x.n)}</b></div><span class="rw">${fmt(x.v)}</span></div>`).join('')||'<div class="muted center">—</div>'}</div>
+ <div class="muted center" style="margin-top:6px">${th?'ทุกการกระทำที่เกี่ยวข้องของผู้เล่นทุกคนจะนับรวมกัน':'Every matching action by every player counts toward the bar.'}</div>`,'sm')}
+DO.goalclaim=d=>send({t:'goal_claim',i:+d.i});
+// =============== trading ===============
+H.trade_inv=m=>{sfx('notify');const th=S.set.lang=='th';const ov=modal('tinv','🔁 '+t('Trade'),`<div class="center"><div class="big" style="margin:4px 0 6px">${esc(m.from)} <span class="muted">Lv${m.lvl}</span></div><div class="muted" style="margin-bottom:12px">${th?'ขอแลกของกับคุณ':'wants to trade with you'}</div><div class="row"><button class="btn ghost" data-do="tans" data-from="${esc(m.from)}" data-ok="0">${t('Decline')}</button><button class="btn mint" data-do="tans" data-from="${esc(m.from)}" data-ok="1">${t('Accept')}</button></div></div>`,'sm');setTimeout(()=>{if(document.body.contains(ov))closeMod('tinv')},30000)};
+DO.tans=d=>{closeMod('tinv');send({t:'trade_ans',from:d.from,ok:d.ok=='1'})};
+DO.tradereq=d=>{closeMod('pc');closeMod('friends');send({t:'trade_req',name:d.n})};
+H.trade=v=>{const first=!S.trade;S.trade=v;if(first){closeMod('tinv');closeMod('pc');closeMod('friends');sfx('ok')}renderTrade()};
+H.trade_end=m=>{S.trade=null;closeMod('trade');if(m.ok){sfx('level');toast('🤝 '+(S.set.lang=='th'?'แลกของสำเร็จกับ ':'Trade complete with ')+m.with,4000);for(let i=0;i<4;i++)setTimeout(()=>burst(rnd(200,600),rnd(250,420),pick(['🎁','⭐','✨','🤝']),3),i*140);if(modOpen('dogs'))send({t:'dogs_get'})}else{sfx('err');if(m.why)toast('🔁 '+m.why,4200)}};
+const tIcon=id=>{const it=S.cat.items[id];if(it)return itThumb(it.draw,it.pal,22,'ti');const o=S.cat.food[id]||S.cat.acc[id]||{e:'❔'};return`<span class="te">${o.e}</span>`};
+const tName=id=>{const o=S.cat.items[id]||S.cat.food[id]||S.cat.acc[id];return o?o.n:id};
+function renderTrade(){const v=S.trade;if(!v)return;const th=S.set.lang=='th';
+ const chips=(inv)=>Object.entries(inv).map(([id,n])=>`<div class="tt on"><div class="ti">${tIcon(id)}</div><b>${esc(tName(id))}</b><span class="tn">×${n}</span></div>`).join('');
+ const left=`<div class="tcol"><h4>🙋 ${th?'คุณเสนอ':'You offer'}</h4><div class="tgrid">${Object.keys(v.av).map(id=>{const sel=v.mine.inv[id]||0;return`<div class="tt ${sel?'on':''}"><div class="ti">${tIcon(id)}</div><b>${esc(tName(id))}</b><div class="tq"><button data-do="tadj" data-id="${id}" data-d="-1">−</button><span>${sel}/${v.av[id]}</span><button data-do="tadj" data-id="${id}" data-d="1">+</button></div></div>`}).join('')||`<div class="muted" style="grid-column:1/-1">${th?'ไม่มีไอเทมให้แลก (ของที่วางอยู่ในบ้านหรือใส่อยู่แลกไม่ได้)':'Nothing to offer (placed or worn items are excluded)'}</div>`}</div>
+  <label class="tcoin">🪙 <input id="tcoins" type="number" min="0" max="${v.coins}" value="${v.mine.coins}"> <small>/ ${fmt(v.coins)}</small></label>
+  ${v.dogs.length?`<div class="muted" style="margin-top:6px">🐶 ${th?'เลือกน้องหมา (สูงสุด 3 ตัว)':'Dogs (max 3)'}</div><div class="tdogs">${v.dogs.map(d=>`<div class="td ${v.mine.dogs.some(x=>x.id==d.id)?'on':''}" data-do="tdog" data-id="${d.id}">${thumbHTML(d.breed,d.variant,26,null)}<small>${esc(d.name)}</small></div>`).join('')}</div>`:''}</div>`;
+ const right=`<div class="tcol theirs"><h4>🎁 ${esc(v.with)} ${th?'เสนอ':'offers'} <small class="muted">Lv${v.wlvl}</small></h4><div class="tgrid">${chips(v.theirs.inv)||''}${v.theirs.dogs.map(d=>`<div class="tt on">${thumbHTML(d.breed,d.variant,22,null)}<b>${esc(d.name)}</b></div>`).join('')}</div>${v.theirs.coins?`<div class="tcoin" style="margin-top:8px">🪙 <b>${fmt(v.theirs.coins)}</b></div>`:''}${!Object.keys(v.theirs.inv).length&&!v.theirs.dogs.length&&!v.theirs.coins?`<div class="muted center" style="padding:24px 0">${th?'ยังไม่ได้เสนออะไร…':'Nothing offered yet…'}</div>`:''}</div>`;
+ const ov=modal('trade','🔁 '+t('Trade')+' · '+esc(v.with),`<div class="tcols">${left}${right}</div><div class="tstat">${v.theirOk?'✅ '+esc(v.with)+(th?' ยืนยันแล้ว':' confirmed'):'⏳ '+(th?'รอ ':'Waiting for ')+esc(v.with)+(th?' ยืนยัน':'')}</div><div class="row" style="margin-top:8px"><button class="btn ghost" data-do="tcancel">✖ ${t('Cancel')}</button><button class="btn ${v.myOk?'sun':'mint'}" data-do="tok">${v.myOk?(th?'↩ ยกเลิกการยืนยัน':'↩ Undo'):'✔ '+t('Confirm')}</button></div>`,'lg',{lock:1});
+ paintItemThumbs(ov);paintThumbs(ov);const ci=$('#tcoins',ov);if(ci)ci.onchange=()=>tset({coins:clamp(Math.floor(+ci.value)||0,0,v.coins)})}
+function tset(ch){const v=S.trade;if(!v)return;const o=Object.assign({inv:Object.assign({},v.mine.inv),coins:v.mine.coins,dogs:v.mine.dogs.map(d=>d.id)},ch);send({t:'trade_set',inv:o.inv,coins:o.coins,dogs:o.dogs});sfx('click')}
+DO.tadj=d=>{const v=S.trade;if(!v)return;const inv=Object.assign({},v.mine.inv),n=clamp((inv[d.id]||0)+ +d.d,0,v.av[d.id]||0);if(n)inv[d.id]=n;else delete inv[d.id];tset({inv})};
+DO.tdog=d=>{const v=S.trade;if(!v)return;let ids=v.mine.dogs.map(x=>x.id);ids=ids.includes(d.id)?ids.filter(x=>x!=d.id):[...ids,d.id].slice(0,3);tset({dogs:ids})};
+DO.tok=()=>{if(S.trade)send({t:'trade_ok',v:!S.trade.myOk,ver:S.trade.ver})};
+DO.tcancel=()=>send({t:'trade_cancel'});

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Cozy Dogs</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B6%3C/text%3E%3C/svg%3E">
+<style>/*@CSS*/</style></head>
+<body>
+<section id="login" class="scr on">
+ <canvas id="bgc"></canvas>
+ <div class="loginwrap">
+  <div class="logo"><h1>Cozy Dogs</h1><p data-t="🐾 cozy multiplayer dog house 🐾">🐾 cozy multiplayer dog house 🐾</p></div>
+  <div class="panel logincard">
+   <div class="tabs"><button class="on" data-do="ltab" data-v="login" id="tLogin" data-t="Login">Login</button><button data-do="ltab" data-v="reg" id="tReg" data-t="Register">Register</button></div>
+   <form id="fLogin" autocomplete="on">
+    <label class="fld"><span data-t="Username">Username</span><input id="lUser" autocomplete="username" maxlength="16"></label>
+    <label class="fld"><span data-t="Password">Password</span><input id="lPass" type="password" autocomplete="current-password" maxlength="64"></label>
+    <div class="err" id="lErr"></div>
+    <div class="row"><button class="btn pink" type="submit" data-t="Login">Login</button><button class="btn ghost" type="button" data-do="guest" data-t="Play as Guest">Play as Guest</button></div>
+   </form>
+   <form id="fReg" class="hidden" autocomplete="on">
+    <label class="fld"><span data-t="Username">Username</span><input id="rUser" autocomplete="username" maxlength="16" placeholder="3-16"></label>
+    <label class="fld"><span data-t="Email">Email</span><input id="rMail" type="email" autocomplete="email" maxlength="60"></label>
+    <label class="fld"><span data-t="Password">Password</span><input id="rPass" type="password" autocomplete="new-password" maxlength="64" placeholder="6+"></label>
+    <div class="err" id="rErr"></div>
+    <div class="row"><button class="btn mint" type="submit" data-t="Create account">Create account</button></div>
+   </form>
+  </div>
+  <div class="tip" id="tip"></div>
+  <div class="tip" style="opacity:.8"><a href="#" data-do="lang" style="color:#ffe9c9">TH / EN</a></div>
+ </div>
+</section>
+<section id="game" class="scr">
+ <div id="stage"><canvas id="cv"></canvas></div>
+ <div id="hud">
+  <div class="pcard panel" id="pcard" data-do="profile"></div>
+  <div class="loc panel" id="loc"></div>
+  <div class="cur" id="cur"></div>
+  <div id="ticker"></div>
+  <div class="online panel" id="online"></div>
+  <div class="goalpill panel hidden" id="goalpill" data-do="community"></div>
+ <div class="spill panel hidden" id="starterpill" data-do="starter"></div>
+ <button class="fetchbtn hidden" id="fetchbtn" data-do="fetchtog" title="Fetch">🎾</button>
+ <div class="coach panel hidden" id="coach"></div>
+  <div class="panel hidden" id="parkinfo"></div>
+  <div class="panel hidden" id="parkbar"></div>
+  <div class="care panel hidden" id="care"></div>
+  <div class="chat panel min" id="chat"></div>
+  <div class="bar2 panel hidden" id="visitbar"></div>
+  <div class="dock panel" id="dock"></div>
+  <div class="panel hidden" id="editbar" style="display:none"></div>
+  <div id="itembar"></div>
+ </div>
+</section>
+<div id="mods"></div><div id="toasts"></div><div id="banner"></div><div id="flash"></div>
+<script>/*@JS*/</script>
+</body></html>
