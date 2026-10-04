@@ -79,14 +79,39 @@ const RESERVED=['__proto__','constructor','prototype','hasownproperty','tostring
 let db={players:nul(),accounts:nul(),sessions:nul()};
 for(const f of [DBF,DBF+'.bak']){try{Object.assign(db,JSON.parse(fs.readFileSync(f,'utf8')));break}catch(e){if(e.code!='ENOENT')console.error('could not read',f,e.message)}}
 db.players=nul(db.players);db.accounts=nul(db.accounts);db.sessions=nul(db.sessions);
+// ---- Supabase persistence (optional). Set SUPABASE_URL + SUPABASE_KEY (service_role / secret key) in the host's environment variables
+//      so accounts, coins and dogs survive redeploys and sleeping servers. Without them the game keeps using the local data.json file.
+const SB_URL=(process.env.SUPABASE_URL||'').trim().replace(/\/+$/,''), SB_KEY=(process.env.SUPABASE_KEY||'').trim(), REMOTE=!!(SB_URL&&SB_KEY);
+const SB_H={apikey:SB_KEY,'Content-Type':'application/json'}; if(SB_KEY.startsWith('eyJ'))SB_H.Authorization='Bearer '+SB_KEY;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function remoteLoad(){                 // returns normally only if the read worked: we never start with empty data and overwrite the real save
+  for(let i=1;;i++){
+    try{const r=await fetch(SB_URL+'/rest/v1/game_data?id=eq.main&select=data',{headers:SB_H,signal:AbortSignal.timeout(15000)});
+      if(!r.ok)throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,200));
+      const rows=await r.json();
+      if(rows[0]&&rows[0].data){Object.assign(db,rows[0].data);db.players=nul(db.players);db.accounts=nul(db.accounts);db.sessions=nul(db.sessions);console.log('loaded data from Supabase:',Object.keys(db.accounts).length,'accounts')}
+      else console.log('Supabase is empty - starting fresh (first save will create the row)');
+      return}
+    catch(e){console.error('Supabase load failed ('+i+'/5):',e.message);if(i>=5){console.error('giving up - not starting, so real data is never overwritten');process.exit(1)}await sleep(3000*i)}
+  }}
+let rSaving=false,rPending=false;
+async function remoteSave(){
+  if(rSaving){rPending=true;return}
+  rSaving=true;
+  try{const r=await fetch(SB_URL+'/rest/v1/game_data?on_conflict=id',{method:'POST',headers:{...SB_H,Prefer:'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({id:'main',data:db,updated_at:new Date().toISOString()}),signal:AbortSignal.timeout(15000)});
+    if(!r.ok)throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,200))}
+  catch(e){console.error('Supabase save failed (will retry):',e.message);dirty=true}
+  finally{rSaving=false;if(rPending){rPending=false;remoteSave()}}}
 let dirty=false,lastBak=0;
 function save(){                       // atomic: write a temp file, then rename (a crash mid-write can never leave a half-written data.json)
   try{const tmp=DBF+'.tmp';fs.writeFileSync(tmp,JSON.stringify(db));
     if(Date.now()-lastBak>6e5){try{fs.copyFileSync(DBF,DBF+'.bak')}catch{}lastBak=Date.now()}
-    fs.renameSync(tmp,DBF);dirty=false}catch(e){console.error('save failed:',e.message)}}
+    fs.renameSync(tmp,DBF);dirty=false}catch(e){console.error('save failed:',e.message)}
+  if(REMOTE)remoteSave()}
 const safe=(name,f)=>(...a)=>{try{return f(...a)}catch(e){console.error('['+name+']',e&&e.stack||e)}};
 setInterval(safe('save',()=>{if(dirty)save()}),5000);
-for(const sg of ['SIGINT','SIGTERM'])process.on(sg,()=>{save();process.exit(0)});
+for(const sg of ['SIGINT','SIGTERM'])process.on(sg,async()=>{save();if(REMOTE){await sleep(100);for(let i=0;i<40&&rSaving;i++)await sleep(100)}process.exit(0)});
 process.on('uncaughtException',e=>console.error('uncaught:',e&&e.stack||e));
 process.on('unhandledRejection',e=>console.error('unhandled:',e));
 
@@ -457,4 +482,4 @@ setInterval(()=>{
   }
 },40000);
 server.on('error',e=>{if(e&&e.code=='EADDRINUSE'){console.error('\n[!] พอร์ต '+PORT+' ถูกใช้อยู่แล้ว — น่าจะมีเซิร์ฟเวอร์ Cozy Dogs ตัวเก่าเปิดค้างอยู่ (ปิดหน้าต่างเทอร์มินัลเก่า หรือกด Ctrl+C)\n    หรือรันพอร์ตอื่น:  Windows: set PORT=3001 && node server.js   |   Mac/Linux: PORT=3001 node server.js\n');process.exit(1)}console.error('server error:',e);process.exit(1)});
-server.listen(PORT,()=>console.log('Cozy Dogs on http://localhost:'+PORT));
+(async()=>{if(REMOTE)await remoteLoad();server.listen(PORT,()=>console.log('Cozy Dogs on http://localhost:'+PORT+(REMOTE?'  (data: Supabase)':'  (data: local file)')))})();
