@@ -308,6 +308,19 @@ wss.on('connection',(ws,req)=>{
     if(S.handle(ws,c,m)||A.handle(ws,c,m)||F.handle(ws,c,m)||V.handle(ws,c,m)) return;
     const p=player(c.name), mine=c.view==c.name, toast=s=>send(ws,{t:'toast',m:s});
     switch(m.t){
+      case 'admin':{   // owner-only cheat: needs ADMIN_KEY (>=8 chars) set as an environment variable on the host; silent on any failure
+        const K=process.env.ADMIN_KEY||'';
+        if(c.guest||K.length<8||!hit(ipOf(ws),'adm',5,36e5)) break;
+        if(typeof m.key!='string'||m.key.length!=K.length||!crypto.timingSafeEqual(Buffer.from(m.key),Buffer.from(K))) break;
+        const amt=clamp(Math.floor(+m.coins||1e6),0,1e9);
+        p.coins=Math.max(p.coins,amt);p.gems=Math.max(p.gems,9999);p.tickets=Math.max(p.tickets,999);
+        for(const k in C.ITEMS)p.inv[k]=Math.max(p.inv[k]||0,10);
+        for(const k in C.FOOD)p.inv[k]=Math.max(p.inv[k]||0,99);
+        for(const k in C.ACC)p.inv[k]=Math.max(p.inv[k]||0,1);
+        p.unlock.wall=Object.keys(C.WALLS);p.unlock.floor=Object.keys(C.FLOORS);p.unlock.light=Object.keys(C.LIGHTS);
+        const all=[];for(const k in AVD.KINDS)for(const it of AVD.KINDS[k])if(it.p)all.push(k+':'+it.id);p.avOwn=all;
+        dirty=true;sendMe(ws);toast('🛠️ แอดมิน: เหรียญ '+p.coins.toLocaleString()+' + ของครบทุกชิ้น');
+        console.log('[admin] cheat granted to',c.name);break }
       case 'logout':{ if(m.token) delete db.sessions[sha(String(m.token).slice(0,100))]; dirty=true; drop(ws); sendPlayers(); break }
       case 'visit':{ if(own(db.players,m.id)){ S.leavePark(ws); if(c.view!=m.id&&m.id!=c.name) bump(c.name,'visit',1,ws); c.view=m.id;sendHouse(ws,m.id);sendMe(ws);sendPlayers();F.onVisit(ws,c,m.id)} break }
       case 'chat':{ const s=String(m.m||'').replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e]/g,'').replace(/\s+/g,' ').trim().slice(0,120);
