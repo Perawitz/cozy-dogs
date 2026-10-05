@@ -49,9 +49,14 @@ UI.dock=function(){const m=S.me,fr=S.fr?S.fr.inReq.length:0;
  $('#dock').classList.toggle('hidden',S.edit)}
 UI.online=function(){const l=S.players.filter(p=>p.name!=S.name);$('#online').innerHTML=`<h5 data-do="togonline">🟢 ${t('Online players')} (${S.players.length})</h5>`+(l.length?l.map(p=>`<div class="pl" data-do="visit" data-n="${esc(p.name)}"><i></i><span>${esc(p.name)}${p.park?' 🌳':''}</span><small>Lv${p.lvl}</small><b class="tb" data-do="tradereq" data-n="${esc(p.name)}" title="Trade">🔁</b></div>`).join(''):`<div class="muted" style="font-size:11px">—</div>`)}
 UI.chat=function(){const el=$('#chat'),min=el.classList.contains('min');const log=S.chat.slice(-30).map(c=>`<div><b>${esc(c.from)}</b> ${esc(c.m)}</div>`).join('');
- el.innerHTML=`<div class="hd" data-do="togchat"><span>💬 ${t('Chat')}</span><span>${min?'▲':'▼'}</span></div><div class="log">${log}</div><div class="em">${['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button data-do="emoji" data-e="${e}">${e}</button>`).join('')}</div><form id="chatf"><input maxlength="120" placeholder="…" autocomplete="off"><button class="btn sm pink">➤</button></form>`;
- const lg=$('.log',el);lg.scrollTop=lg.scrollHeight;$('#chatf').onsubmit=e=>{e.preventDefault();const i=$('input',el);if(i.value.trim()){send({t:'chat',m:i.value});i.value=''}}}
-DO.togchat=()=>{const el=$('#chat');el.classList.toggle('min');UI.chat()};
+ let lg=$('.log',el);
+ if(!lg||!$('#chatf',el)){   // build the panel once
+  el.innerHTML=`<div class="hd" data-do="togchat"><span>💬 ${t('Chat')}</span><span>${min?'▲':'▼'}</span></div><div class="log">${log}</div><div class="em">${['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button data-do="emoji" data-e="${e}">${e}</button>`).join('')}</div><form id="chatf"><input maxlength="120" placeholder="…" autocomplete="off" enterkeyhint="send"><button class="btn sm pink">➤</button></form>`;
+  lg=$('.log',el);$('#chatf').onsubmit=e=>{e.preventDefault();const i=$('input',el);if(i.value.trim()){send({t:'chat',m:i.value});i.value=''}}}
+ else{   // later calls only refresh the log + header: rebuilding the <input> on every incoming message dropped focus and the typed text (and closed the phone keyboard)
+  lg.innerHTML=log;const sp=$$('.hd span',el);if(sp[0])sp[0].textContent='💬 '+t('Chat');if(sp[1])sp[1].textContent=min?'▲':'▼'}
+ lg.scrollTop=lg.scrollHeight}
+DO.togchat=()=>{const el=$('#chat');el.classList.toggle('min');UI.chat();if(!el.classList.contains('min')&&matchMedia('(pointer:coarse)').matches){const i=$('input',el);if(i)i.focus()}};
 DO.togonline=()=>{$('#online').classList.toggle('hidden')};
 DO.emoji=d=>send({t:'emoji',e:d.e});
 DO.visit=d=>{if(S.edit)return toast('Finish decorating first');if(Park.on)Park.leaveLocal();send({t:'visit',id:d.n});closeMod('friends')};
@@ -68,7 +73,9 @@ UI.edit=function(){const cat=S.editCat||'all',C=S.cat.items,inv=S.me.inv,placed=
  paintItemThumbs($('#editbar'));$$('#editbar .inv').forEach(el=>el.addEventListener('pointerdown',e=>{if(el.classList.contains('dis'))return;e.preventDefault();startPlace(el.dataset.id,e)}))}
 DO.ecat=d=>{S.editCat=d.k;UI.edit()};
 DO.decor=()=>{if(S.owner!=S.name){send({t:'visit',id:S.name});}S.edit=!S.edit;World.selItem=null;World.drag=null;UI.dock();UI.bars();if(S.edit)toast('🛋️ '+t('Drag items into your room'))};
-DO.flip=flipItem;DO.store=storeItem;
+DO.flip=flipItem;DO.store=storeItem;DO.discard=discardItem;
+addEventListener('keydown',e=>{if(!S.edit||Park.on||!World.selItem)return;const g=e.target,n=g&&g.tagName;if(n=='INPUT'||n=='TEXTAREA'||n=='SELECT'||(g&&g.isContentEditable))return;
+ if(e.key=='Delete'||e.key=='Backspace'){e.preventDefault();storeItem()}else if(e.key=='Escape')selectItem(null)});
 // ---- care card
 const FOODS=['kibble','treat','fruit','cookie','bone','meat','cake'];
 UI.care=function(){const el=$('#care'),d=S.dogs[S.sel];if(!d){el.classList.add('hidden');return}el.classList.remove('hidden');const b=DOGS.BR[d.breed],own=S.owner==S.name,F=S.cat.food;

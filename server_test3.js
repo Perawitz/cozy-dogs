@@ -42,6 +42,14 @@ const startMsg=c=>c.wait('mp_start',8000);
  const eb=await b.wait('mp_end',8000),ec=await c.wait('mp_end',12000);
  ok(eb.me.rank==1&&ec.me.rank==2,'faster human wins');ok(eb.me.coins==60&&ec.me.coins==38,'full rewards vs human ('+eb.me.coins+'/'+ec.me.coins+')');
  ok(eb.res[0].ft>0,'finish time reported');
+ // regression: the player who joined SECOND but crosses the line first must be ranked 1st (rank used to follow join order)
+ const rd=await reg("raceD"),re=await reg("raceE");
+ rd.send({t:"mp_find",g:"race"});await rd.wait("mp_lobby");re.send({t:"mp_find",g:"race"});await re.wait('mp_lobby',2000,x=>x.n==2);
+ await startMsg(rd);await startMsg(re);await sleep(3700);
+ const u1=runTaps(rd,140),u2=runTaps(re,80);await Promise.all([u1,u2]);
+ const ed=await rd.wait("mp_end",8000),ee=await re.wait('mp_end',12000);
+ ok(ee.me.rank==1&&ed.me.rank==2,'second joiner who finishes first is ranked 1st ('+ee.me.rank+'/'+ed.me.rank+')');
+ ok(ed.res.every((x,i)=>ed.res.every((y,j)=>!(x.ft>0&&y.ft>0&&x.ft<y.ft)||x.rank<y.rank)),'ranks follow finish times');
 
  // ---------- 3. lobby cancel + leave mid game
  const d=await reg('lobD');d.send({t:'mp_find',g:'duel'});await d.wait('mp_lobby');d.send({t:'mp_cancel'});await sleep(1700);ok(!d.last('mp_start'),'cancel leaves the lobby (no game)');

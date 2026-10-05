@@ -46,7 +46,7 @@ function checkHungry(){S.hungry={};if(S.owner==S.name)for(const d of Object.valu
 H.dogs=m=>{if(m.full){const keep=new Set(m.dogs.map(d=>d.id));for(const id of Object.keys(S.dogs))if(!keep.has(id))delete S.dogs[id];if(S.sel&&!S.dogs[S.sel]){S.sel=null;UI.care()}}
  const selBefore=S.sel&&S.dogs[S.sel]?S.dogs[S.sel].acc:null;for(const d of m.dogs){const old=S.dogs[d.id];setDog(d);if(old&&old.state!=d.state&&d.state=='EAT')sfx('eat')}
  checkHungry();if(S.sel&&S.dogs[S.sel]){if(S.dogs[S.sel].acc!=selBefore)UI.care();else UI.careBars()}};
-H.dogs_all=m=>{S.allDogs=m.dogs;if(modOpen('pdogs'))renderParkDogs();if(modOpen('dogs'))renderDogs();if(modOpen('prof'))renderProfile()};
+H.dogs_all=m=>{S.allDogs=m.dogs;if(modOpen('pdogs'))renderParkDogs();if(modOpen('bpick'))renderBrawlPick();if(modOpen('dogs'))renderDogs();if(modOpen('prof'))renderProfile()};
 H.items=m=>{const old=new Set(S.items.map(i=>i.uid));S.items=m.items;rebuildItems();if(S.pendingSelect){const n=m.items.find(i=>!old.has(i.uid));if(n){selectItem(n.uid)}S.pendingSelect=null}
  if(World.selItem&&!m.items.some(i=>i.uid==World.selItem))World.selItem=null;if(S.edit)UI.edit();UI.loc()};
 H.deco=m=>{S.deco=m.deco;ROOM.setDeco(S.deco);if(modOpen('shop'))renderShop();sfx('ok')};
@@ -55,7 +55,7 @@ H.players=m=>{S.players=m.list;UI.online()};
 H.chat=m=>{Park.onChat(m);if(!Park.on&&m.from==S.owner)S.avBub={m:m.m,at:performance.now()};S.chat.push(m);if(S.chat.length>60)S.chat.shift();const el=$('#chat');UI.chat();if(el.classList.contains('min')){const hd=$('.hd span',el);if(hd)hd.textContent='💬 '+t('Chat')+' •'}};
 H.event=m=>ticker(m.text);
 H.notify=m=>{toast(locMsg(m.m));sfx('notify')};
-H.toast=m=>{toast(locMsg(m.m));if(/ไม่พอ|ไม่มี|ไม่ได้|เต็ม|Not enough|แล้ว$/.test(m.m)&&!/learned|ปลด|เป็นเพื่อน|ส่ง/.test(m.m))sfx('err')};
+H.toast=m=>{if(S.capBusy)capUnlock();toast(locMsg(m.m));if(/ไม่พอ|ไม่มี|ไม่ได้|เต็ม|Not enough|แล้ว$/.test(m.m)&&!/learned|ปลด|เป็นเพื่อน|ส่ง/.test(m.m))sfx('err')};
 H.levelup=m=>{sfx('level');toast('⭐ '+TT('Level Up!','เลเวลอัป!')+' Lv.'+m.lvl+'  +50🪙 +1💎',4200);const r=cv.getBoundingClientRect();for(let i=0;i<5;i++)setTimeout(()=>burst(rnd(150,650),rnd(250,450),pick(['⭐','🎉','✨']),4),i*150)};
 H.buy_ok=m=>{sfx('coin');const it=S.cat.items[m.id]||S.cat.food[m.id]||S.cat.acc[m.id];toast('🛍️ '+(it?it.n:m.id)+' ×'+m.n)};
 H.equip_ok=m=>{sfx('ok');const d=(S.allDogs||[]).find(x=>x.id==m.dog);if(d)d.acc=m.acc;const s=S.dogs[m.dog];if(s)s.acc=m.acc;if(modOpen('prof'))renderProfile();UI.care()};

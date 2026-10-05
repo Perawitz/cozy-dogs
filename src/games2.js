@@ -1,32 +1,36 @@
 // Cozy Dogs - online mini-game arcade (client). The server owns every room; this file only draws and sends inputs.
-//   Dog Race (alternate taps) · Bone Grab (reaction duel) · Breed Duel (quiz) + the "Games" hub with the lucky wheel and the solo games.
+//   Dog Race (alternate taps) · Bone Grab (reaction duel) · Treat Frenzy · Odd Pup Out · Breed Duel (quiz) + the "Games" hub with the lucky wheel and the solo games.
+//   Dog Brawl (turn-based fights) lives in brawl.js and plugs into the handlers below.
 'use strict';
 const TT=(en,th)=>S.set.lang=='th'?th:en;
 SFX.whoosh=()=>{tone(300,.25,'sawtooth',.03,0,3)};SFX.tick=()=>tone(660,.07,'square',.06);SFX.go=()=>{tone(880,.16,'square',.08);tone(1320,.28,'square',.08,.08)};SFX.step=()=>tone(300+Math.random()*60,.03,'square',.025);
 const OG=[
+ ['brawl','⚔️','Dog Brawl','ให้น้องหมาสู้กันเอง! แต่ละตัวมีค่า HP / โจมตี / ป้องกัน / ความเร็ว และสกิลพิเศษ 2 อย่างไม่เหมือนกัน ทุกคนเลือกท่าลับพร้อมกันทุกรอบ สู้ 6 รอบ','Dogs fight! Every dog has its own HP / ATK / DEF / SPD and 2 special skills. Everybody picks a move at the same time — 6 rounds.','2-4'],
  ['race','🏁','Dog Race','แตะซ้าย-ขวาสลับกันให้เร็วที่สุด! วิ่งแข่งกับผู้เล่นจริง 2-4 คน','Alternate left / right taps to outrun 2-4 players','2-4'],
  ['grab','🦴','Bone Grab','ดวลปฏิกิริยา 1 ต่อ 1 ใครแตะกระดูกไวกว่าชนะ (ชนะ 3 รอบ)','1v1 reaction duel — first to win 3 rounds','2'],
  ['rush','🍪','Treat Frenzy','ขนมโผล่ทั่วจอ! แตะให้ไวกว่าคนอื่น 🍪+1 🦴+3 ⭐+5 ระวังรองเท้า 🥾 (−2) นาน 24 วินาที','Treats pop up everywhere — tap them before the others! Avoid the boots. 24 seconds','2-4'],
  ['odd','🔍','Odd Pup Out','หาน้องหมาตัวที่แตกต่างจากตะแกรงให้เร็วที่สุด 6 รอบ ยิ่งไปยิ่งยาก','Spot the one different dog in the grid — 6 rounds, getting harder','2-4'],
+ ['rps','✊','Rock Paper Scissors','เป่ายิ้งฉุบ 1 ต่อ 1 กับผู้เล่นจริง ถ้าไม่มีใครอยู่บอทจะมาเล่นด้วย · ชนะรับ 30 เหรียญ (บอทรับครึ่งเดียว)','1v1 Rock-Paper-Scissors against a real player — a bot joins if nobody is around. Win 30 coins (half vs bots).','2','gstart'],
  ['duel','🧠','Breed Duel','ตอบคำถามเรื่องสายพันธุ์และความรู้หมา 5 ข้อ ตอบไวได้แต้มเพิ่ม','5 quick questions about breeds and dog facts — faster = more points','2-4']];
 const MP={prev:[],mv:[],g:null,room:null,pl:[],me:0,lobby:null,res:null,raf:0,iv:0,state:'idle',rn:0,pos:[],fin:[],shown:[],loc:0,lastSide:-1,goAt:0,sc:[],acted:false,q:null,qEnd:0,qms:10000,keysOn:false};
 // ================= hub =================
 DO.games=()=>{send({t:'mp_get'});send({t:'spin_get'});renderHub()};
 H.mp_info=m=>{S.mpInfo=m;if(modOpen('games'))renderHub()};
 function renderHub(){const th=S.set.lang=='th',inf=S.mpInfo||{cap:600,used:0,wait:{}},sp=S.spin;
- const og=OG.map(g=>`<div class="gmcard og" data-do="mpfind" data-g="${g[0]}"><span class="e">${g[1]}</span><div style="flex:1"><b style="font-size:16px">${t(g[2])}</b> <span class="pill">👥 ${g[5]}</span>${inf.wait&&inf.wait[g[0]]?` <span class="pill on">⏳ ${inf.wait[g[0]]} ${TT('waiting','รออยู่')}</span>`:''}<div class="muted">${th?g[3]:g[4]}</div></div></div>`).join('');
+ const og=OG.map(g=>`<div class="gmcard og" data-do="${g[6]||'mpfind'}" data-g="${g[0]}"><span class="e">${g[1]}</span><div style="flex:1"><b style="font-size:16px">${t(g[2])}</b> <span class="pill">👥 ${g[5]}</span>${inf.wait&&inf.wait[g[0]]?` <span class="pill on">⏳ ${inf.wait[g[0]]} ${TT('waiting','รออยู่')}</span>`:''}<div class="muted">${th?g[3]:g[4]}</div></div></div>`).join('');
  modal('games','🎮 '+t('Games'),`<h4 class="hubh">🌐 ${TT('Online games','เกมออนไลน์')}</h4><div class="muted" style="margin-bottom:8px">${TT('Real players join your room · if nobody is around, friendly bots fill in (half rewards).','ผู้เล่นจริงจะเข้าห้องเดียวกับคุณ · ถ้าไม่มีใครอยู่ จะมีบอทมาเล่นด้วย (รางวัลครึ่งเดียว)')}<br>🪙 ${TT('Arcade coins today','เหรียญเกมออนไลน์วันนี้')}: <b>${inf.used}/${inf.cap}</b></div>${og}
  <div class="gmcard" data-do="wheel" style="margin-top:6px"><span class="e">🎰</span><div style="flex:1"><b style="font-size:16px">${TT('Lucky Wheel','วงล้อนำโชค')}</b>${sp&&sp.free||S.me.spinFree?` <span class="pill on">🎁 ${TT('FREE spin!','หมุนฟรี!')}</span>`:''}<div class="muted">${TT('One free spin every day — coins, gems, tickets and more.','หมุนฟรีวันละครั้ง ได้เหรียญ เพชร ตั๋ว และของรางวัลอื่น ๆ')}</div></div></div>
  <h4 class="hubh">🎮 ${TT('Solo mini-games','มินิเกมเล่นคนเดียว')}</h4><div class="muted" style="margin-bottom:8px">${th?'รางวัลเหรียญจากมินิเกมจำกัดวันละ 500 เหรียญ':'Mini game coin rewards are capped at 500 per day.'}</div>`+
-  GAMES.map(g=>`<div class="gmcard" data-do="gstart" data-g="${g[0]}"><span class="e">${g[1]}</span><div><b style="font-size:16px">${t(g[2])}</b><div class="muted">${th?g[3]:g[4]}</div></div></div>`).join(''),'sm')}
+  GAMES.filter(g=>g[0]!='rps').map(g=>`<div class="gmcard" data-do="gstart" data-g="${g[0]}"><span class="e">${g[1]}</span><div><b style="font-size:16px">${t(g[2])}</b><div class="muted">${th?g[3]:g[4]}</div></div></div>`).join(''),'sm')}
 // ================= flow =================
 const mpRoomOpen=()=>!!modOpen('mp');
 function mpModal(title,body,cls){return modal('mp',title,body,cls||'sm',{lock:1})}
 DO.mpfind=d=>{if(MP.g)return toast(TT('Already in a game','คุณอยู่ในเกมอยู่แล้ว'));if(S.edit)return toast(TT('Finish decorating first','ตกแต่งให้เสร็จก่อนนะ'));
- closeMod('games');MP.reset(true);MP.g=d.g;MP.state='lobby';MP.seen=performance.now();send({t:'mp_find',g:d.g,dog:LS.get('cd_pdog',null)});renderLobby({n:1,max:d.g=='grab'?2:4,ms:8000,names:[S.name]})};
+ if(d.g=='brawl'&&!d.dog)return DO.brpick();      // Dog Brawl: choose the fighter first (its stats and skills come from its breed)
+ closeMod('games');MP.reset(true);MP.g=d.g;MP.state='lobby';MP.seen=performance.now();send({t:'mp_find',g:d.g,dog:d.dog||LS.get('cd_pdog',null)});renderLobby({n:1,max:d.g=='grab'?2:4,ms:8000,names:[S.name]})};
 DO.mpcancel=()=>{send({t:'mp_cancel'});MP.reset()};
 DO.mpleave=()=>ask(TT('Leave this game? You will forfeit.','ออกจากเกมนี้? จะนับว่าแพ้นะ'),()=>{send({t:'mp_leave'});MP.reset()},{cls:'red',yes:TT('Leave','ออก')});
-DO.mpagain=()=>{const g=MP.g;MP.reset(true);DO.mpfind({g})};
+DO.mpagain=()=>{const g=MP.g;MP.reset(g!='brawl');DO.mpfind({g})};
 DO.mpclose=()=>{MP.reset();DO.games()};
 MP.reset=(keepOpen)=>{cancelAnimationFrame(MP.raf);clearInterval(MP.iv);Object.assign(MP,{g:null,room:null,pl:[],lobby:null,res:null,state:'idle',pos:[],fin:[],shown:[],prev:[],mv:[],loc:0,lastSide:-1,sc:[],acted:false,q:null,items:{},lockEnd:0});if(!keepOpen)closeMod('mp')};
 MP.abort=()=>{if(MP.g||MP.state!='idle'){MP.reset();toast(TT('Connection lost — game cancelled','การเชื่อมต่อหลุด — ยกเลิกเกม'))}};
@@ -41,7 +45,7 @@ function renderLobby(m){MP.lobby=MP.lobby||{n:m.n,max:m.max,end:performance.now(
  clearInterval(MP.iv);MP.iv=setInterval(()=>{const e=$('#lobs');if(!e||!MP.lobby)return clearInterval(MP.iv);e.textContent=Math.max(0,Math.ceil((MP.lobby.end-performance.now())/1000))},250)}
 // ---- start
 H.mp_start=m=>{clearInterval(MP.iv);if(Park.on)Park.leaveLocal();Object.assign(MP,{g:m.g,room:m,pl:m.pl,me:m.me,lobby:null,state:'count',goAt:performance.now()+m.go,pos:m.pl.map(()=>0),fin:m.pl.map(()=>0),shown:m.pl.map(()=>0),loc:0,lastSide:-1,sc:m.pl.map(()=>0),acted:false,rn:0,lastTick:4});
- S.sel=null;UI.care();sfx('level');({race:startRace,grab:startGrab,duel:startDuel,rush:startRush,odd:startOdd})[m.g](m)};
+ S.sel=null;UI.care();sfx('level');({race:startRace,grab:startGrab,duel:startDuel,rush:startRush,odd:startOdd,brawl:startBrawl})[m.g](m)};
 H.mp_p=m=>send({t:'mp_pr',k:m.k});
 H.mp_gone=m=>toast('🚪 '+m.n+' '+TT('left the game','ออกจากเกมแล้ว'));
 const pName=p=>(p.bot?'🤖 ':'')+esc(p.n);
@@ -135,7 +139,7 @@ H.mp_or=m=>{if(MP.g!='odd')return;MP.state='rev';MP.sc=m.sc;updScores();$$('#ogr
 // ================= results =================
 H.mp_end=m=>{MP.state='done';clearInterval(MP.iv);cancelAnimationFrame(MP.raf);MP.res=m;const th=S.set.lang=='th',me=m.me,med=['🥇','🥈','🥉','4️⃣'],res=m.res.slice().sort((a,b)=>a.rank-b.rank);
  const head=me.forfeit?TT('Opponent left — you win!','คู่ต่อสู้ออกจากเกม — คุณชนะ!'):me.win?TT('You win! 🎉','คุณชนะ! 🎉'):me.rank==1?TT('Finished first','มาเป็นที่ 1'):TT('Finished #','จบอันดับที่ ')+me.rank;
- const rows=res.map(r=>`<div class="li" style="${r.n==S.name?'background:#fff3c4':''}"><b style="width:34px;font-size:20px;text-align:center">${med[r.rank-1]||r.rank}</b>${thumbHTML(r.breed,r.variant,14,null)}<div class="g"><b>${r.bot?'🤖 ':''}${esc(r.n)}${r.left?' 🚪':''}</b><small>${m.g=='race'?(r.ft?r.ft+'s':r.left?TT('left','ออก'):'—'):(m.g=='duel'||m.g=='rush'||m.g=='odd')?r.score+' pts':r.score+' / 3'}</small></div></div>`).join('');
+ const rows=res.map(r=>`<div class="li" style="${r.n==S.name?'background:#fff3c4':''}"><b style="width:34px;font-size:20px;text-align:center">${med[r.rank-1]||r.rank}</b>${thumbHTML(r.breed,r.variant,14,null)}<div class="g"><b>${r.bot?'🤖 ':''}${esc(r.n)}${r.left?' 🚪':''}</b><small>${m.g=='race'?(r.ft?r.ft+'s':r.left?TT('left','ออก'):'—'):m.g=='brawl'?'⚔ '+r.score+' '+TT('damage','ดาเมจ'):(m.g=='duel'||m.g=='rush'||m.g=='odd')?r.score+' pts':r.score+' / 3'}</small></div></div>`).join('');
  mpModal(gicon(m.g)+' '+gname(m.g),`<div class="center"><div class="big" style="margin:4px 0 8px">${head}</div><div class="rwbox">+${me.coins} ${ic('coin','big')} <small>· +${me.xp} XP</small></div>${!me.vsHuman?`<div class="muted">🤖 ${TT('Played with bots — rewards halved','เล่นกับบอท — รางวัลลดครึ่ง')}</div>`:''}${me.capLeft<=0?`<div class="muted" style="color:#d13c4c">${TT('Daily arcade coin cap reached','ครบเพดานเหรียญเกมออนไลน์ของวันนี้แล้ว')}</div>`:''}</div><div class="list" style="margin-top:10px">${rows}</div>
   <div class="row"><button class="btn ghost" data-do="mpclose">${TT('Back to games','กลับไปหน้าเกม')}</button><button class="btn mint" data-do="mpagain">▶ ${TT('Play again','เล่นอีกครั้ง')}</button></div>`,'sm');paintThumbs(modOpen('mp'));
  sfx(me.win?'level':me.rank<=2?'win':'lose');if(me.win){for(let i=0;i<5;i++)setTimeout(()=>burst(rnd(150,650),rnd(250,450),pick(['⭐','🎉','🏆']),3),i*140)}

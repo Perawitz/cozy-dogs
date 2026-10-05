@@ -79,15 +79,22 @@ function editOverlay(c,t){if(!S.edit)return;
  if(World.drag&&World.drag.mode=='new'&&World.drag.x!=null){const def=S.cat.items[World.drag.id],p=fitLocal(def,World.drag.x,World.drag.y),ok=!!p,pp=p||[World.drag.x,World.drag.y];
   const it={draw:def.draw,pal:def.pal,kind:def.kind,x:pp[0],y:pp[1],f:0,uid:'ghost'};ROOM.item(c,it,t,env(),{ghost:true});const b=ROOM.box(it);c.fillStyle=ok?'rgba(111,209,165,.28)':'rgba(255,107,107,.35)';c.fillRect(b.x0,b.y0,b.x1-b.x0,b.y1-b.y0)}
  c.restore()}
+// The floating bar over the selected item: flip / put back into the bag / delete for good (needs a 2nd tap).
+// (It used to be an empty <div>, which is why furniture could not be removed.)
+function itemBarHtml(){return`<button class="btn sm sky" data-do="flip" title="${t('Flip')}">🔄 ${t('Flip')}</button><button class="btn sm mint" data-do="store" title="${t('Store')}">📦 ${t('Store')}</button><button class="btn sm red" data-do="discard" title="${t('Delete')}">🗑 ${t('Delete')}</button>`}
 function positionItemBar(){const bar=$('#itembar');const it=S.edit&&World.selItem&&(S.ritems||[]).find(i=>i.uid==World.selItem);if(!it){bar.classList.remove('on');return}
- const b=ROOM.box(it),r=cv.getBoundingClientRect(),px=r.left+(b.x0+b.x1)/2/800*r.width,py=r.top+b.y0/600*r.height;bar.classList.add('on');bar.style.left=px+'px';bar.style.top=Math.max(r.top+4,py-44)+'px';bar.style.transform='translateX(-50%)'}
-function selectItem(uid){World.selItem=uid;positionItemBar()}
-function startPlace(id,ev){if(!S.edit)return;const def=S.cat.items[id];World.drag={mode:'new',id,x:null,y:null,moved:false,sx:ev.clientX,sy:ev.clientY};
- const mv=e=>{if(Math.hypot(e.clientX-World.drag.sx,e.clientY-World.drag.sy)>6)World.drag.moved=true;if(World.drag.moved){const[x,y]=toWorld(e);World.drag.x=x;World.drag.y=y}};
- const up=e=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);const d=World.drag;World.drag=null;if(!d)return;const r=cv.getBoundingClientRect();
+ if(bar.dataset.lg!==S.set.lang){bar.dataset.lg=S.set.lang;bar.innerHTML=itemBarHtml();bar._w=0}
+ const b=ROOM.box(it),r=cv.getBoundingClientRect(),px=r.left+(b.x0+b.x1)/2/800*r.width,py=r.top+b.y0/600*r.height;bar.classList.add('on');
+ if(!bar._w)bar._w=bar.offsetWidth||230;
+ bar.style.left=clamp(px-bar._w/2,6,Math.max(6,innerWidth-bar._w-6))+'px';bar.style.top=Math.max(r.top+4,py-44)+'px';bar.style.transform='none'}
+function selectItem(uid){World.selItem=uid;disarmDiscard();positionItemBar()}
+function startPlace(id,ev){if(!S.edit)return;const def=S.cat.items[id];const d={mode:'new',id,x:null,y:null,moved:false,sx:ev.clientX,sy:ev.clientY};World.drag=d;
+ const mv=e=>{if(Math.hypot(e.clientX-d.sx,e.clientY-d.sy)>6)d.moved=true;if(d.moved){const[x,y]=toWorld(e);d.x=x;d.y=y}};
+ const stop=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',stop);if(World.drag===d)World.drag=null};
+ const up=e=>{stop();const r=cv.getBoundingClientRect();
   let x,y;if(d.moved&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){[x,y]=toWorld(e)}else if(!d.moved){x=def.kind=='wall'?560:def.kind=='rug'?400:380;y=def.kind=='wall'?110:def.wallside?340:def.kind=='rug'?470:470}else return;
   S.pendingSelect=id;send({t:'place',id,x,y});sfx('place')};
- addEventListener('pointermove',mv);addEventListener('pointerup',up)}
+ addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',stop)}
 cv.addEventListener('pointerdown',e=>{if(Park.on)return;const[x,y]=toWorld(e);
  if(S.edit&&S.owner==S.name){const it=pickItem(x,y);if(it){selectItem(it.uid);World.drag={mode:'item',uid:it.uid,ox:it.x-x,oy:it.y-y,moved:false};cv.setPointerCapture(e.pointerId);sfx('click')}else{selectItem(null)}return}
  if(S.fetchMode&&S.owner==S.name){fetchThrow(clamp(x,70,730),clamp(y,350,556));return}
@@ -96,10 +103,14 @@ function avatarTap(){S.avTap=performance.now()+1900;sfx('pop');if(S.owner==S.nam
 cv.addEventListener('pointermove',e=>{if(Park.on){cv.style.cursor='crosshair';return}const[x,y]=toWorld(e);const d=World.drag;
  if(d&&d.mode=='item'){const it=(S.ritems||[]).find(i=>i.uid==d.uid);if(!it)return;const def=S.cat.items[it.type],p=fitLocal(def,x+d.ox,y+d.oy);if(p){if(p[0]!=it.x||p[1]!=it.y)d.moved=true;it.x=p[0];it.y=p[1]}return}
  if(S.edit){cv.style.cursor=pickItem(x,y)?'grab':'default'}else cv.style.cursor=S.fetchMode?'crosshair':(pickDog(x,y)||AVA.pickHome(x,y))?'pointer':'default'});
-const endDrag=()=>{const d=World.drag;if(d&&d.mode=='item'){const it=(S.ritems||[]).find(i=>i.uid==d.uid);if(it&&d.moved){send({t:'move',uid:it.uid,x:it.x,y:it.y});sfx('place')}}World.drag=null};
+const endDrag=()=>{const d=World.drag;if(!d||d.mode!='item')return;const it=(S.ritems||[]).find(i=>i.uid==d.uid);if(it&&d.moved){send({t:'move',uid:it.uid,x:it.x,y:it.y});sfx('place')}World.drag=null};
 cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
 function flipItem(){const it=(S.ritems||[]).find(i=>i.uid==World.selItem);if(!it)return;it.f=it.f?0:1;send({t:'move',uid:it.uid,x:it.x,y:it.y,f:it.f});sfx('click')}
 function storeItem(){if(!World.selItem)return;send({t:'store',uid:World.selItem});World.selItem=null;sfx('pop')}
+function disarmDiscard(){clearTimeout(discardItem.tm);const b=$('#itembar [data-do=discard]');if(b&&b.classList.contains('arm')){b.classList.remove('arm');b.innerHTML='🗑 '+t('Delete');$('#itembar')._w=0}}
+function discardItem(){if(!World.selItem)return;const bar=$('#itembar'),b=$('[data-do=discard]',bar);
+ if(b&&!b.classList.contains('arm')){b.classList.add('arm');b.innerHTML='🗑 '+t('Tap again to delete');bar._w=0;clearTimeout(discardItem.tm);discardItem.tm=setTimeout(disarmDiscard,2600);return}
+ disarmDiscard();send({t:'discard',uid:World.selItem});World.selItem=null;sfx('pop')}
 // ---------- photo ----------
 function photo(){const f=$('#flash');f.style.transition='none';f.style.opacity=.9;requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0});sfx('shake');
  const W=720,H=720*.75,pad=22,o=document.createElement('canvas');o.width=W+pad*2;o.height=H+pad*2+64;const c=o.getContext('2d');c.fillStyle='#fffaf1';c.fillRect(0,0,o.width,o.height);c.imageSmoothingEnabled=true;c.drawImage(cv,pad,pad,W,H);

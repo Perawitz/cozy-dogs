@@ -4,15 +4,18 @@
 //   duel  Breed Duel      2-4 players, 5 quiz rounds with a speed bonus
 //   rush  Treat Frenzy    2-4 players, 24 s of treats popping up on a shared field - first tap wins it, avoid the boots
 //   odd   Odd Pup Out     2-4 players, 6 rounds of 'spot the different dog' in a growing grid
+//   brawl Dog Brawl       2-4 players, turn-based dog fight: every dog has its own stats (HP/ATK/DEF/SPD from breed + rarity) and 2 skills;
+//                         each round all players choose a move in secret and the server resolves them (rules in brawl.js / brawl_data.js)
 // A lobby waits ~8 s for other players; if nobody joins, bots fill the room so the game is always playable (and pays half).
 'use strict';
+const BRW=require('./brawl'),BRD=BRW.D;
 module.exports=function(X){
 const {db,conns,send,player,clamp,rnd,pick,today,lvl,sendMe,addXp,BREEDS,dirty,bump,safe,own,F,S}=X;
 const toast=(ws,m)=>send(ws,{t:'toast',m});
-const GAMES={race:{max:4,fill:3},grab:{max:2,fill:2},duel:{max:4,fill:3},rush:{max:4,fill:3},odd:{max:4,fill:3}};
-const RUSHMS=24000,ODDN=6,ODDMS=9000;
+const GAMES={race:{max:4,fill:3},grab:{max:2,fill:2},duel:{max:4,fill:3},rush:{max:4,fill:3},odd:{max:4,fill:3},brawl:{max:4,fill:3}};
+const RUSHMS=24000,ODDN=6,ODDMS=9000,BRMS=BRD.CFG.ms,BRN=BRD.CFG.rounds,BRFAST=Math.max(1,+process.env.CD_BRFAST||1),BRASK=Math.max(2500,Math.round(BRMS/BRFAST));   // CD_BRFAST: tests only - makes bots, the between-round pause and the answer window faster
 const WAIT=+process.env.CD_MPWAIT||8000, TICK=100, CAP=600, STEP=1.8, MINTAP=65, QMS=10000, QN=5;
-const lobbies={race:null,grab:null,duel:null,rush:null,odd:null}, rooms=new Map();let nextId=1;
+const lobbies={race:null,grab:null,duel:null,rush:null,odd:null,brawl:null}, rooms=new Map();let nextId=1;
 const BOTNAMES=['Pudding','Mochi','Biscuit','Nova','Waffle','Pepper','Bean','Maple','Coco','Teddy','Miso','Ollie'];
 const RAR={C:0,R:1,E:2,L:3,M:4};
 
@@ -62,7 +65,7 @@ function find(ws,c,m){if(typeof m.g!='string'||!own(GAMES,m.g))return;const now=
  L.pl.push(mkPl(ws,c,m.dog));c.mp={lobby:L};for(const p of L.pl)send(p.ws,lobbyMsg(L));sendInfo(ws,c)}
 function leaveLobby(ws,c){const L=c.mp&&c.mp.lobby;if(!L)return false;L.pl=L.pl.filter(p=>p.ws!==ws);c.mp=null;if(!L.pl.length){if(lobbies[L.g]===L)lobbies[L.g]=null}else for(const p of L.pl)send(p.ws,lobbyMsg(L));return true}
 function sendInfo(ws,c){const p=player(c.name);if(!p.mp||p.mp.date!=today())p.mp={date:today(),coins:0};
- send(ws,{t:'mp_info',cap:CAP,used:p.mp.coins,wait:Object.fromEntries(Object.keys(GAMES).map(g=>[g,lobbies[g]?lobbies[g].pl.length:0]))})}
+ send(ws,{t:'mp_info',cap:CAP,used:p.mp.coins,wait:{...Object.fromEntries(Object.keys(GAMES).map(g=>[g,lobbies[g]?lobbies[g].pl.length:0])),rps:X.rpsWaiting?X.rpsWaiting():0}})}
 
 // ---------------------------------------------------------------- rooms
 function startRoom(L){if(lobbies[L.g]===L)lobbies[L.g]=null;const G=GAMES[L.g],now=Date.now(),pl=L.pl.filter(p=>p.ws&&p.ws.readyState==1);if(!pl.length)return;
@@ -74,8 +77,9 @@ function startRoom(L){if(lobbies[L.g]===L)lobbies[L.g]=null;const G=GAMES[L.g],n
  if(room.g=='duel'){room.qs=mkQuestions(QN);room.qi=-1}
  else if(room.g=='odd'){room.oi=-1}
  else if(room.g=='rush'){room.items=[];room.nid=1}
- const info=pl.map(p=>({n:p.name,bot:p.bot,breed:p.breed,variant:p.variant,acc:p.acc,dn:p.dn,lvl:p.lvl}));
- pl.forEach(p=>{if(p.ws)send(p.ws,{t:'mp_start',g:room.g,id:room.id,pl:info,me:p.i,go:3600,cfg:{len:100,win:3,rounds:room.g=='odd'?ODDN:QN,qms:room.g=='odd'?ODDMS:QMS,dur:RUSHMS}})});
+ else if(room.g=='brawl')brawlInit(room);
+ const info=pl.map(p=>({n:p.name,bot:p.bot,breed:p.breed,variant:p.variant,acc:p.acc,dn:p.dn,lvl:p.lvl,...(p.f?{hp:p.f.max,atk:p.f.atk,def:p.f.def,spd:p.f.spd,en:p.f.en,sk:p.f.sk,arch:p.f.arch}:{})}));
+ pl.forEach(p=>{if(p.ws)send(p.ws,{t:'mp_start',g:room.g,id:room.id,pl:info,me:p.i,go:3600,cfg:{len:100,win:3,rounds:room.g=='odd'?ODDN:room.g=='brawl'?BRN:QN,qms:room.g=='odd'?ODDMS:room.g=='brawl'?BRMS:QMS,dur:RUSHMS}})});
  for(let k=0;k<3;k++)setTimeout(()=>{if(room.over)return;for(const p of humans(room)){p.pk=p.pk||{};p.pk[k]=Date.now();send(p.ws,{t:'mp_p',k})}},300+k*500)}
 const bcast=(room,o)=>{for(const p of room.pl)if(p.ws&&!p.left)send(p.ws,o)};
 function rttOf(p){return clamp(p.rtt,0,350)}
@@ -92,7 +96,8 @@ function finish(room,ranks,extra){if(room.over)return;
   bump(c.name,'mp',1,p.ws);bump(c.name,room.g,1,p.ws);const win=rank==1&&n>1;if(win){bump(c.name,'mpwin',1,p.ws);bump(c.name,room.g+'win',1,p.ws)}
   dirty();c.mp=null;send(p.ws,{t:'mp_end',g:room.g,res,me:{rank,coins,xp,win,capLeft:Math.max(0,CAP-pl.mp.coins),vsHuman:room.vsHuman,...(extra||{})}});sendMe(p.ws)}
  room.over=true;rooms.delete(room.id)}
-const rankBy=(pl,key)=>{const idx=pl.map((_,i)=>i).sort((a,b)=>key(b)-key(a));const r=[];idx.forEach((i,k)=>r[i]=k+1);return r};
+// key() takes a PLAYER object (it used to be called with the index, so every game ranked players in join order)
+const rankBy=(pl,key)=>{const idx=pl.map((_,i)=>i).sort((a,b)=>key(pl[b])-key(pl[a]));const r=[];idx.forEach((i,k)=>r[i]=k+1);return r};
 
 // ---------------------------------------------------------------- RACE
 function raceStep(room,now,dt){
@@ -180,11 +185,41 @@ function oddPick(ws,c,m){const room=c.mp&&c.mp.room;if(!room||room.g!='odd'||roo
  if(now<(room.locks[p.i]||0))return;const el=now-room.qAt-rttOf(p);if(el<420)return;
  if((m.c|0)===room.ans){oddGot(room,p,now,el);send(ws,{t:'mp_ok',i:room.oi})}else{room.locks[p.i]=now+1200;p.score=Math.max(0,p.score-10);send(ws,{t:'mp_ow',c:m.c|0,sc:p.score})}}
 
+// ---------------------------------------------------------------- DOG BRAWL
+// Turn-based, simultaneous moves. Round = 'ask' (everybody secretly picks a move, 7 s) -> 'res' (server resolves, clients animate the events).
+// Move on the wire = {t:'mp_bp', r:round, a:'atk'|'grd'|'s0'|'s1', to:target index} ('t' is already the message type). Rules, stats and skills live in brawl.js / brawl_data.js; this part only does the networking.
+function brawlInit(room){room.rn=0;room.picks={};room.F=room.pl.map(p=>{const row=BREEDS.find(b=>b[0]==p.breed)||BREEDS[0];return p.f=BRW.mkFighter(row[0],row[2],row[6])});room.F.seq=0}
+function brawlAsk(room,now){room.rn++;room.state='ask';room.qAt=now;room.picks={};
+ for(const p of room.pl)if(p.bot&&p.f.alive)p.botAt=now+rnd(900,3600)/BRFAST;
+ bcast(room,{t:'mp_ba',r:room.rn,n:BRN,ms:BRASK,...BRW.snap(room.F)})}
+function brawlResolve(room,now){const picks=room.pl.map(p=>room.picks[p.i]||null),out=BRW.resolve(room.F,picks);
+ room.pl.forEach(p=>{p.score=p.f.dealt});
+ room.state='res';room.resT=now+Math.min(9000,1100+BRD.evTime(out.ev))/BRFAST;
+ bcast(room,{t:'mp_bx',r:room.rn,ev:out.ev,...BRW.snap(room.F)})}
+const brawlOver=room=>BRW.aliveCount(room.F)<=1||room.rn>=BRN||!room.pl.some(p=>!p.bot&&!p.left&&p.f.alive);
+const brawlEnd=room=>finish(room,rankBy(room.pl,p=>p.left?-1e9+p.score:BRW.rankKey(p.f)));
+function brawlStep(room,now){
+ if(room.state=='count'){if(now>=room.goAt){room.playT0=now;if(brawlOver(room))brawlEnd(room);else brawlAsk(room,now)}return}
+ if(!humans(room).length)return destroy(room);
+ if(room.state=='ask'){
+  if(BRW.aliveCount(room.F)<=1)return brawlEnd(room);           // everybody else left in the middle of a round: the last dog standing wins right away
+  for(const p of room.pl)if(p.bot&&p.f.alive&&!room.picks[p.i]&&now>=p.botAt)room.picks[p.i]=BRW.botPick(room.F,p.i);
+  if(room.pl.filter(p=>!p.left&&p.f.alive).every(p=>room.picks[p.i])||now>=room.qAt+BRASK+300)brawlResolve(room,now);return}
+ if(room.state=='res'&&now>=room.resT){if(brawlOver(room))brawlEnd(room);else brawlAsk(room,now)}}
+function brawlPick(ws,c,m){const room=c.mp&&c.mp.room;if(!room||room.g!='brawl'||room.state!='ask'||(m.r|0)!==room.rn)return;
+ const p=room.pl.find(x=>x.ws===ws);if(!p||p.left||!p.f.alive||room.picks[p.i])return;
+ const a=m.a;if(a!='atk'&&a!='grd'&&a!='s0'&&a!='s1')return;
+ const sk=a=='s0'||a=='s1'?BRD.SK[p.f.sk[a=='s0'?0:1]]:null;
+ if(sk&&p.f.en<sk.cost)return send(ws,{t:'mp_bno',r:room.rn,why:'en'});                       // not enough energy: tell the client so it can unlock its buttons
+ const t=Number.isInteger(m.to)?m.to:-1;                         // (m.t is taken: it is the message type)
+ if((a=='atk'||(sk&&sk.tgt=='one'))&&!(t>=0&&t<room.pl.length&&t!==p.i&&room.F[t].alive))return send(ws,{t:'mp_bno',r:room.rn,why:'target'});
+ room.picks[p.i]={a,t};send(ws,{t:'mp_bok',r:room.rn})}
+
 // ---------------------------------------------------------------- leaving
 function leave(ws,c){if(leaveLobby(ws,c))return;const room=c.mp&&c.mp.room;if(!room)return;const p=room.pl.find(x=>x.ws===ws);c.mp=null;if(!p)return;p.left=true;
  const hs=humans(room);if(!hs.length)return destroy(room);
  if(room.g=='grab'&&!room.over){const o=room.pl.find(x=>x!==p);o.score=Math.max(o.score,3);finish(room,rankBy(room.pl,x=>x.left?-1:x.score),{forfeit:true})}
- else bcast(room,{t:'mp_gone',n:p.name})}
+ else{if(room.g=='brawl'&&p.f&&p.f.alive){p.f.alive=false;p.f.hp=0;p.f.ko=++room.F.seq}bcast(room,{t:'mp_gone',n:p.name})}}
 
 // ---------------------------------------------------------------- main loop
 let last=Date.now();
@@ -193,7 +228,7 @@ setInterval(safe('arcade',()=>{const now=Date.now(),dt=Math.min(.3,(now-last)/10
   if(!L.pl.length){lobbies[g]=null;continue}
   if(L.pl.length>=G.max&&!L.startAt){L.startAt=now+1200}
   if((L.startAt&&now>=L.startAt)||now>=L.fillAt)startRoom(L)}
- for(const room of [...rooms.values()]){try{if(room.g=='race')raceStep(room,now,dt);else if(room.g=='grab')grabStep(room,now);else if(room.g=='rush')rushStep(room,now);else if(room.g=='odd')oddStep(room,now);else duelStep(room,now)}catch(e){console.error('[room]',e&&e.stack||e);try{bcast(room,{t:'mp_abort'})}catch{}destroy(room)}}}),TICK);
+ for(const room of [...rooms.values()]){try{if(room.g=='race')raceStep(room,now,dt);else if(room.g=='grab')grabStep(room,now);else if(room.g=='rush')rushStep(room,now);else if(room.g=='odd')oddStep(room,now);else if(room.g=='brawl')brawlStep(room,now);else duelStep(room,now)}catch(e){console.error('[room]',e&&e.stack||e);try{bcast(room,{t:'mp_abort'})}catch{}destroy(room)}}}),TICK);
 
 const HND=Object.create(null);
 HND.mp_find=(ws,c,m)=>find(ws,c,m);
@@ -205,6 +240,7 @@ HND.mp_act=(ws,c,m)=>grabAct(ws,c,m);
 HND.mp_ans=(ws,c,m)=>duelAns(ws,c,m);
 HND.mp_hit=(ws,c,m)=>rushHit(ws,c,m);
 HND.mp_pick=(ws,c,m)=>oddPick(ws,c,m);
+HND.mp_bp=(ws,c,m)=>brawlPick(ws,c,m);
 HND.mp_pr=(ws,c,m)=>{const room=c.mp&&c.mp.room;if(!room)return;const p=room.pl.find(x=>x.ws===ws),k=m.k|0;if(!p||!p.pk||!p.pk[k])return;const r=Date.now()-p.pk[k];p.pk[k]=0;p.samples.push(r);p.rtt=Math.min(...p.samples)};
 const handle=(ws,c,m)=>{const f=HND[m.t];if(!f)return false;f(ws,c,m);return true};
 const onClose=ws=>{const c=conns.get(ws);if(c&&c.mp)leave(ws,c)};

@@ -75,13 +75,29 @@ function renderCapsule(){const m=S.me,W=S.welcome||{rates:{C:60,R:25,E:10,L:4,M:
   g.fillStyle='rgba(190,230,255,.55)';d.e(60,56,48,48,'rgba(190,230,255,.55)');d.e(60,56,44,44,'rgba(220,244,255,.6)');
   const cols=['#ff6b8a','#ffc94d','#6fd1a5','#6fb8ff','#b79bff','#ff9a4d'];for(let i=0;i<16;i++){const a=i*2.4+Math.sin(t*(S.capShake?9:.7)+i)*.25,r=8+(i%5)*7,x=60+Math.cos(a)*r,y=62+Math.abs(Math.sin(a))*18-(i%3)*10;d.se(Math.round(x),Math.round(y),5,5,cols[i%6])}
   d.r(14,52,2,40,'rgba(255,255,255,.0)');g.fillStyle='rgba(255,255,255,.7)';g.fillRect(30,24,3,22);g.fillRect(34,20,8,3);d.bx(20,100,80,6,'#ffe9f0',0);g.restore();capAnim=requestAnimationFrame(draw)};draw()}
-DO.gacha=d=>{const n=+d.n,tk=!!d.tk;if(tk?S.me.tickets<n:S.me.coins<(S.welcome?S.welcome.cost:100)*n)return sfx('err'),toast(S.set.lang=='th'?'ไม่พอ':'Not enough');S.capShake=true;sfx('shake');S.capPrev=[...S.me.owned];send({t:'capsule',n,ticket:tk});setTimeout(()=>S.capShake=false,1500)};
-H.capsule=m=>{S.capShake=false;const seen=new Set(S.capPrev||S.me.owned);const res=m.res.map(r=>{const nw=!seen.has(r.breed);seen.add(r.breed);return Object.assign({nw},r)});
- const best=res.reduce((a,r)=>RORD[r.r]<RORD[a]?r.r:a,'C');
- const ov=document.createElement('div');ov.className='reveal';document.body.append(ov);const close=()=>{ov.remove();renderCapsuleIfOpen();UI.cur()};
- const card=(r,big,extra='')=>{const b=DOGS.BR[r.breed];return`<div class="panel rcard r-${r.r}" style="border-color:${RCOL[r.r]};${big?'':'width:auto;'}${extra}">${r.r!='C'?'<div class="glow"></div>':''}<div style="position:relative">${r.nw?'<span class="tag" style="position:absolute;left:0;top:0;background:var(--pink);border:2px solid var(--ink);border-radius:8px;font-size:11px;font-weight:900;padding:0 6px;color:#fff">'+(S.set.lang=='th'?'ใหม่!':'NEW!')+'</span>':''}${thumbHTML(r.breed,r.variant,big?85:42,null)}<h3>${esc(r.name)}</h3><div>${rarTag(r.r)}</div><div class="muted">${esc(b.name)}${r.variant!='Normal'?' · '+t(r.variant):''}${r.away?' · 🏠 '+(S.set.lang=='th'?'บ้านเต็ม':'full'):''}</div></div></div>`};
- if(res.length==1){ov.innerHTML=`<div style="font-size:60px;animation:wob .3s infinite" id="egg">🥚</div>`;setTimeout(()=>{sfx('reveal',res[0].r);ov.innerHTML=card(res[0],true)+`<button class="btn pink" id="rcl">OK</button>`;paintThumbs(ov);$('#rcl').onclick=close;const a=$('.rcard',ov).getBoundingClientRect();if(res[0].r!='C')sparkle(400,300,0)},900)}
- else{ov.innerHTML=`<div style="font-size:60px;animation:wob .3s infinite">🥚🥚🥚</div>`;setTimeout(()=>{sfx('reveal',best);ov.innerHTML=`<div class="rc10">${res.map((r,i)=>card(r,false,'animation-delay:'+i*.08+'s')).join('')}</div><button class="btn pink" id="rcl">OK</button>`;paintThumbs(ov);$('#rcl').onclick=close},900)}};
+// One pull at a time. While a request is in flight the buttons are locked; if several answers ever arrive together (slow connection, two tabs, a frantic double tap)
+// the result screens are shown one after another - never stacked on top of each other (stacked screens used to share one OK button id, so OK stopped working).
+let capSeen=new Set(),capQ=[],capOpen=0,capLab=null;
+function capUnlock(){S.capBusy=0;renderCapsuleIfOpen()}
+DO.gacha=d=>{const n=+d.n,tk=!!d.tk;if(capOpen||capQ.length||(S.capBusy&&Date.now()-S.capBusy<6000))return;
+ if(tk?S.me.tickets<n:S.me.coins<(S.welcome?S.welcome.cost:100)*n)return sfx('err'),toast(S.set.lang=='th'?'ไม่พอ':'Not enough');
+ const stamp=S.capBusy=Date.now();setTimeout(()=>{if(S.capBusy===stamp)capUnlock()},6000);        // (no answer for 6 s: unlock the buttons again)
+ $$('#mods [data-do=gacha]').forEach(b=>b.classList.add('dis'));S.capShake=true;sfx('shake');S.capPrev=[...S.me.owned];send({t:'capsule',n,ticket:tk});setTimeout(()=>S.capShake=false,1500)};
+H.capsule=m=>{S.capBusy=0;S.capShake=false;
+ if(!capOpen&&!capQ.length)capSeen=new Set(S.capPrev||S.me.owned);      // a fresh batch: "NEW!" means not owned before this pull
+ capQ.push(m.res.map(r=>{const nw=!capSeen.has(r.breed);capSeen.add(r.breed);return Object.assign({nw},r)}));
+ if(!capOpen)capNext();else if(capLab)capLab()};
+function capNext(){const res=capQ.shift();if(!res){capOpen=0;return}capOpen=1;
+ const best=res.reduce((a,r)=>RORD[r.r]<RORD[a]?r.r:a,'C'),one=res.length==1,th=S.set.lang=='th';
+ const ov=document.createElement('div');ov.className='reveal';document.body.append(ov);if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+ let done=false;capLab=()=>{const b=$('.rclose',ov),n=capQ.length;if(b)b.textContent='OK'+(n?' · '+(th?'ยังมีอีก '+n:n+' more'):'')};   // ("OK · 2 more" while other results are waiting)
+ const close=()=>{if(done)return;done=true;capLab=null;document.removeEventListener('keydown',key);ov.remove();if(capQ.length)return capNext();capOpen=0;renderCapsuleIfOpen();UI.cur()};
+ const key=e=>{if((e.key=='Enter'||e.key==' '||e.key=='Escape')&&ov.querySelector('.rclose')){e.preventDefault();e.stopPropagation();close()}};document.addEventListener('keydown',key);
+ const card=(r,big,extra='')=>{const b=DOGS.BR[r.breed];return`<div class="panel rcard r-${r.r}" style="border-color:${RCOL[r.r]};${big?'':'width:auto;'}${extra}">${r.r!='C'?'<div class="glow"></div>':''}<div style="position:relative">${r.nw?'<span class="tag" style="position:absolute;left:0;top:0;background:var(--pink);border:2px solid var(--ink);border-radius:8px;font-size:11px;font-weight:900;padding:0 6px;color:#fff">'+(th?'ใหม่!':'NEW!')+'</span>':''}${thumbHTML(r.breed,r.variant,big?85:42,null)}<h3>${esc(r.name)}</h3><div>${rarTag(r.r)}</div><div class="muted">${esc(b.name)}${r.variant!='Normal'?' · '+t(r.variant):''}${r.away?' · 🏠 '+(th?'บ้านเต็ม':'full'):''}</div></div></div>`};
+ ov.innerHTML=one?`<div style="font-size:60px;animation:wob .3s infinite" id="egg">🥚</div>`:`<div style="font-size:60px;animation:wob .3s infinite">🥚🥚🥚</div>`;
+ setTimeout(()=>{if(done)return;sfx('reveal',one?res[0].r:best);
+  ov.innerHTML=(one?card(res[0],true):`<div class="rc10">${res.map((r,i)=>card(r,false,'animation-delay:'+i*.08+'s')).join('')}</div>`)+`<button class="btn pink rclose">OK</button>`;
+  paintThumbs(ov);capLab();$('.rclose',ov).onclick=close;if(one&&res[0].r!='C')sparkle(400,300,0)},900)}
 function renderCapsuleIfOpen(){if(modOpen('capsule'))renderCapsule()}
 // ================= COLLECTION / QUESTS / ACH =================
 DO.coll=()=>{send({t:'ach'});renderColl()};

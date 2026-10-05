@@ -236,7 +236,7 @@ function leaderboard(me){const ps=Object.entries(db.players).filter(([n])=>!isGu
   out.avs=avs;return out}
 
 const S=require('./social')({db,conns,send,sendAll,wsOf,player,give,rtxt,clamp,rnd,pick,today,lvl,sendMe,pushDogs,pushHouse,C,BR,dirty:()=>{dirty=true},bump,realName,maxDogs,sendPlayers});
-const XF={db,conns,send,sendAll,wsOf,player,give,rtxt,clamp,rnd,pick,rid,today,lvl,sendMe,sendHouse,pushDogs,pushHouse,houseDogs,pub,rt,decide,posOf,addXp,C,BR,BREEDS,dirty:()=>{dirty=true},bump,realName,own,cat,safe,toView,viewers,maxItems,maxDogs,hlOf,isGuestName,DEF,S,favToyOf};
+const XF={rpsWaiting:()=>queue.length,db,conns,send,sendAll,wsOf,player,give,rtxt,clamp,rnd,pick,rid,today,lvl,sendMe,sendHouse,pushDogs,pushHouse,houseDogs,pub,rt,decide,posOf,addXp,C,BR,BREEDS,dirty:()=>{dirty=true},bump,realName,own,cat,safe,toView,viewers,maxItems,maxDogs,hlOf,isGuestName,DEF,S,favToyOf};
 const F=require('./fun')(XF);
 const A=require('./arcade')({...XF,F});
 V=require('./wardrobe')(XF);
@@ -251,7 +251,7 @@ const wss=new WebSocketServer({server,maxPayload:4096});
 const BADK=['toString','valueOf','toJSON','constructor','__proto__','prototype'];
 function scrub(o,d){for(const k of BADK)if(Object.prototype.hasOwnProperty.call(o,k))delete o[k];
   for(const k of Object.keys(o)){const v=o[k];if(v&&typeof v=='object'){if(d>=3)o[k]=null;else scrub(v,d+1)}}}
-function drop(ws){const qi=queue.indexOf(ws);if(qi>=0)queue.splice(qi,1);const c=conns.get(ws);if(c&&c.game)endRps(c.game,c.name);S.onClose(ws);A.onClose(ws);F.onClose(ws);conns.delete(ws)}
+function drop(ws){const qi=queue.indexOf(ws);if(qi>=0)queue.splice(qi,1);const c=conns.get(ws);if(c)clearTimeout(c.rpsBot);if(c&&c.game)endRps(c.game,c.name);S.onClose(ws);A.onClose(ws);F.onClose(ws);conns.delete(ws)}
 const ipOf=ws=>ws.ip||'?', isLocal=ip=>/^(::1|127\.|::ffff:127\.)/.test(ip), lim=new Map();
 function hit(ip,kind,max,win){if(isLocal(ip))return true;const k=kind+ip,n=Date.now(),e=lim.get(k);if(!e||n-e.t>win){lim.set(k,{t:n,n:1});return true}return ++e.n<=max}
 setInterval(safe('lim',()=>{const n=Date.now();for(const [k,e] of lim)if(n-e.t>36e5)lim.delete(k)}),6e5);
@@ -384,6 +384,10 @@ wss.on('connection',(ws,req)=>{
         it.x=pos[0];it.y=pos[1];if(m.f!==undefined)it.f=m.f?1:0;dirty=true;toView(c.name,{t:'items',items:p.items});break }
       case 'store':{
         if(!mine) break; const i=p.items.findIndex(i=>i.uid==m.uid); if(i<0) break; p.items.splice(i,1);dirty=true;toView(c.name,{t:'items',items:p.items});break }
+      case 'discard':{   // delete for good: the piece leaves the room AND one copy leaves the bag (no refund)
+        if(!mine) break; const i=p.items.findIndex(i=>i.uid==m.uid); if(i<0) break; const ty=p.items[i].type; p.items.splice(i,1);
+        if((p.inv[ty]||0)>1)p.inv[ty]--; else delete p.inv[ty];
+        dirty=true;toView(c.name,{t:'items',items:p.items});sendMe(ws);break }
       case 'capsule':{
         const n=m.n==10?10:1, ticket=!!m.ticket;
         if(ticket?p.tickets<n:p.coins<COST*n) return toast(ticket?'Tickets ไม่พอ':'Coins ไม่พอ');
@@ -443,12 +447,12 @@ wss.on('connection',(ws,req)=>{
       case 'rps_find':{
         if(c.game||queue.includes(ws)) break;
         const o=queue.shift();
-        if(o&&conns.has(o)){const oc=conns.get(o),g={a:ws,b:o,pick:{}};c.game=oc.game=g;
+        if(o&&conns.has(o)){const oc=conns.get(o),g={a:ws,b:o,pick:{}};c.game=oc.game=g;clearTimeout(oc.rpsBot);
           send(ws,{t:'rps_start',vs:oc.name,lvl:lvl(player(oc.name)),my:lvl(p)});send(o,{t:'rps_start',vs:c.name,lvl:lvl(p),my:lvl(player(oc.name))});
           g.timer=setTimeout(()=>endRps(g),25000);}
-        else{queue.push(ws);send(ws,{t:'rps_wait'})} break;
+        else{queue.push(ws);send(ws,{t:'rps_wait'});clearTimeout(c.rpsBot);c.rpsBot=setTimeout(()=>rpsBot(ws),RPS_WAIT)} break;      // nobody came: a friendly bot plays (like the other online games)
       }
-      case 'rps_cancel':{ const qi=queue.indexOf(ws); if(qi>=0) queue.splice(qi,1); break }
+      case 'rps_cancel':{ const qi=queue.indexOf(ws); if(qi>=0) queue.splice(qi,1); clearTimeout(c.rpsBot); break }
       case 'rps_pick':{ const g=c.game; if(!g||typeof m.v!='string'||!['R','P','S'].includes(m.v)||g.pick[c.name]) break; g.pick[c.name]=m.v; if(Object.keys(g.pick).length==2) endRps(g); break }
     }
   }
@@ -456,13 +460,23 @@ wss.on('connection',(ws,req)=>{
   setTimeout(()=>{if(!conns.has(ws)&&ws.readyState==1)ws.close()},60000).unref();    // sockets that never log in are dropped
 });
 setInterval(safe('idle',()=>{const n=Date.now();for(const [w,c] of conns)if(n-(c.last||0)>180000){send(w,{t:'kick',idle:1});w.close()}}),30000);   // dead connections (client pings every 20 s)
+const RPS_WAIT=+process.env.CD_MPWAIT||8000, BOT_NAMES=['Pudding','Mochi','Biscuit','Nova','Waffle','Pepper','Bean','Maple','Coco','Teddy','Miso','Ollie'];
+function rpsBot(ws){          // no human opponent showed up: start a bot match (half reward, counted in the daily arcade cap)
+  const c=conns.get(ws),qi=queue.indexOf(ws); if(!c||qi<0||c.game) return; queue.splice(qi,1);
+  const nm=pick(BOT_NAMES),g={a:ws,b:null,bot:nm,pick:{}};c.game=g;
+  send(ws,{t:'rps_start',vs:'🤖 '+nm,lvl:Math.floor(rnd(2,9)),my:lvl(player(c.name)),bot:1});
+  g.timer=setTimeout(()=>endRps(g),25000);
+  g.botT=setTimeout(()=>{if(c.game!==g)return;g.pick.$bot=pick(['R','P','S']);if(g.pick[c.name])endRps(g)},rnd(1200,3200));
+}
 function endRps(g,quitter){            // server decides winner & pays out
-  clearTimeout(g.timer); const A=conns.get(g.a),B=conns.get(g.b); if(!A&&!B) return;
-  const beats={R:'S',S:'P',P:'R'}, pa=A&&g.pick[A.name], pb=B&&g.pick[B.name]; let ra=0;
+  clearTimeout(g.timer);clearTimeout(g.botT); const A=conns.get(g.a),B=g.bot?null:conns.get(g.b); if(!A&&!B) return;
+  const beats={R:'S',S:'P',P:'R'}, pa=A&&g.pick[A.name], pb=g.bot?g.pick.$bot:B&&g.pick[B.name]; let ra=0;
   if(quitter) ra=quitter==(A&&A.name)?-1:1; else if(pa&&!pb) ra=1; else if(pb&&!pa) ra=-1; else if(pa&&pb&&pa!=pb) ra=beats[pa]==pb?1:-1;
   for(const [w,c,my,op,r] of [[g.a,A,pa,pb,ra],[g.b,B,pb,pa,-ra]]){
-    if(!c) continue; c.game=null; const p=player(c.name), gain=r>0?30:r==0?5:0; p.coins+=gain; if(r>0){p.wins++;addXp(p,20,w);bump(c.name,'win',1,w)} dirty=true;
-    send(w,{t:'rps_result',my,op,r,gain}); sendMe(w);
+    if(!c) continue; c.game=null; const p=player(c.name); let gain=r>0?30:r==0?5:0;
+    if(g.bot){if(!p.mp||p.mp.date!=today())p.mp={date:today(),coins:0};gain=clamp(Math.round(gain/2),0,Math.max(0,600-p.mp.coins));p.mp.coins+=gain}
+    p.coins+=gain; if(r>0){if(!g.bot)p.wins++;addXp(p,g.bot?10:20,w);bump(c.name,'win',1,w)} dirty=true;
+    send(w,{t:'rps_result',my,op,r,gain,bot:g.bot?1:0}); sendMe(w);
   }
 }
 // ---- simulation (1 Hz, only watched houses) + random cute events

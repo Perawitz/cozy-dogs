@@ -34,6 +34,12 @@ let a0;(async()=>{
  const uid=it.items.at(-1).uid;
  a.send({t:'move',uid,x:9999,y:9999});it=await a.wait('items');const m=it.items.find(i=>i.uid==uid);ok(m.x==770&&m.y==578,'move clamped');
  a.send({t:'store',uid});it=await a.wait('items');ok(it.items.length==11,'store');
+ // discard = delete for good: the piece leaves the room AND one copy leaves the bag (store keeps it in the bag)
+ me=a.last('me');ok(me.inv.ball==2,'store keeps the ball in the bag: '+me.inv.ball);
+ a.send({t:'place',id:'ball',x:300,y:450});it=await a.wait('items');const uid2=it.items.at(-1).uid;ok(it.items.length==12,'place again');
+ a.send({t:'discard',uid:uid2});it=await a.wait('items');ok(it.items.length==11&&!it.items.some(i=>i.uid==uid2),'discard removes it from the room');
+ await sleep(200);me=a.last('me');ok(me.inv.ball==1,'discard removes one copy from the bag: '+me.inv.ball);
+ a.send({t:'discard',uid:'nope'});a.send({t:'discard'});a.send({t:'discard',uid:{}});await sleep(150);ok(a.last('me').inv.ball==1,'discard of an unknown uid is ignored');
  // wall item clamp
  a.send({t:'shop_buy',id:'clock'});await a.wait('buy_ok');await a.tw();a.send({t:'place',id:'clock',x:400,y:100});r=await a.tw();ok(/ไม่ได้/.test(r.m),'wall item in window rejected');
  a.send({t:'place',id:'clock',x:150,y:100});it=await a.wait('items');ok(it.items.length==12,'wall item placed');

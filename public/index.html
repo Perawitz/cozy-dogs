@@ -7,7 +7,8 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;background:#2a1f2e;font-family:var(--ui);color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
 button{font-family:inherit;color:inherit;cursor:pointer}
-input,select{font-family:inherit;color:var(--ink)}
+input,select,textarea{font-family:inherit;color:var(--ink)}
+input,textarea{user-select:text;-webkit-user-select:text}   /* body is user-select:none; iPhone Safari then refuses typing in any input without the -webkit- form */
 .hidden{display:none!important}
 .ic{width:auto;height:18px;image-rendering:pixelated;vertical-align:-4px}.ic.big{height:26px}.ic.sm{height:14px;vertical-align:-2px}
 .scr{position:fixed;inset:0;display:none}.scr.on{display:block}
@@ -84,7 +85,7 @@ input,select{font-family:inherit;color:var(--ink)}
 .inv{flex:none;width:76px;border:3px solid var(--ink);border-radius:10px;background:#fff;text-align:center;padding:3px 2px;position:relative;touch-action:none;cursor:grab}.inv.dis{opacity:.4}.inv canvas{width:60px;height:50px}.inv b{font-size:10px;display:block;line-height:1.1;height:22px;overflow:hidden}
 .inv em{position:absolute;right:-5px;top:-7px;background:var(--pink);border:2px solid var(--ink);border-radius:9px;font-size:11px;padding:0 5px;font-style:normal;font-weight:900}
 .pill{border:2px solid var(--ink);background:var(--paper2);border-radius:14px;padding:2px 10px;font-weight:900;font-size:12px}.pill.on{background:var(--sun)}
-#itembar{position:absolute;display:none;gap:6px;pointer-events:auto;z-index:5}#itembar.on{display:flex}
+#itembar{position:absolute;display:none;gap:6px;pointer-events:auto;z-index:5;white-space:nowrap}#itembar.on{display:flex}#itembar .btn.arm{outline:3px solid #fff;animation:armpulse .4s ease-in-out infinite alternate}@keyframes armpulse{from{filter:brightness(1)}to{filter:brightness(1.3)}}
 /* ---------- modals ---------- */
 #mods{position:fixed;inset:0;pointer-events:none;z-index:50}
 .ov{position:fixed;inset:0;background:rgba(36,20,40,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:10px;pointer-events:auto;animation:fade .15s}
@@ -146,8 +147,11 @@ input,select{font-family:inherit;color:var(--ink)}
 .days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.day .rw{white-space:normal;display:block;line-height:1.3}.day{border:3px solid var(--ink);border-radius:10px;background:#fff;text-align:center;padding:5px 0;font-size:11px;font-weight:900}.day b{display:block;font-size:12px}.day.now{background:var(--sun);transform:translateY(-3px);box-shadow:0 3px 0 rgba(90,61,51,.35)}.day.done{background:#d7f7e3}.day .e{font-size:20px;display:block}
 /* photo polaroid */
 .rotsm{animation:wob 1.2s ease-in-out infinite}@keyframes wob{50%{transform:rotate(4deg)}}
-@media(max-width:700px){.chat{display:none}.cur{flex-wrap:nowrap;gap:4px;max-width:none}.chip{padding:2px 6px 2px 5px;font-size:12px;gap:3px;min-width:0}.chip .plus{display:none}.chip .ic.big{height:20px}.pcard b{max-width:70px;font-size:13px}.pcard .av{width:42px;height:42px}.pcard{padding:4px 8px 4px 4px;min-width:0;gap:6px}.xp{width:70px}.online{display:none}.pcard{min-width:0}.xp{width:80px}.chip{min-width:0;font-size:13px}.loc{top:60px;font-size:12px}#ticker{top:96px}.care{bottom:78px}.dk{width:52px}.dk .e{font-size:21px}.loc small{display:none}}
-@media(max-height:560px){.care .bars{display:none}.care{bottom:70px}.chat{display:none}}
+@media(max-width:700px){.cur{flex-wrap:nowrap;gap:4px;max-width:none}.chip{padding:2px 6px 2px 5px;font-size:12px;gap:3px;min-width:0}.chip .plus{display:none}.chip .ic.big{height:20px}.pcard b{max-width:70px;font-size:13px}.pcard .av{width:42px;height:42px}.pcard{padding:4px 8px 4px 4px;min-width:0;gap:6px}.xp{width:70px}.online{display:none}.pcard{min-width:0}.xp{width:80px}.chip{min-width:0;font-size:13px}.loc{top:60px;font-size:12px}#ticker{top:96px}.care{bottom:78px}.dk{width:52px}.dk .e{font-size:21px}.loc small{display:none}}
+@media(max-height:560px){.care .bars{display:none}.care{bottom:70px}}
+/* phones: chat stays available (small, collapsed by default) instead of being hidden; 16px input = no iOS zoom */
+@media(max-width:700px),(max-height:560px){.chat{left:auto;right:8px;bottom:136px;width:min(270px,calc(100vw - 16px))}.chat.min{width:auto}.chat .hd{font-size:14px;gap:8px;padding:3px 5px}.chat .log{height:64px}.chat .em{display:none}.chat input{font-size:16px;padding:6px 8px}}
+@media(max-height:560px) and (min-width:701px){.chat{bottom:104px}}   /* wide landscape phones: sit above the dock / (2-row) park bar */
 .gc>.row,.gc>.btn{margin-top:auto}
 #editbar{left:50%;transform:translateX(-50%)}.mgb .row{white-space:nowrap}
 /* ---------- park / community / trade (v4) ---------- */
@@ -280,6 +284,48 @@ canvas#cv.throw{cursor:crosshair}
 .empty .es-b:before{content:"";position:absolute;left:-10px;top:50%;margin-top:-7px;border:7px solid transparent;border-right-color:var(--ink);border-left:0}
 .empty .es-b:after{content:"";position:absolute;left:-5px;top:50%;margin-top:-5px;border:5px solid transparent;border-right-color:#fff;border-left:0}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}.stc{border:3px solid var(--ink);border-radius:12px;background:#fff;text-align:center;padding:6px 2px 5px;box-shadow:0 3px 0 rgba(90,61,51,.18)}.stc .e{font-size:18px;display:block;line-height:1.2}.stc b{display:block;font-size:17px;line-height:1.2}.stc small{color:var(--ink2);font-weight:800;font-size:11px}
+
+/* ---- Dog Brawl */
+.mod.br{width:min(660px,100%)}
+.bwroot{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}.bwr{display:flex;flex-direction:column;gap:8px;min-width:0}
+.bwtop{display:flex;align-items:center;gap:8px}.bwtop .pill{white-space:nowrap}.bwtop .dtimer{flex:1;margin:0}
+.bwcards{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:6px}
+.bwc{border:3px solid var(--ink);border-radius:12px;background:#fff;padding:4px 5px 3px;min-width:0;position:relative;transition:filter .2s,background .15s}
+.bwc.me{background:var(--sun)}.bwc.foe{cursor:pointer}.bwc.foe:hover{background:var(--pink2)}
+.bwc.sel{outline:4px solid #ff3b5c;outline-offset:1px;background:var(--pink2)}.bwc.sel::after{content:'🎯';position:absolute;right:1px;top:-13px;font-size:16px}
+.bwc.out{filter:grayscale(1);opacity:.55;cursor:default}.bwc.out:hover{background:#fff}
+.bwh{display:flex;align-items:center;gap:4px;font-size:12px;min-width:0}.bwh b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.bwh canvas{width:26px;height:26px;flex:none}
+.bwhp{position:relative;height:15px;border:2px solid var(--ink);border-radius:8px;background:#f1e4cf;overflow:hidden;margin:2px 0}.bwhp i{position:absolute;inset:0 auto 0 0;width:100%;background:#6fd1a5;transition:width .1s,background .2s}
+.bwhp span{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:900;color:#3b2a24;text-shadow:0 0 3px #fff,0 0 3px #fff}
+.bwe{font-size:10px;letter-spacing:0;height:14px;white-space:nowrap;overflow:hidden}.bwe b{color:#f59e0b;font-weight:900;letter-spacing:-1px;margin-left:1px}.bwe i{color:#d9c9aa;font-style:normal;letter-spacing:-1px}
+.bws{font-size:11px;min-height:15px;white-space:nowrap;overflow:hidden}
+.bwarena canvas{aspect-ratio:640/260;touch-action:manipulation}.bwarena .raceov{font-size:60px}
+.bwmsg{text-align:center;font-weight:900;font-size:14px;min-height:21px;line-height:1.3}
+.bacts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bact{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:0 6px;text-align:left;padding:6px 8px 7px;min-height:60px;border:3px solid var(--ink);border-radius:14px;background:#fff;box-shadow:0 4px 0 var(--ink);cursor:pointer;touch-action:manipulation;font-family:inherit;color:var(--ink)}
+.bact .bi{grid-row:1/3;font-size:26px;text-align:center;line-height:1}.bact .bn{display:flex;justify-content:space-between;gap:4px;font-size:14px;align-items:baseline}.bact .bn em{font-style:normal;color:#b45309;font-weight:900;white-space:nowrap;font-size:13px}.bact .bn em.fr{color:#1f8f55}
+.bact small{font-size:11px;line-height:1.15;color:var(--ink2);font-weight:700}
+.bact.a{background:#ffe3e8}.bact.g{background:#e3f2ff}.bact.s{background:#e6fbe9}
+.bact:hover{filter:brightness(1.04)}.bact:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.bact.off{opacity:.45;filter:grayscale(.6);cursor:not-allowed}.bact.off:active{transform:none;box-shadow:0 4px 0 var(--ink)}
+.bact.pick{outline:4px solid #ff3b5c;outline-offset:1px;opacity:1;filter:none}
+.bact kbd{position:absolute;right:7px;bottom:2px;font-size:9px;opacity:.45;font-family:inherit;font-weight:900}
+@media(hover:none){.bact kbd{display:none}}
+.bwfoot{margin-top:2px}
+/* fighter chooser + rules */
+.bpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin:8px 0}
+.bpc{border:3px solid var(--ink);border-radius:12px;background:#fff;padding:5px 4px;text-align:center;cursor:pointer;min-width:0}.bpc:hover{background:var(--pink2)}.bpc.sel{background:var(--sun);box-shadow:0 0 0 3px #ff3b5c}
+.bpc canvas{width:60px;height:60px;display:block;margin:0 auto}.bpc b{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bpc small{display:block;font-size:10px;font-weight:800;color:var(--ink2)}
+.bpd{border:3px solid var(--ink);border-radius:14px;background:var(--paper2);padding:8px 10px;margin-top:4px}.bpt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px;font-size:15px}
+.bstats{display:grid;gap:3px}.bstat{display:grid;grid-template-columns:62px 1fr 28px;align-items:center;gap:6px;font-size:12px;font-weight:900}.bstat b{text-align:right}
+.bbar{height:10px;border:2px solid var(--ink);border-radius:6px;background:#f1e4cf;overflow:hidden}.bbar i{display:block;height:100%;background:linear-gradient(#8fe3bd,#58c595)}
+.bskl{display:grid;gap:4px;margin-top:8px}.bsk2{display:flex;gap:8px;align-items:flex-start;font-size:13px}.bsk2>i{font-style:normal;font-size:22px;line-height:1.1;flex:none;width:28px;text-align:center}.bsk2 em{font-style:normal;color:#b45309;font-weight:900;font-size:12px}.bsk2 small{display:block;color:var(--ink2);font-weight:700;font-size:11.5px}
+.bhelp p{margin:6px 0;font-size:13px;line-height:1.4}.bhelp h4{margin:10px 0 4px}
+@media(max-width:700px){.bact{min-height:58px}.bwc{padding:3px 4px 2px}.bwh{font-size:11px}.bwh canvas{width:22px;height:22px}.bwarena .raceov{font-size:44px}}
+@media(max-height:560px) and (min-width:560px){.mod.br{width:min(940px,100%)}.br .mh{padding:5px 12px;font-size:16px}.br .mh .x{width:28px;height:28px}.br .mb{padding:8px 10px 10px}
+ .bwroot{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:"top cards" "arena ctl";align-items:start;gap:6px 10px}
+ .bwtop{grid-area:top;align-self:center}.bwcards{grid-area:cards;gap:4px}.bwarena{grid-area:arena}.bwr{grid-area:ctl;gap:6px}
+ .bact{min-height:46px;padding:4px 7px 5px}.bact small{display:none}.bact .bi{font-size:22px}.bwmsg{font-size:13px;min-height:18px}.bwfoot{margin-top:0}.bwc{padding:3px 4px 2px}.bwe{height:12px}.bws{min-height:12px}}
 </style></head>
 <body>
 <section id="login" class="scr on">
@@ -384,6 +430,75 @@ function priceOf(key){const[k,id]=key.split(':');const it=find(k,id);return it?i
 function price(av,owned){const own_=new Set(owned||[]);const need=used(av).filter(x=>!own_.has(x));return{need,cost:need.reduce((a,x)=>a+priceOf(x),0)}}
 module.exports={HOMEPOS,ownerSpot,HAIR,EYES,MOUTH,TOP,PAT,BOT,SHOE,HAT,GLASS,EXTRA,HOME,SKIN,HAIRC,EYEC,TOPC,BOTC,SHOEC,LEASH,KINDS,NCOL,defaults,clean,used,price,priceOf,find,hash};
 ;window.AVD=module.exports})();
+;
+(function(){const module={exports:{}};// Cozy Dogs - Dog Brawl data, shared by the server (rules engine, brawl.js) and the client (stat cards, skill buttons).
+// build.js embeds this file in public/index.html as window.BRD, so both sides always agree on the numbers.
+// Every dog's power comes from its breed: rarity + body size + a fighting style ("archetype"), and each breed owns 2 skills.
+'use strict';
+const RT={C:0,R:1,E:2,L:3,M:4};
+
+// ---- fighting style per breed (hand-picked for flavour; a breed that is not listed falls back to a size-based guess)
+const ARCH_OF={};
+for(const [arch,ids] of Object.entries({
+ fighter:'chihuahua dachshund yorkie blacklab boxer pitbull akita gsd doberman rottweiler rhodesian malamute greatdane flamepuppy',
+ tank:   'pug boston labrador frenchie schnauzer basset chowchow bernese saintbernard newfoundland mastiff crystalpuppy',
+ speedy: 'corgi beagle jackrussell husky dalmatian bordercollie aussie greyhound borzoi galaxyhusky moonshiba',
+ trick:  'pomeranian shihtzu maltese bichon shiba golden samoyed poodle cocker pyrenees rainbowcorgi cloudpuppy starpuppy'}))
+ for(const id of ids.split(' '))ARCH_OF[id]=arch;
+// per-style tuning: hp / atk are multipliers, def / spd are additions, en0 = starting energy
+const ARCH={
+ fighter:{hp:.99,atk:1.16,def:-.7,spd:.5, en0:1,n:['Fighter','นักสู้'],ic:'⚔️'},
+ tank:   {hp:1.02,atk:.93,def:2.4,spd:-1.4,en0:1,n:['Tank','ตัวถึก'],ic:'🛡️'},
+ speedy: {hp:1,   atk:1.04,def:-.9,spd:3.1,en0:1,n:['Speedster','สายเร็ว'],ic:'💨'},
+ trick:  {hp:1,   atk:1,   def:1.2,spd:1,  en0:2,n:['Trickster','สายแสบ'],ic:'🎩'}};
+
+// centre dog (hp, atk, def, spd) and how far rarity (per tier) and body size (per unit above 0.85) move each stat.
+// hp / atk move by a fraction, def / spd by points. HP is deliberately kept in a narrow band: it decides who survives.
+const TUNE={base:[92,26,3,6],rar:[.01,.02,.35,.25],size:[.04,.10,1.2,-3]};
+
+// ---- skills. cost = energy, tgt = one enemy / all enemies / self, mult = attack multiplier, hits = number of hits
+const SK={
+ bite:  {ic:'🦷',cost:2,tgt:'one', mult:.45,hits:3,n:['Frenzy Bite','กัดรัว'],d:['3 quick bites, 45% power each','กัด 3 ครั้งติด ครั้งละ 45% ของพลังโจมตี']},
+ smash: {ic:'💥',cost:3,tgt:'one', mult:2,pierce:1,n:['Bone Smash','ทุบกระดูก'],d:['One huge 200% hit that pierces guard','ฟาดหนัก 200% ทะลุการป้องกันบางส่วน']},
+ whip:  {ic:'🌀',cost:2,tgt:'all', mult:.6,n:['Tail Whip','ตีหางหมุน'],d:['Hits every enemy for 60% power','ตีศัตรูทุกตัว 60% ของพลังโจมตี']},
+ pounce:{ic:'🐾',cost:2,tgt:'one', mult:1.4,pri:1,n:['Quick Pounce','กระโจนเร็ว'],d:['140% hit that always strikes first','โจมตี 140% และลงมือก่อนใครเสมอ']},
+ bark:  {ic:'😱',cost:2,tgt:'one', mult:.6,sc:.45,n:['Scary Bark','เห่าขู่'],d:['60% hit; the target\'s next attack drops to 45%','โจมตี 60% และการโจมตีครั้งหน้าของเป้าหมายเหลือ 45%']},
+ steal: {ic:'🦴',cost:2,tgt:'one', mult:.9,take:2,n:['Bone Thief','ขโมยกระดูก'],d:['90% hit and steals 2 energy','โจมตี 90% และขโมยพลังงาน 2 หน่วย']},
+ howl:  {ic:'📣',cost:3,tgt:'all', mult:.35,wk:.7,n:['Thunder Howl','หอนก้องฟ้า'],d:['35% to all enemies and weakens them (−30% ATK next round)','โจมตีศัตรูทุกตัว 35% และทำให้อ่อนแรง (โจมตี −30% รอบหน้า)']},
+ fluff: {ic:'☁️',cost:2,tgt:'self',shield:24,n:['Fluffy Shield','ขนฟูกันกระแทก'],d:['A 24-point shield for 2 rounds','ได้โล่ 24 แต้ม นาน 2 รอบ']},
+ nap:   {ic:'😴',cost:3,tgt:'self',heal:.26,n:['Power Nap','งีบเอาแรง'],d:['Heal 26% of max HP','ฟื้น HP 26% ของ HP สูงสุด']},
+ zoom:  {ic:'💨',cost:2,tgt:'self',up:1.1,n:['Zoomies','วิ่งซิ่งหลบ'],d:['Dodge every attack this round, then +10% ATK for 2 rounds','หลบทุกการโจมตีในรอบนี้ แล้วโจมตี +10% อีก 2 รอบ']},
+ eyes:  {ic:'🥺',cost:2,tgt:'self',p:.65,n:['Puppy Eyes','ตาแป๋ว'],d:['Each attacker has a 65% chance to melt and skip you','ผู้โจมตีแต่ละตัวมีโอกาส 65% ใจอ่อนไม่ลงมือกับคุณ']},
+ treat: {ic:'🍖',cost:2,tgt:'self',heal:.1,up:1.5,n:['Treat Time','ขนมวิเศษ'],d:['Heal 10% HP and +50% ATK for 2 rounds','ฟื้น HP 10% และโจมตี +50% นาน 2 รอบ']},
+ rage:  {ic:'🔥',cost:3,tgt:'self',up:1.9,n:['Mad Dog','โหมดบ้าพลัง'],d:['+90% ATK but half DEF for 2 rounds','โจมตี +90% แต่ป้องกันลดครึ่ง นาน 2 รอบ']}};
+// the two basic moves every dog has
+const BASIC={atk:{ic:'🐕',n:['Bite','กัด'],d:['A normal attack on one enemy','โจมตีศัตรูหนึ่งตัวตามปกติ']},
+             grd:{ic:'🛡️',n:['Guard','ป้องกัน'],d:['Take half damage this round and gain +1 extra energy','รับดาเมจครึ่งเดียวในรอบนี้ และได้พลังงานเพิ่ม +1']}};
+// each style owns a pool of "signature" skills and a pool of "support" skills; the breed id picks one of each
+const POOL={fighter:[['smash','bite','pounce','rage'],['bark','whip','steal','treat']],
+            tank:   [['fluff','nap','smash','howl'],['bark','eyes','whip','treat']],
+            speedy: [['zoom','pounce','bite','steal'],['eyes','whip','treat','bark']],
+            trick:  [['eyes','treat','steal','howl'],['nap','zoom','fluff','bark','whip']]};
+
+const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0};
+const archOf=(id,size)=>ARCH_OF[id]||(size>=1.15?'tank':size<=.8?'speedy':'fighter');
+
+// -> {arch, hp, atk, def, spd, en0, sk:[skillId,skillId]}
+function statsFor(id,r,size){
+ const rt=RT[r]||0,sz=+size||.9,arch=archOf(id,sz),m=ARCH[arch],T=TUNE,z=sz-.85;
+ const hp=T.base[0]*(1+rt*T.rar[0]+z*T.size[0])*m.hp,atk=T.base[1]*(1+rt*T.rar[1]+z*T.size[1])*m.atk;
+ const def=T.base[2]+rt*T.rar[2]+z*T.size[2]+m.def,spd=T.base[3]+rt*T.rar[3]+z*T.size[3]+m.spd;
+ const h=hash(id),pa=POOL[arch][0],pb=POOL[arch][1];
+ return{arch,hp:Math.round(hp),atk:Math.round(atk),def:Math.max(1,Math.min(9,Math.round(def))),spd:Math.max(2,Math.min(12,Math.round(spd))),en0:m.en0,
+  sk:[pa[h%pa.length],pb[(h>>>4)%pb.length]]}}
+
+// how long the client animates each kind of battle event (ms). The server uses the same numbers to schedule the next round.
+const EVMS={act:380,hit:480,miss:380,cancel:420,heal:460,shield:380,buff:340,debuff:360,steal:360,ko:800,fizzle:120};
+const evTime=ev=>ev.reduce((s,e)=>s+(EVMS[e.k]||300),0);
+const CFG={ms:7000,rounds:6,maxEn:5};
+
+module.exports={RT,TUNE,ARCH,ARCH_OF,SK,BASIC,POOL,statsFor,archOf,hash,EVMS,evTime,CFG};
+;window.BRD=module.exports})();
 ;
 // Pixel-art human avatar generator for Cozy Dogs. Produces RGBA frames (44x48 px) per look / view / pose / frame.
 // Same conventions as dogpix.js (PX=2.5 screen px per art pixel, dark brown outline, top-lit shading).
@@ -1711,7 +1826,7 @@ const TH={'Shop':'ร้านค้า','Dogs':'น้องหมา','Capsule
  'Daily Reward':'รางวัลรายวัน','Day':'วัน','Level':'เลเวล','Breeds':'สายพันธุ์','Wins':'ชนะ','Online':'ออนไลน์','Offline':'ออฟไลน์','Profile':'โปรไฟล์','Sound':'เสียงเอฟเฟกต์','Music':'เพลงประกอบ','Volume':'ระดับเสียง','Names':'แสดงชื่อหมา','Language':'ภาษา','Weather':'สภาพอากาศ','Time of day':'ช่วงเวลา','Auto':'อัตโนมัติ','Log out':'ออกจากระบบ',
  'Sunny':'แดดจ้า','Cloudy':'มีเมฆ','Rain':'ฝนตก','Snow':'หิมะ','Morning':'เช้า','Noon':'เที่ยง','Evening':'เย็น','Night':'กลางคืน','Achievements':'ความสำเร็จ','Daily quests':'ภารกิจประจำวัน','Bonus':'โบนัส','Open':'เปิด','x10':'x10','Pity':'การันตี',
  'Memory Match':'จับคู่ความจำ','Cookie Catch':'รับขนม','Guess the Breed':'ทายสายพันธุ์','Rock Paper Scissors':'เป่ายิ้งฉุบ','Moves':'จำนวนครั้ง','Score':'คะแนน','Time':'เวลา','Start':'เริ่ม','Again':'เล่นอีกครั้ง','Reward':'รางวัล','Rock':'ค้อน','Paper':'กระดาษ','Scissors':'กรรไกร',
- 'Store':'เก็บเข้ากระเป๋า','Flip':'กลับด้าน','Inventory':'กระเป๋า','Drag items into your room':'ลากไอเทมไปวางในห้อง','Empty':'ว่าง','Tap a dog to care for it':'แตะที่น้องหมาเพื่อดูแล','Leaderboard':'อันดับผู้เล่น','Rank':'อันดับ','Online players':'ผู้เล่นออนไลน์',
+ 'Store':'เก็บเข้ากระเป๋า','Flip':'กลับด้าน','Delete':'ลบทิ้ง','Tap again to delete':'แตะอีกครั้งเพื่อลบ','Inventory':'กระเป๋า','Drag items into your room':'ลากไอเทมไปวางในห้อง','Empty':'ว่าง','Tap a dog to care for it':'แตะที่น้องหมาเพื่อดูแล','Leaderboard':'อันดับผู้เล่น','Rank':'อันดับ','Online players':'ผู้เล่นออนไลน์',
  'Common':'ธรรมดา','Rare':'หายาก','Epic':'เอพิค','Legendary':'ตำนาน','Mythic':'มิธิก','Welcome back':'ยินดีต้อนรับกลับมา','Home':'บ้านของฉัน','Reconnecting':'กำลังเชื่อมต่อใหม่','Select all':'เลือกทั้งหมด','Selected':'เลือกแล้ว', 'Pet your dogs':'ลูบหัวน้องหมา','Feed your dogs':'ให้อาหารน้องหมา','Play with your dogs':'เล่นกับน้องหมา','Give a bath':'อาบน้ำให้น้องหมา','Brush your dogs':'หวีขนน้องหมา','Train a trick':'เทรนลูกเล่น','Open a capsule':'เปิดกาชา 1 ครั้ง','Win a Rock-Paper-Scissors match':'ชนะเป่ายิ้งฉุบ 1 ครั้ง','Play 2 mini games':'เล่นมินิเกม 2 ครั้ง',"Visit someone's house":'ไปเยี่ยมบ้านคนอื่น','Decorate: place 2 items':'ตกแต่ง: วางของ 2 ชิ้น','Send a gift to a friend':'ส่งของขวัญให้เพื่อน',
  'Dog Lover':'คนรักหมา','Own 5 dogs':'มีหมา 5 ตัว','Dog Parent':'พ่อแม่น้องหมา','Own 15 dogs':'มีหมา 15 ตัว','Dog Whisperer':'ผู้กระซิบหมา','Own 30 dogs':'มีหมา 30 ตัว','Collector':'นักสะสม','Collect 10 breeds':'สะสมครบ 10 สายพันธุ์','Breed Expert':'ผู้เชี่ยวชาญสายพันธุ์','Collect 25 breeds':'สะสมครบ 25 สายพันธุ์','Complete Collection':'สะสมครบทุกสายพันธุ์','Collect all 50 breeds':'สะสมครบ 50 สายพันธุ์',
  'Pet Master':'เซียนลูบหัว','Pet 100 times':'ลูบหัว 100 ครั้ง','Cuddle Legend':'ตำนานกอด','Pet 1000 times':'ลูบหัว 1000 ครั้ง','Master Chef':'เชฟมือทอง','Feed dogs 50 times':'ให้อาหาร 50 ครั้ง','Trainer':'ครูฝึก','Train tricks 20 times':'เทรนลูกเล่น 20 ครั้ง','Gambler':'นักพนัน','Win 5 RPS matches':'ชนะเป่ายิ้งฉุบ 5 ครั้ง','Champion':'แชมป์','Win 25 RPS matches':'ชนะเป่ายิ้งฉุบ 25 ครั้ง',
@@ -1861,15 +1976,22 @@ function editOverlay(c,t){if(!S.edit)return;
  if(World.drag&&World.drag.mode=='new'&&World.drag.x!=null){const def=S.cat.items[World.drag.id],p=fitLocal(def,World.drag.x,World.drag.y),ok=!!p,pp=p||[World.drag.x,World.drag.y];
   const it={draw:def.draw,pal:def.pal,kind:def.kind,x:pp[0],y:pp[1],f:0,uid:'ghost'};ROOM.item(c,it,t,env(),{ghost:true});const b=ROOM.box(it);c.fillStyle=ok?'rgba(111,209,165,.28)':'rgba(255,107,107,.35)';c.fillRect(b.x0,b.y0,b.x1-b.x0,b.y1-b.y0)}
  c.restore()}
+// The floating bar over the selected item: flip / put back into the bag / delete for good (needs a 2nd tap).
+// (It used to be an empty <div>, which is why furniture could not be removed.)
+function itemBarHtml(){return`<button class="btn sm sky" data-do="flip" title="${t('Flip')}">🔄 ${t('Flip')}</button><button class="btn sm mint" data-do="store" title="${t('Store')}">📦 ${t('Store')}</button><button class="btn sm red" data-do="discard" title="${t('Delete')}">🗑 ${t('Delete')}</button>`}
 function positionItemBar(){const bar=$('#itembar');const it=S.edit&&World.selItem&&(S.ritems||[]).find(i=>i.uid==World.selItem);if(!it){bar.classList.remove('on');return}
- const b=ROOM.box(it),r=cv.getBoundingClientRect(),px=r.left+(b.x0+b.x1)/2/800*r.width,py=r.top+b.y0/600*r.height;bar.classList.add('on');bar.style.left=px+'px';bar.style.top=Math.max(r.top+4,py-44)+'px';bar.style.transform='translateX(-50%)'}
-function selectItem(uid){World.selItem=uid;positionItemBar()}
-function startPlace(id,ev){if(!S.edit)return;const def=S.cat.items[id];World.drag={mode:'new',id,x:null,y:null,moved:false,sx:ev.clientX,sy:ev.clientY};
- const mv=e=>{if(Math.hypot(e.clientX-World.drag.sx,e.clientY-World.drag.sy)>6)World.drag.moved=true;if(World.drag.moved){const[x,y]=toWorld(e);World.drag.x=x;World.drag.y=y}};
- const up=e=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);const d=World.drag;World.drag=null;if(!d)return;const r=cv.getBoundingClientRect();
+ if(bar.dataset.lg!==S.set.lang){bar.dataset.lg=S.set.lang;bar.innerHTML=itemBarHtml();bar._w=0}
+ const b=ROOM.box(it),r=cv.getBoundingClientRect(),px=r.left+(b.x0+b.x1)/2/800*r.width,py=r.top+b.y0/600*r.height;bar.classList.add('on');
+ if(!bar._w)bar._w=bar.offsetWidth||230;
+ bar.style.left=clamp(px-bar._w/2,6,Math.max(6,innerWidth-bar._w-6))+'px';bar.style.top=Math.max(r.top+4,py-44)+'px';bar.style.transform='none'}
+function selectItem(uid){World.selItem=uid;disarmDiscard();positionItemBar()}
+function startPlace(id,ev){if(!S.edit)return;const def=S.cat.items[id];const d={mode:'new',id,x:null,y:null,moved:false,sx:ev.clientX,sy:ev.clientY};World.drag=d;
+ const mv=e=>{if(Math.hypot(e.clientX-d.sx,e.clientY-d.sy)>6)d.moved=true;if(d.moved){const[x,y]=toWorld(e);d.x=x;d.y=y}};
+ const stop=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',stop);if(World.drag===d)World.drag=null};
+ const up=e=>{stop();const r=cv.getBoundingClientRect();
   let x,y;if(d.moved&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){[x,y]=toWorld(e)}else if(!d.moved){x=def.kind=='wall'?560:def.kind=='rug'?400:380;y=def.kind=='wall'?110:def.wallside?340:def.kind=='rug'?470:470}else return;
   S.pendingSelect=id;send({t:'place',id,x,y});sfx('place')};
- addEventListener('pointermove',mv);addEventListener('pointerup',up)}
+ addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',stop)}
 cv.addEventListener('pointerdown',e=>{if(Park.on)return;const[x,y]=toWorld(e);
  if(S.edit&&S.owner==S.name){const it=pickItem(x,y);if(it){selectItem(it.uid);World.drag={mode:'item',uid:it.uid,ox:it.x-x,oy:it.y-y,moved:false};cv.setPointerCapture(e.pointerId);sfx('click')}else{selectItem(null)}return}
  if(S.fetchMode&&S.owner==S.name){fetchThrow(clamp(x,70,730),clamp(y,350,556));return}
@@ -1878,10 +2000,14 @@ function avatarTap(){S.avTap=performance.now()+1900;sfx('pop');if(S.owner==S.nam
 cv.addEventListener('pointermove',e=>{if(Park.on){cv.style.cursor='crosshair';return}const[x,y]=toWorld(e);const d=World.drag;
  if(d&&d.mode=='item'){const it=(S.ritems||[]).find(i=>i.uid==d.uid);if(!it)return;const def=S.cat.items[it.type],p=fitLocal(def,x+d.ox,y+d.oy);if(p){if(p[0]!=it.x||p[1]!=it.y)d.moved=true;it.x=p[0];it.y=p[1]}return}
  if(S.edit){cv.style.cursor=pickItem(x,y)?'grab':'default'}else cv.style.cursor=S.fetchMode?'crosshair':(pickDog(x,y)||AVA.pickHome(x,y))?'pointer':'default'});
-const endDrag=()=>{const d=World.drag;if(d&&d.mode=='item'){const it=(S.ritems||[]).find(i=>i.uid==d.uid);if(it&&d.moved){send({t:'move',uid:it.uid,x:it.x,y:it.y});sfx('place')}}World.drag=null};
+const endDrag=()=>{const d=World.drag;if(!d||d.mode!='item')return;const it=(S.ritems||[]).find(i=>i.uid==d.uid);if(it&&d.moved){send({t:'move',uid:it.uid,x:it.x,y:it.y});sfx('place')}World.drag=null};
 cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
 function flipItem(){const it=(S.ritems||[]).find(i=>i.uid==World.selItem);if(!it)return;it.f=it.f?0:1;send({t:'move',uid:it.uid,x:it.x,y:it.y,f:it.f});sfx('click')}
 function storeItem(){if(!World.selItem)return;send({t:'store',uid:World.selItem});World.selItem=null;sfx('pop')}
+function disarmDiscard(){clearTimeout(discardItem.tm);const b=$('#itembar [data-do=discard]');if(b&&b.classList.contains('arm')){b.classList.remove('arm');b.innerHTML='🗑 '+t('Delete');$('#itembar')._w=0}}
+function discardItem(){if(!World.selItem)return;const bar=$('#itembar'),b=$('[data-do=discard]',bar);
+ if(b&&!b.classList.contains('arm')){b.classList.add('arm');b.innerHTML='🗑 '+t('Tap again to delete');bar._w=0;clearTimeout(discardItem.tm);discardItem.tm=setTimeout(disarmDiscard,2600);return}
+ disarmDiscard();send({t:'discard',uid:World.selItem});World.selItem=null;sfx('pop')}
 // ---------- photo ----------
 function photo(){const f=$('#flash');f.style.transition='none';f.style.opacity=.9;requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0});sfx('shake');
  const W=720,H=720*.75,pad=22,o=document.createElement('canvas');o.width=W+pad*2;o.height=H+pad*2+64;const c=o.getContext('2d');c.fillStyle='#fffaf1';c.fillRect(0,0,o.width,o.height);c.imageSmoothingEnabled=true;c.drawImage(cv,pad,pad,W,H);
@@ -1941,9 +2067,14 @@ UI.dock=function(){const m=S.me,fr=S.fr?S.fr.inReq.length:0;
  $('#dock').classList.toggle('hidden',S.edit)}
 UI.online=function(){const l=S.players.filter(p=>p.name!=S.name);$('#online').innerHTML=`<h5 data-do="togonline">🟢 ${t('Online players')} (${S.players.length})</h5>`+(l.length?l.map(p=>`<div class="pl" data-do="visit" data-n="${esc(p.name)}"><i></i><span>${esc(p.name)}${p.park?' 🌳':''}</span><small>Lv${p.lvl}</small><b class="tb" data-do="tradereq" data-n="${esc(p.name)}" title="Trade">🔁</b></div>`).join(''):`<div class="muted" style="font-size:11px">—</div>`)}
 UI.chat=function(){const el=$('#chat'),min=el.classList.contains('min');const log=S.chat.slice(-30).map(c=>`<div><b>${esc(c.from)}</b> ${esc(c.m)}</div>`).join('');
- el.innerHTML=`<div class="hd" data-do="togchat"><span>💬 ${t('Chat')}</span><span>${min?'▲':'▼'}</span></div><div class="log">${log}</div><div class="em">${['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button data-do="emoji" data-e="${e}">${e}</button>`).join('')}</div><form id="chatf"><input maxlength="120" placeholder="…" autocomplete="off"><button class="btn sm pink">➤</button></form>`;
- const lg=$('.log',el);lg.scrollTop=lg.scrollHeight;$('#chatf').onsubmit=e=>{e.preventDefault();const i=$('input',el);if(i.value.trim()){send({t:'chat',m:i.value});i.value=''}}}
-DO.togchat=()=>{const el=$('#chat');el.classList.toggle('min');UI.chat()};
+ let lg=$('.log',el);
+ if(!lg||!$('#chatf',el)){   // build the panel once
+  el.innerHTML=`<div class="hd" data-do="togchat"><span>💬 ${t('Chat')}</span><span>${min?'▲':'▼'}</span></div><div class="log">${log}</div><div class="em">${['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button data-do="emoji" data-e="${e}">${e}</button>`).join('')}</div><form id="chatf"><input maxlength="120" placeholder="…" autocomplete="off" enterkeyhint="send"><button class="btn sm pink">➤</button></form>`;
+  lg=$('.log',el);$('#chatf').onsubmit=e=>{e.preventDefault();const i=$('input',el);if(i.value.trim()){send({t:'chat',m:i.value});i.value=''}}}
+ else{   // later calls only refresh the log + header: rebuilding the <input> on every incoming message dropped focus and the typed text (and closed the phone keyboard)
+  lg.innerHTML=log;const sp=$$('.hd span',el);if(sp[0])sp[0].textContent='💬 '+t('Chat');if(sp[1])sp[1].textContent=min?'▲':'▼'}
+ lg.scrollTop=lg.scrollHeight}
+DO.togchat=()=>{const el=$('#chat');el.classList.toggle('min');UI.chat();if(!el.classList.contains('min')&&matchMedia('(pointer:coarse)').matches){const i=$('input',el);if(i)i.focus()}};
 DO.togonline=()=>{$('#online').classList.toggle('hidden')};
 DO.emoji=d=>send({t:'emoji',e:d.e});
 DO.visit=d=>{if(S.edit)return toast('Finish decorating first');if(Park.on)Park.leaveLocal();send({t:'visit',id:d.n});closeMod('friends')};
@@ -1960,7 +2091,9 @@ UI.edit=function(){const cat=S.editCat||'all',C=S.cat.items,inv=S.me.inv,placed=
  paintItemThumbs($('#editbar'));$$('#editbar .inv').forEach(el=>el.addEventListener('pointerdown',e=>{if(el.classList.contains('dis'))return;e.preventDefault();startPlace(el.dataset.id,e)}))}
 DO.ecat=d=>{S.editCat=d.k;UI.edit()};
 DO.decor=()=>{if(S.owner!=S.name){send({t:'visit',id:S.name});}S.edit=!S.edit;World.selItem=null;World.drag=null;UI.dock();UI.bars();if(S.edit)toast('🛋️ '+t('Drag items into your room'))};
-DO.flip=flipItem;DO.store=storeItem;
+DO.flip=flipItem;DO.store=storeItem;DO.discard=discardItem;
+addEventListener('keydown',e=>{if(!S.edit||Park.on||!World.selItem)return;const g=e.target,n=g&&g.tagName;if(n=='INPUT'||n=='TEXTAREA'||n=='SELECT'||(g&&g.isContentEditable))return;
+ if(e.key=='Delete'||e.key=='Backspace'){e.preventDefault();storeItem()}else if(e.key=='Escape')selectItem(null)});
 // ---- care card
 const FOODS=['kibble','treat','fruit','cookie','bone','meat','cake'];
 UI.care=function(){const el=$('#care'),d=S.dogs[S.sel];if(!d){el.classList.add('hidden');return}el.classList.remove('hidden');const b=DOGS.BR[d.breed],own=S.owner==S.name,F=S.cat.food;
@@ -2057,13 +2190,29 @@ function renderCapsule(){const m=S.me,W=S.welcome||{rates:{C:60,R:25,E:10,L:4,M:
   g.fillStyle='rgba(190,230,255,.55)';d.e(60,56,48,48,'rgba(190,230,255,.55)');d.e(60,56,44,44,'rgba(220,244,255,.6)');
   const cols=['#ff6b8a','#ffc94d','#6fd1a5','#6fb8ff','#b79bff','#ff9a4d'];for(let i=0;i<16;i++){const a=i*2.4+Math.sin(t*(S.capShake?9:.7)+i)*.25,r=8+(i%5)*7,x=60+Math.cos(a)*r,y=62+Math.abs(Math.sin(a))*18-(i%3)*10;d.se(Math.round(x),Math.round(y),5,5,cols[i%6])}
   d.r(14,52,2,40,'rgba(255,255,255,.0)');g.fillStyle='rgba(255,255,255,.7)';g.fillRect(30,24,3,22);g.fillRect(34,20,8,3);d.bx(20,100,80,6,'#ffe9f0',0);g.restore();capAnim=requestAnimationFrame(draw)};draw()}
-DO.gacha=d=>{const n=+d.n,tk=!!d.tk;if(tk?S.me.tickets<n:S.me.coins<(S.welcome?S.welcome.cost:100)*n)return sfx('err'),toast(S.set.lang=='th'?'ไม่พอ':'Not enough');S.capShake=true;sfx('shake');S.capPrev=[...S.me.owned];send({t:'capsule',n,ticket:tk});setTimeout(()=>S.capShake=false,1500)};
-H.capsule=m=>{S.capShake=false;const seen=new Set(S.capPrev||S.me.owned);const res=m.res.map(r=>{const nw=!seen.has(r.breed);seen.add(r.breed);return Object.assign({nw},r)});
- const best=res.reduce((a,r)=>RORD[r.r]<RORD[a]?r.r:a,'C');
- const ov=document.createElement('div');ov.className='reveal';document.body.append(ov);const close=()=>{ov.remove();renderCapsuleIfOpen();UI.cur()};
- const card=(r,big,extra='')=>{const b=DOGS.BR[r.breed];return`<div class="panel rcard r-${r.r}" style="border-color:${RCOL[r.r]};${big?'':'width:auto;'}${extra}">${r.r!='C'?'<div class="glow"></div>':''}<div style="position:relative">${r.nw?'<span class="tag" style="position:absolute;left:0;top:0;background:var(--pink);border:2px solid var(--ink);border-radius:8px;font-size:11px;font-weight:900;padding:0 6px;color:#fff">'+(S.set.lang=='th'?'ใหม่!':'NEW!')+'</span>':''}${thumbHTML(r.breed,r.variant,big?85:42,null)}<h3>${esc(r.name)}</h3><div>${rarTag(r.r)}</div><div class="muted">${esc(b.name)}${r.variant!='Normal'?' · '+t(r.variant):''}${r.away?' · 🏠 '+(S.set.lang=='th'?'บ้านเต็ม':'full'):''}</div></div></div>`};
- if(res.length==1){ov.innerHTML=`<div style="font-size:60px;animation:wob .3s infinite" id="egg">🥚</div>`;setTimeout(()=>{sfx('reveal',res[0].r);ov.innerHTML=card(res[0],true)+`<button class="btn pink" id="rcl">OK</button>`;paintThumbs(ov);$('#rcl').onclick=close;const a=$('.rcard',ov).getBoundingClientRect();if(res[0].r!='C')sparkle(400,300,0)},900)}
- else{ov.innerHTML=`<div style="font-size:60px;animation:wob .3s infinite">🥚🥚🥚</div>`;setTimeout(()=>{sfx('reveal',best);ov.innerHTML=`<div class="rc10">${res.map((r,i)=>card(r,false,'animation-delay:'+i*.08+'s')).join('')}</div><button class="btn pink" id="rcl">OK</button>`;paintThumbs(ov);$('#rcl').onclick=close},900)}};
+// One pull at a time. While a request is in flight the buttons are locked; if several answers ever arrive together (slow connection, two tabs, a frantic double tap)
+// the result screens are shown one after another - never stacked on top of each other (stacked screens used to share one OK button id, so OK stopped working).
+let capSeen=new Set(),capQ=[],capOpen=0,capLab=null;
+function capUnlock(){S.capBusy=0;renderCapsuleIfOpen()}
+DO.gacha=d=>{const n=+d.n,tk=!!d.tk;if(capOpen||capQ.length||(S.capBusy&&Date.now()-S.capBusy<6000))return;
+ if(tk?S.me.tickets<n:S.me.coins<(S.welcome?S.welcome.cost:100)*n)return sfx('err'),toast(S.set.lang=='th'?'ไม่พอ':'Not enough');
+ const stamp=S.capBusy=Date.now();setTimeout(()=>{if(S.capBusy===stamp)capUnlock()},6000);        // (no answer for 6 s: unlock the buttons again)
+ $$('#mods [data-do=gacha]').forEach(b=>b.classList.add('dis'));S.capShake=true;sfx('shake');S.capPrev=[...S.me.owned];send({t:'capsule',n,ticket:tk});setTimeout(()=>S.capShake=false,1500)};
+H.capsule=m=>{S.capBusy=0;S.capShake=false;
+ if(!capOpen&&!capQ.length)capSeen=new Set(S.capPrev||S.me.owned);      // a fresh batch: "NEW!" means not owned before this pull
+ capQ.push(m.res.map(r=>{const nw=!capSeen.has(r.breed);capSeen.add(r.breed);return Object.assign({nw},r)}));
+ if(!capOpen)capNext();else if(capLab)capLab()};
+function capNext(){const res=capQ.shift();if(!res){capOpen=0;return}capOpen=1;
+ const best=res.reduce((a,r)=>RORD[r.r]<RORD[a]?r.r:a,'C'),one=res.length==1,th=S.set.lang=='th';
+ const ov=document.createElement('div');ov.className='reveal';document.body.append(ov);if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+ let done=false;capLab=()=>{const b=$('.rclose',ov),n=capQ.length;if(b)b.textContent='OK'+(n?' · '+(th?'ยังมีอีก '+n:n+' more'):'')};   // ("OK · 2 more" while other results are waiting)
+ const close=()=>{if(done)return;done=true;capLab=null;document.removeEventListener('keydown',key);ov.remove();if(capQ.length)return capNext();capOpen=0;renderCapsuleIfOpen();UI.cur()};
+ const key=e=>{if((e.key=='Enter'||e.key==' '||e.key=='Escape')&&ov.querySelector('.rclose')){e.preventDefault();e.stopPropagation();close()}};document.addEventListener('keydown',key);
+ const card=(r,big,extra='')=>{const b=DOGS.BR[r.breed];return`<div class="panel rcard r-${r.r}" style="border-color:${RCOL[r.r]};${big?'':'width:auto;'}${extra}">${r.r!='C'?'<div class="glow"></div>':''}<div style="position:relative">${r.nw?'<span class="tag" style="position:absolute;left:0;top:0;background:var(--pink);border:2px solid var(--ink);border-radius:8px;font-size:11px;font-weight:900;padding:0 6px;color:#fff">'+(th?'ใหม่!':'NEW!')+'</span>':''}${thumbHTML(r.breed,r.variant,big?85:42,null)}<h3>${esc(r.name)}</h3><div>${rarTag(r.r)}</div><div class="muted">${esc(b.name)}${r.variant!='Normal'?' · '+t(r.variant):''}${r.away?' · 🏠 '+(th?'บ้านเต็ม':'full'):''}</div></div></div>`};
+ ov.innerHTML=one?`<div style="font-size:60px;animation:wob .3s infinite" id="egg">🥚</div>`:`<div style="font-size:60px;animation:wob .3s infinite">🥚🥚🥚</div>`;
+ setTimeout(()=>{if(done)return;sfx('reveal',one?res[0].r:best);
+  ov.innerHTML=(one?card(res[0],true):`<div class="rc10">${res.map((r,i)=>card(r,false,'animation-delay:'+i*.08+'s')).join('')}</div>`)+`<button class="btn pink rclose">OK</button>`;
+  paintThumbs(ov);capLab();$('.rclose',ov).onclick=close;if(one&&res[0].r!='C')sparkle(400,300,0)},900)}
 function renderCapsuleIfOpen(){if(modOpen('capsule'))renderCapsule()}
 // ================= COLLECTION / QUESTS / ACH =================
 DO.coll=()=>{send({t:'ach'});renderColl()};
@@ -2118,7 +2267,7 @@ H.daily_ok=m=>{sfx('level');S.me.canClaim=false;toast('🎁 +'+[m.r.c&&m.r.c+'�
 ;
 // Cozy Dogs - mini games: Memory Match, Cookie Catch, Guess the Breed, Rock-Paper-Scissors (rewards validated by server)
 'use strict';
-const GAMES=[['memory','🃏','Memory Match','จับคู่ภาพน้องหมาให้ครบ ยิ่งพลาดน้อยยิ่งได้เหรียญเยอะ','Flip cards and match every pair. Fewer moves = more coins.'],['catch','🍪','Cookie Catch','พาน้องหมารับขนมที่ร่วงลงมาภายใน 20 วินาที','Catch falling treats in 20 seconds.'],['guess','❓','Guess the Breed','ทายสายพันธุ์จากหน้าตา 5 ข้อ','Guess the breed from its look. 5 rounds.'],['rps','✊','Rock Paper Scissors','ท้าเป่ายิ้งฉุบกับผู้เล่นออนไลน์ ชนะรับ 30 เหรียญ','Challenge another online player. Win 30 coins.']];
+const GAMES=[['memory','🃏','Memory Match','จับคู่ภาพน้องหมาให้ครบ ยิ่งพลาดน้อยยิ่งได้เหรียญเยอะ','Flip cards and match every pair. Fewer moves = more coins.'],['catch','🍪','Cookie Catch','พาน้องหมารับขนมที่ร่วงลงมาภายใน 20 วินาที','Catch falling treats in 20 seconds.'],['guess','❓','Guess the Breed','ทายสายพันธุ์จากหน้าตา 5 ข้อ','Guess the breed from its look. 5 rounds.'],['rps','✊','Rock Paper Scissors','เป่ายิ้งฉุบ 1 ต่อ 1 กับผู้เล่นจริง ถ้าไม่มีใครอยู่บอทจะมาเล่นด้วย · ชนะรับ 30 เหรียญ (บอทรับครึ่งเดียว)','1v1 Rock-Paper-Scissors against a real player — a bot joins if nobody is around. Win 30 coins (half vs bots).']];
 DO.games=()=>{const th=S.set.lang=='th';modal('games','🎮 '+t('Games'),`<div class="muted" style="margin-bottom:10px">${th?'รางวัลเหรียญจากมินิเกมจำกัดวันละ 500 เหรียญ':'Mini game coin rewards are capped at 500 per day.'}</div>`+GAMES.map(g=>`<div class="gmcard" data-do="gstart" data-g="${g[0]}"><span class="e">${g[1]}</span><div><b style="font-size:16px">${t(g[2])}</b><div class="muted">${th?g[3]:g[4]}</div></div></div>`).join(''),'sm')};
 let gcleanup=null;
 function gwin(title,body,onClose){if(gcleanup){gcleanup();gcleanup=null}const ov=modal('game',title,'<div class="mgb">'+body+'</div>','sm',{lock:0});ov.addEventListener('close',()=>{if(gcleanup){gcleanup();gcleanup=null}if(onClose)onClose()},{once:true});return ov}
@@ -2152,7 +2301,7 @@ function gGuess(){const ids=Object.keys(DOGS.BR),th=S.set.lang=='th';let round=0
   $$('.opts4 .btn',ov).forEach(b=>b.onclick=()=>{const ok=b.dataset.g==correct;if(ok)score++;sfx(ok?'ok':'err');$$('.opts4 .btn',ov).forEach(x=>{x.style.pointerEvents='none';if(x.dataset.g==correct)x.classList.replace('ghost','mint');else if(x==b&&!ok)x.classList.replace('ghost','red')});setTimeout(next,850)})};next()}
 // ---- Rock Paper Scissors (matchmaking via server)
 const RPS_E={R:'✊',P:'✋',S:'✌️'};
-function gRps(){gwin('✊ '+t('Rock Paper Scissors'),`<div id="rpsb" class="center"><div class="muted">${S.set.lang=='th'?'ค้นหาคู่ต่อสู้ออนไลน์…':'Looking for an opponent…'}</div><div style="font-size:50px;margin:10px" class="rotsm">🔎</div><button class="btn ghost" data-do="rpscancel">${t('Cancel')}</button></div>`,()=>send({t:'rps_cancel'}));S.rps=true;send({t:'rps_find'})}
+function gRps(){gwin('✊ '+t('Rock Paper Scissors'),`<div id="rpsb" class="center"><div class="muted">${S.set.lang=='th'?'ค้นหาคู่ต่อสู้ออนไลน์… ถ้าไม่มีใคร บอทจะมาเล่นด้วย':'Looking for an opponent… a bot joins if nobody shows up'}</div><div style="font-size:50px;margin:10px" class="rotsm">🔎</div><button class="btn ghost" data-do="rpscancel">${t('Cancel')}</button></div>`,()=>send({t:'rps_cancel'}));S.rps=true;send({t:'rps_find'})}
 DO.rpscancel=()=>{send({t:'rps_cancel'});closeMod('game')};
 H.rps_wait=()=>{};
 H.rps_start=m=>{S.rpsPick=null;if(!modOpen('game'))gRps();const b=$('#rpsb');if(!b)return;sfx('notify');b.innerHTML=`<div class="big">${esc(S.name)} <span class="muted">Lv${m.my}</span> ⚔️ ${esc(m.vs)} <span class="muted">Lv${m.lvl}</span></div><div class="muted" style="margin:6px">${t('Time')}: <b id="rpst">25</b></div><div class="rps">${['R','P','S'].map(k=>`<button data-k="${k}">${RPS_E[k]}</button>`).join('')}</div><div id="rpsr" class="muted" style="margin-top:10px"></div>`;
@@ -2731,34 +2880,38 @@ const _help=DO.help;DO.help=function(){_help.apply(this,arguments);const l=$('#m
 
 ;
 // Cozy Dogs - online mini-game arcade (client). The server owns every room; this file only draws and sends inputs.
-//   Dog Race (alternate taps) · Bone Grab (reaction duel) · Breed Duel (quiz) + the "Games" hub with the lucky wheel and the solo games.
+//   Dog Race (alternate taps) · Bone Grab (reaction duel) · Treat Frenzy · Odd Pup Out · Breed Duel (quiz) + the "Games" hub with the lucky wheel and the solo games.
+//   Dog Brawl (turn-based fights) lives in brawl.js and plugs into the handlers below.
 'use strict';
 const TT=(en,th)=>S.set.lang=='th'?th:en;
 SFX.whoosh=()=>{tone(300,.25,'sawtooth',.03,0,3)};SFX.tick=()=>tone(660,.07,'square',.06);SFX.go=()=>{tone(880,.16,'square',.08);tone(1320,.28,'square',.08,.08)};SFX.step=()=>tone(300+Math.random()*60,.03,'square',.025);
 const OG=[
+ ['brawl','⚔️','Dog Brawl','ให้น้องหมาสู้กันเอง! แต่ละตัวมีค่า HP / โจมตี / ป้องกัน / ความเร็ว และสกิลพิเศษ 2 อย่างไม่เหมือนกัน ทุกคนเลือกท่าลับพร้อมกันทุกรอบ สู้ 6 รอบ','Dogs fight! Every dog has its own HP / ATK / DEF / SPD and 2 special skills. Everybody picks a move at the same time — 6 rounds.','2-4'],
  ['race','🏁','Dog Race','แตะซ้าย-ขวาสลับกันให้เร็วที่สุด! วิ่งแข่งกับผู้เล่นจริง 2-4 คน','Alternate left / right taps to outrun 2-4 players','2-4'],
  ['grab','🦴','Bone Grab','ดวลปฏิกิริยา 1 ต่อ 1 ใครแตะกระดูกไวกว่าชนะ (ชนะ 3 รอบ)','1v1 reaction duel — first to win 3 rounds','2'],
  ['rush','🍪','Treat Frenzy','ขนมโผล่ทั่วจอ! แตะให้ไวกว่าคนอื่น 🍪+1 🦴+3 ⭐+5 ระวังรองเท้า 🥾 (−2) นาน 24 วินาที','Treats pop up everywhere — tap them before the others! Avoid the boots. 24 seconds','2-4'],
  ['odd','🔍','Odd Pup Out','หาน้องหมาตัวที่แตกต่างจากตะแกรงให้เร็วที่สุด 6 รอบ ยิ่งไปยิ่งยาก','Spot the one different dog in the grid — 6 rounds, getting harder','2-4'],
+ ['rps','✊','Rock Paper Scissors','เป่ายิ้งฉุบ 1 ต่อ 1 กับผู้เล่นจริง ถ้าไม่มีใครอยู่บอทจะมาเล่นด้วย · ชนะรับ 30 เหรียญ (บอทรับครึ่งเดียว)','1v1 Rock-Paper-Scissors against a real player — a bot joins if nobody is around. Win 30 coins (half vs bots).','2','gstart'],
  ['duel','🧠','Breed Duel','ตอบคำถามเรื่องสายพันธุ์และความรู้หมา 5 ข้อ ตอบไวได้แต้มเพิ่ม','5 quick questions about breeds and dog facts — faster = more points','2-4']];
 const MP={prev:[],mv:[],g:null,room:null,pl:[],me:0,lobby:null,res:null,raf:0,iv:0,state:'idle',rn:0,pos:[],fin:[],shown:[],loc:0,lastSide:-1,goAt:0,sc:[],acted:false,q:null,qEnd:0,qms:10000,keysOn:false};
 // ================= hub =================
 DO.games=()=>{send({t:'mp_get'});send({t:'spin_get'});renderHub()};
 H.mp_info=m=>{S.mpInfo=m;if(modOpen('games'))renderHub()};
 function renderHub(){const th=S.set.lang=='th',inf=S.mpInfo||{cap:600,used:0,wait:{}},sp=S.spin;
- const og=OG.map(g=>`<div class="gmcard og" data-do="mpfind" data-g="${g[0]}"><span class="e">${g[1]}</span><div style="flex:1"><b style="font-size:16px">${t(g[2])}</b> <span class="pill">👥 ${g[5]}</span>${inf.wait&&inf.wait[g[0]]?` <span class="pill on">⏳ ${inf.wait[g[0]]} ${TT('waiting','รออยู่')}</span>`:''}<div class="muted">${th?g[3]:g[4]}</div></div></div>`).join('');
+ const og=OG.map(g=>`<div class="gmcard og" data-do="${g[6]||'mpfind'}" data-g="${g[0]}"><span class="e">${g[1]}</span><div style="flex:1"><b style="font-size:16px">${t(g[2])}</b> <span class="pill">👥 ${g[5]}</span>${inf.wait&&inf.wait[g[0]]?` <span class="pill on">⏳ ${inf.wait[g[0]]} ${TT('waiting','รออยู่')}</span>`:''}<div class="muted">${th?g[3]:g[4]}</div></div></div>`).join('');
  modal('games','🎮 '+t('Games'),`<h4 class="hubh">🌐 ${TT('Online games','เกมออนไลน์')}</h4><div class="muted" style="margin-bottom:8px">${TT('Real players join your room · if nobody is around, friendly bots fill in (half rewards).','ผู้เล่นจริงจะเข้าห้องเดียวกับคุณ · ถ้าไม่มีใครอยู่ จะมีบอทมาเล่นด้วย (รางวัลครึ่งเดียว)')}<br>🪙 ${TT('Arcade coins today','เหรียญเกมออนไลน์วันนี้')}: <b>${inf.used}/${inf.cap}</b></div>${og}
  <div class="gmcard" data-do="wheel" style="margin-top:6px"><span class="e">🎰</span><div style="flex:1"><b style="font-size:16px">${TT('Lucky Wheel','วงล้อนำโชค')}</b>${sp&&sp.free||S.me.spinFree?` <span class="pill on">🎁 ${TT('FREE spin!','หมุนฟรี!')}</span>`:''}<div class="muted">${TT('One free spin every day — coins, gems, tickets and more.','หมุนฟรีวันละครั้ง ได้เหรียญ เพชร ตั๋ว และของรางวัลอื่น ๆ')}</div></div></div>
  <h4 class="hubh">🎮 ${TT('Solo mini-games','มินิเกมเล่นคนเดียว')}</h4><div class="muted" style="margin-bottom:8px">${th?'รางวัลเหรียญจากมินิเกมจำกัดวันละ 500 เหรียญ':'Mini game coin rewards are capped at 500 per day.'}</div>`+
-  GAMES.map(g=>`<div class="gmcard" data-do="gstart" data-g="${g[0]}"><span class="e">${g[1]}</span><div><b style="font-size:16px">${t(g[2])}</b><div class="muted">${th?g[3]:g[4]}</div></div></div>`).join(''),'sm')}
+  GAMES.filter(g=>g[0]!='rps').map(g=>`<div class="gmcard" data-do="gstart" data-g="${g[0]}"><span class="e">${g[1]}</span><div><b style="font-size:16px">${t(g[2])}</b><div class="muted">${th?g[3]:g[4]}</div></div></div>`).join(''),'sm')}
 // ================= flow =================
 const mpRoomOpen=()=>!!modOpen('mp');
 function mpModal(title,body,cls){return modal('mp',title,body,cls||'sm',{lock:1})}
 DO.mpfind=d=>{if(MP.g)return toast(TT('Already in a game','คุณอยู่ในเกมอยู่แล้ว'));if(S.edit)return toast(TT('Finish decorating first','ตกแต่งให้เสร็จก่อนนะ'));
- closeMod('games');MP.reset(true);MP.g=d.g;MP.state='lobby';MP.seen=performance.now();send({t:'mp_find',g:d.g,dog:LS.get('cd_pdog',null)});renderLobby({n:1,max:d.g=='grab'?2:4,ms:8000,names:[S.name]})};
+ if(d.g=='brawl'&&!d.dog)return DO.brpick();      // Dog Brawl: choose the fighter first (its stats and skills come from its breed)
+ closeMod('games');MP.reset(true);MP.g=d.g;MP.state='lobby';MP.seen=performance.now();send({t:'mp_find',g:d.g,dog:d.dog||LS.get('cd_pdog',null)});renderLobby({n:1,max:d.g=='grab'?2:4,ms:8000,names:[S.name]})};
 DO.mpcancel=()=>{send({t:'mp_cancel'});MP.reset()};
 DO.mpleave=()=>ask(TT('Leave this game? You will forfeit.','ออกจากเกมนี้? จะนับว่าแพ้นะ'),()=>{send({t:'mp_leave'});MP.reset()},{cls:'red',yes:TT('Leave','ออก')});
-DO.mpagain=()=>{const g=MP.g;MP.reset(true);DO.mpfind({g})};
+DO.mpagain=()=>{const g=MP.g;MP.reset(g!='brawl');DO.mpfind({g})};
 DO.mpclose=()=>{MP.reset();DO.games()};
 MP.reset=(keepOpen)=>{cancelAnimationFrame(MP.raf);clearInterval(MP.iv);Object.assign(MP,{g:null,room:null,pl:[],lobby:null,res:null,state:'idle',pos:[],fin:[],shown:[],prev:[],mv:[],loc:0,lastSide:-1,sc:[],acted:false,q:null,items:{},lockEnd:0});if(!keepOpen)closeMod('mp')};
 MP.abort=()=>{if(MP.g||MP.state!='idle'){MP.reset();toast(TT('Connection lost — game cancelled','การเชื่อมต่อหลุด — ยกเลิกเกม'))}};
@@ -2773,7 +2926,7 @@ function renderLobby(m){MP.lobby=MP.lobby||{n:m.n,max:m.max,end:performance.now(
  clearInterval(MP.iv);MP.iv=setInterval(()=>{const e=$('#lobs');if(!e||!MP.lobby)return clearInterval(MP.iv);e.textContent=Math.max(0,Math.ceil((MP.lobby.end-performance.now())/1000))},250)}
 // ---- start
 H.mp_start=m=>{clearInterval(MP.iv);if(Park.on)Park.leaveLocal();Object.assign(MP,{g:m.g,room:m,pl:m.pl,me:m.me,lobby:null,state:'count',goAt:performance.now()+m.go,pos:m.pl.map(()=>0),fin:m.pl.map(()=>0),shown:m.pl.map(()=>0),loc:0,lastSide:-1,sc:m.pl.map(()=>0),acted:false,rn:0,lastTick:4});
- S.sel=null;UI.care();sfx('level');({race:startRace,grab:startGrab,duel:startDuel,rush:startRush,odd:startOdd})[m.g](m)};
+ S.sel=null;UI.care();sfx('level');({race:startRace,grab:startGrab,duel:startDuel,rush:startRush,odd:startOdd,brawl:startBrawl})[m.g](m)};
 H.mp_p=m=>send({t:'mp_pr',k:m.k});
 H.mp_gone=m=>toast('🚪 '+m.n+' '+TT('left the game','ออกจากเกมแล้ว'));
 const pName=p=>(p.bot?'🤖 ':'')+esc(p.n);
@@ -2867,7 +3020,7 @@ H.mp_or=m=>{if(MP.g!='odd')return;MP.state='rev';MP.sc=m.sc;updScores();$$('#ogr
 // ================= results =================
 H.mp_end=m=>{MP.state='done';clearInterval(MP.iv);cancelAnimationFrame(MP.raf);MP.res=m;const th=S.set.lang=='th',me=m.me,med=['🥇','🥈','🥉','4️⃣'],res=m.res.slice().sort((a,b)=>a.rank-b.rank);
  const head=me.forfeit?TT('Opponent left — you win!','คู่ต่อสู้ออกจากเกม — คุณชนะ!'):me.win?TT('You win! 🎉','คุณชนะ! 🎉'):me.rank==1?TT('Finished first','มาเป็นที่ 1'):TT('Finished #','จบอันดับที่ ')+me.rank;
- const rows=res.map(r=>`<div class="li" style="${r.n==S.name?'background:#fff3c4':''}"><b style="width:34px;font-size:20px;text-align:center">${med[r.rank-1]||r.rank}</b>${thumbHTML(r.breed,r.variant,14,null)}<div class="g"><b>${r.bot?'🤖 ':''}${esc(r.n)}${r.left?' 🚪':''}</b><small>${m.g=='race'?(r.ft?r.ft+'s':r.left?TT('left','ออก'):'—'):(m.g=='duel'||m.g=='rush'||m.g=='odd')?r.score+' pts':r.score+' / 3'}</small></div></div>`).join('');
+ const rows=res.map(r=>`<div class="li" style="${r.n==S.name?'background:#fff3c4':''}"><b style="width:34px;font-size:20px;text-align:center">${med[r.rank-1]||r.rank}</b>${thumbHTML(r.breed,r.variant,14,null)}<div class="g"><b>${r.bot?'🤖 ':''}${esc(r.n)}${r.left?' 🚪':''}</b><small>${m.g=='race'?(r.ft?r.ft+'s':r.left?TT('left','ออก'):'—'):m.g=='brawl'?'⚔ '+r.score+' '+TT('damage','ดาเมจ'):(m.g=='duel'||m.g=='rush'||m.g=='odd')?r.score+' pts':r.score+' / 3'}</small></div></div>`).join('');
  mpModal(gicon(m.g)+' '+gname(m.g),`<div class="center"><div class="big" style="margin:4px 0 8px">${head}</div><div class="rwbox">+${me.coins} ${ic('coin','big')} <small>· +${me.xp} XP</small></div>${!me.vsHuman?`<div class="muted">🤖 ${TT('Played with bots — rewards halved','เล่นกับบอท — รางวัลลดครึ่ง')}</div>`:''}${me.capLeft<=0?`<div class="muted" style="color:#d13c4c">${TT('Daily arcade coin cap reached','ครบเพดานเหรียญเกมออนไลน์ของวันนี้แล้ว')}</div>`:''}</div><div class="list" style="margin-top:10px">${rows}</div>
   <div class="row"><button class="btn ghost" data-do="mpclose">${TT('Back to games','กลับไปหน้าเกม')}</button><button class="btn mint" data-do="mpagain">▶ ${TT('Play again','เล่นอีกครั้ง')}</button></div>`,'sm');paintThumbs(modOpen('mp'));
  sfx(me.win?'level':me.rank<=2?'win':'lose');if(me.win){for(let i=0;i<5;i++)setTimeout(()=>burst(rnd(150,650),rnd(250,450),pick(['⭐','🎉','🏆']),3),i*140)}
@@ -2879,6 +3032,198 @@ for(const k of Object.keys(H))if(k.startsWith('mp_')&&k!='mp_info'&&k!='mp_abort
 MP.seen=performance.now();
 setInterval(()=>{if(!MP.g||MP.state=='idle'||MP.state=='done')return;const lim=MP.state=='lobby'?30000:18000;if(performance.now()-MP.seen>lim){send({t:'mp_leave'});MP.reset();toast(TT('Lost contact with the game — back to home','เกมไม่ตอบสนอง — กลับหน้าหลัก'))}},2000);
 const _closemod=DO.closemod;DO.closemod=d=>{if(d.id=='mp'){if(MP.state=='done'||MP.state=='idle')return DO.mpclose();if(MP.state=='lobby')return DO.mpcancel();return DO.mpleave()}_closemod(d)};
+
+;
+// Cozy Dogs - Dog Brawl (client).
+// The server owns the rules (brawl.js + brawl_data.js - build.js embeds the data here as window.BRD, so both sides always use the same numbers).
+// This file lets the player choose a fighter, draws the arena, sends ONE move per round and plays back the events the server sends (hits, misses, skills, K.O.s).
+'use strict';
+Object.assign(TH,{'Dog Brawl':'หมากัดกัน'});
+const BWL=()=>S.set.lang=='th'?1:0,bwN=o=>o.n[BWL()],bwD=o=>o.d[BWL()];
+SFX.bhit=()=>{tone(180,.12,'square',.08,0,.5);tone(95,.14,'sawtooth',.06,.02)};
+SFX.bcrit=()=>{tone(280,.1,'square',.09);tone(560,.18,'square',.08,.07,1.3);tone(90,.16,'sawtooth',.07,.02)};
+SFX.bmiss=()=>tone(520,.18,'sine',.05,0,.4);
+SFX.bheal=()=>{tone(523,.1,'sine',.07);tone(784,.2,'sine',.07,.09)};
+SFX.bshield=()=>tone(300,.2,'triangle',.08,0,1.6);
+SFX.bko=()=>tone(330,.5,'sawtooth',.07,0,.35);
+SFX.bbuff=()=>{tone(440,.09,'square',.05);tone(660,.12,'square',.05,.07)};
+SFX.bsel=()=>tone(700,.05,'square',.04);
+
+const BW={on:false,ph:'idle',N:0,pl:[],me:0,order:[],slot:[],stepT:0,raf:0,uiT:0,chosen:null,top:[],sig:[]};
+
+// ================================================================ fighter chooser
+const bwStats=id=>{const b=DOGS.BR[id]||{r:'C',size:.9};return BRD.statsFor(id,b.r,b.size)};
+let bwMaxMemo=null;
+function bwMax(){if(bwMaxMemo)return bwMaxMemo;const m={hp:1,atk:1,def:1,spd:1};for(const id in DOGS.BR){const s=bwStats(id);for(const k in m)m[k]=Math.max(m[k],s[k])}return bwMaxMemo=m}
+const bwDogs=()=>{const all=S.allDogs||[],home=all.filter(d=>!d.away);return home.length?home:all};
+function bwStatBars(s){const M=bwMax();return[['❤️','HP',s.hp,M.hp],['⚔️','ATK',s.atk,M.atk],['🛡️','DEF',s.def,M.def],['💨','SPD',s.spd,M.spd]].map(([e,l,v,m])=>`<div class="bstat"><span>${e} ${l}</span><div class="bbar"><i style="width:${Math.max(8,Math.round(v/m*100))}%"></i></div><b>${v}</b></div>`).join('')}
+function bwSkillRow(id){const k=BRD.SK[id];return`<div class="bsk2"><i>${k.ic}</i><div><b>${esc(bwN(k))}</b> <em>⚡${k.cost}</em><small>${esc(bwD(k))}</small></div></div>`}
+function bwDetail(d){const b=DOGS.BR[d.breed],s=bwStats(d.breed),A=BRD.ARCH[s.arch];
+ return`<div class="bpd"><div class="bpt"><b>${esc(d.name)}</b> <span class="muted">${esc(b.name)}</span> ${rarTag(b.r)} <span class="pill">${A.ic} ${A.n[BWL()]}</span></div><div class="bstats">${bwStatBars(s)}</div><div class="bskl">${s.sk.map(bwSkillRow).join('')}</div></div>`}
+DO.brpick=()=>{send({t:'dogs_get'});renderBrawlPick()};
+function renderBrawlPick(){const dogs=bwDogs(),pref=BW.chosen||LS.get('cd_brdog',null)||LS.get('cd_pdog',null),cur=dogs.find(d=>d.id==pref)||dogs[0];BW.chosen=cur?cur.id:null;
+ const body=!dogs.length?`<div class="muted center" style="padding:24px">…</div>`:
+  `<div class="muted">${TT('Every dog fights with its own stats and 2 skills — pick who steps into the ring!','น้องหมาแต่ละตัวมีค่าพลังและสกิลไม่เหมือนกัน เลือกตัวที่จะลงสังเวียนเลย!')}</div>
+   <div class="bpgrid">${dogs.map(d=>{const s=bwStats(d.breed),A=BRD.ARCH[s.arch];return`<div class="bpc ${cur&&cur.id==d.id?'sel':''}" data-do="brsel" data-id="${d.id}">${thumbHTML(d.breed,d.variant,30,d.acc)}<b>${esc(d.name)}</b><small>${A.ic} ${A.n[BWL()]}</small></div>`}).join('')}</div>${bwDetail(cur)}`;
+ modal('bpick','⚔️ '+TT('Dog Brawl — choose your fighter','หมากัดกัน — เลือกนักสู้'),body+`<div class="row" style="margin-top:10px"><button class="btn ghost" data-do="brhelp">❓ ${TT('How to play','วิธีเล่น')}</button><button class="btn mint" data-do="brgo"${cur?'':' disabled'}>⚔️ ${TT('Find a fight','หาคู่ต่อสู้')}</button></div>`,'');
+ paintThumbs(modOpen('bpick'))}
+DO.brsel=d=>{BW.chosen=d.id;renderBrawlPick()};
+DO.brgo=()=>{const cur=bwDogs().find(d=>d.id==BW.chosen);if(!cur)return;LS.set('cd_brdog',cur.id);closeMod('bpick');DO.mpfind({g:'brawl',dog:cur.id})};
+DO.brhelp=()=>{const L=BWL(),B=BRD.BASIC,C=BRD.CFG,secs=C.ms/1000;
+ modal('brhelp','❓ '+TT('Dog Brawl — how to play','หมากัดกัน — วิธีเล่น'),`<div class="bhelp">
+  <p>🎯 <b>${TT('Goal','เป้าหมาย')}</b> — ${TT(`Knock out the other dogs! After ${C.rounds} rounds (or when only one dog is left) the survivors are ranked by HP left, then by damage dealt. Knocked-out dogs rank by who lasted longer.`,`ล้มน้องหมาตัวอื่นให้หมด! ครบ ${C.rounds} รอบ (หรือเหลือตัวเดียว) จะจัดอันดับตัวที่รอดจาก HP ที่เหลือ แล้วดูดาเมจที่ทำได้ ตัวที่สลบจัดอันดับตามว่าใครอยู่ได้นานกว่า`)}</p>
+  <p>⚔️ <b>${TT('Every round','ทุกรอบ')}</b> — ${TT(`Everybody secretly picks ONE move within ${secs} seconds, then all moves play out together. Faster dogs (SPD) act first, and ${BRD.SK.pounce.n[0]} always goes first. Tap an enemy to choose your target.`,`ทุกคนเลือกท่า 1 ท่าแบบลับ ๆ ภายใน ${secs} วินาที แล้วทุกท่าจะเกิดขึ้นพร้อมกัน หมาที่เร็วกว่า (SPD) ลงมือก่อน และ ${BRD.SK.pounce.n[1]} ลงมือก่อนเสมอ แตะศัตรูเพื่อเลือกเป้าหมาย`)}</p>
+  <p>⚡ <b>${TT('Energy','พลังงาน')}</b> — ${TT(`You gain +1 every round (+1 more when you Guard), up to ${C.maxEn}. ${B.atk.n[0]} and ${B.grd.n[0]} are free; skills cost 2-3.`,`ได้ +1 ทุกรอบ (+1 เพิ่มเมื่อป้องกัน) สูงสุด ${C.maxEn} ท่า ${B.atk.n[1]} และ ${B.grd.n[1]} ใช้ฟรี ส่วนสกิลใช้ 2-3`)}</p>
+  <p>🛡️ <b>${B.grd.n[L]}</b> — ${bwD(B.grd)}</p>
+  <p>📊 <b>${TT('Stats','ค่าพลัง')}</b> — ❤️ HP ${TT('how much you can take','ความทนทาน')} · ⚔️ ATK ${TT('damage','พลังโจมตี')} · 🛡️ DEF ${TT('each point cuts damage by 3% (max 50%)','แต้มละ 3% ลดดาเมจ (สูงสุด 50%)')} · 💨 SPD ${TT('acts first, hits critically more often and dodges slower dogs more often','ลงมือก่อน ติดคริบ่อยขึ้น และหลบหมาที่ช้ากว่าได้บ่อยขึ้น')}</p>
+  <p>🏆 <b>${TT('Rewards','รางวัล')}</b> — 🥇 60 · 🥈 38 · 🥉 22 · 4th 10 ${TT('coins (half when you only fought bots).','เหรียญ (ครึ่งเดียวถ้าสู้กับบอทล้วน)')}</p>
+  <h4>${TT('All skills','สกิลทั้งหมด')}</h4>${Object.keys(BRD.SK).map(bwSkillRow).join('')}</div>`,'sm')};
+
+// ================================================================ the arena
+const bwXY=i=>{const s=BW.slot[i];return{x:Math.round(640*(s+.5)/BW.N),y:208+(s%2?10:0)}};
+const bwNm=i=>(BW.pl[i].bot?'🤖 ':'')+BW.pl[i].n;
+function bwBg(){const c=document.createElement('canvas');c.width=640;c.height=260;const g=c.getContext('2d');
+ let gr=g.createLinearGradient(0,0,0,160);gr.addColorStop(0,'#aedcff');gr.addColorStop(1,'#e8f6ff');g.fillStyle=gr;g.fillRect(0,0,640,260);
+ g.fillStyle='rgba(255,255,255,.9)';for(const[x,y,r]of[[90,40,20],[120,33,27],[152,42,19],[470,54,22],[502,46,29],[538,57,19]]){g.beginPath();g.arc(x,y,r,0,7);g.fill()}
+ g.fillStyle='#bfe8a2';g.beginPath();g.moveTo(0,170);for(let x=0;x<=640;x+=16)g.lineTo(x,126+Math.sin(x*.02)*12+Math.cos(x*.057)*6);g.lineTo(640,170);g.closePath();g.fill();
+ gr=g.createLinearGradient(0,150,0,260);gr.addColorStop(0,'#a9e08b');gr.addColorStop(1,'#84cc6b');g.fillStyle=gr;g.fillRect(0,150,640,110);
+ g.strokeStyle='#6fb85a';g.lineWidth=2;for(let i=0;i<30;i++){const x=(i*97)%640,y=162+((i*53)%90);g.beginPath();g.moveTo(x,y);g.lineTo(x-2,y-6);g.moveTo(x,y);g.lineTo(x+2,y-7);g.stroke()}
+ g.lineWidth=4;g.strokeStyle='#5a3d33';g.fillStyle='#f6dfae';g.beginPath();g.ellipse(320,214,306,40,0,0,7);g.fill();g.stroke();
+ g.fillStyle='rgba(255,255,255,.3)';g.beginPath();g.ellipse(320,214,268,31,0,0,7);g.fill();g.strokeStyle='rgba(140,100,70,.35)';g.lineWidth=2;g.beginPath();g.ellipse(320,214,268,31,0,0,7);g.stroke();
+ return c}
+function bwBubble(g,x,y,txt){g.font=`900 17px ${BW.font}`;const w=g.measureText(txt).width+20;x=clamp(x,w/2+4,636-w/2);g.fillStyle='#fff';g.strokeStyle='#5a3d33';g.lineWidth=3;g.beginPath();if(g.roundRect)g.roundRect(x-w/2,y-17,w,27,10);else g.rect(x-w/2,y-17,w,27);g.fill();g.stroke();g.fillStyle='#5a3d33';g.textAlign='center';g.fillText(txt,x,y+3)}
+function bwDog(g,i,now){const p=BW.pl[i],b=DOGS.BR[p.breed];if(!b)return;const{x,y}=bwXY(i),t=now/1000,right=BW.slot[i]<BW.N/2,sc=(1+.45*b.size)*(BW.N>3?.85:1),fl=right?1:-1;
+ let ox=0,oy=0,state='IDLE',mv=false,run=false,flash=0,alpha=1;
+ const L=BW.lunge[i];if(L&&now<L.t0+L.ms){const k=(now-L.t0)/L.ms;ox=L.dx*Math.sin(Math.PI*Math.min(1,k));oy=-Math.abs(Math.sin(Math.PI*k))*10;state='BARK'}
+ const Hh=BW.hurt[i];if(Hh&&now<Hh.t0+Hh.ms){const k=(now-Hh.t0)/Hh.ms;ox-=fl*Math.sin(k*Math.PI*7)*8*(1-k);flash=1-k;if(state=='IDLE')state='CORNER'}
+ const Dd=BW.dodge[i];if(Dd&&now<Dd+380){const k=(now-Dd)/380;ox-=fl*Math.sin(Math.PI*k)*40;state='RUN';mv=true;run=true}
+ const Ps=BW.pose[i];if(Ps&&now<Ps.until&&state=='IDLE')state=Ps.s;
+ const down=BW.down[i];if(down){state='SLEEP';alpha=.55;flash=0;mv=false}
+ g.save();g.globalAlpha=alpha;g.fillStyle='rgba(60,32,22,.25)';g.beginPath();g.ellipse(x,y+3,36*sc,7,0,0,7);g.fill();
+ const o={state,mv,run,seed:i,acc:p.acc,happy:state=='IDLE',noAura:true};
+ if(flash>0){const tmp=BW.tmp||(BW.tmp=document.createElement('canvas'));tmp.width=300;tmp.height=240;const tg=tmp.getContext('2d');tg.imageSmoothingEnabled=false;tg.translate(150,190+oy);tg.scale(fl*sc,sc);
+  const r=DOGS.sprite(tg,b,p.variant,t+i*.31,o);BW.top[i]=(r&&r.top||80)*sc;
+  tg.setTransform(1,0,0,1,0,0);tg.globalCompositeOperation='source-atop';tg.fillStyle=`rgba(255,60,60,${.6*flash})`;tg.fillRect(0,0,300,240);g.drawImage(tmp,x+ox-150,y-190)}
+ else{g.translate(x+ox,y+oy);g.scale(fl*sc,sc);const r=DOGS.sprite(g,b,p.variant,t+i*.31,o);BW.top[i]=(r&&r.top||80)*sc}
+ g.restore();
+ if(down){g.font='22px sans-serif';g.textAlign='center';g.fillText(BW.gone[i]?'🚪':'💫',x,y-(BW.top[i]||60)-4+Math.sin(t*4)*3)}
+ if(BW.guard[i]&&!down){g.save();g.strokeStyle='rgba(80,160,255,.9)';g.fillStyle='rgba(120,190,255,.28)';g.lineWidth=4;g.beginPath();g.ellipse(x,y-(BW.top[i]||60)*.5,50*sc,(BW.top[i]||60)*.62,0,0,7);g.fill();g.stroke();g.restore()}}
+function bwDraw(g,now){g.clearRect(0,0,640,260);g.imageSmoothingEnabled=false;g.drawImage(BW.bg,0,0);
+ const idx=BW.order.slice().sort((a,b)=>bwXY(a).y-bwXY(b).y);for(const i of idx)bwDog(g,i,now);
+ for(const i of idx){const L=BW.lbl[i];if(L&&now<L.t0+L.ms){const k=(now-L.t0)/L.ms,{x,y}=bwXY(i);g.globalAlpha=k<.15?k/.15:k>.8?(1-k)/.2:1;bwBubble(g,x,y-(BW.top[i]||80)-16-Math.min(k*10,6),L.txt);g.globalAlpha=1}}
+ if(BW.ph=='ask'&&!BW.sent&&BW.al[BW.me]&&BW.tgt>=0&&BW.al[BW.tgt]){const{x,y}=bwXY(BW.tgt),yy=y-(BW.top[BW.tgt]||80)-30+Math.sin(now/130)*4;g.fillStyle='#ff3b5c';g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.moveTo(x-12,yy-11);g.lineTo(x+12,yy-11);g.lineTo(x,yy+7);g.closePath();g.stroke();g.fill()}
+ BW.fx=BW.fx.filter(f=>now<f.t0+f.ms);for(const f of BW.fx){const k=(now-f.t0)/f.ms;g.globalAlpha=k>.7?(1-k)/.3:1;g.font=`900 ${f.size}px ${BW.font}`;g.textAlign='center';g.lineWidth=5;g.strokeStyle='rgba(255,255,255,.95)';g.strokeText(f.txt,f.x,f.y-k*38);g.fillStyle=f.col;g.fillText(f.txt,f.x,f.y-k*38)}g.globalAlpha=1}
+function bwLoop(){const c=$('#bwc');if(!c||!BW.on)return;const now=performance.now(),dt=Math.min(.1,(now-BW.last)/1000);BW.last=now;
+ for(let i=0;i<BW.N;i++)BW.vhp[i]+=(BW.shown[i]-BW.vhp[i])*Math.min(1,dt*9);
+ bwDraw(c.getContext('2d'),now);if(now-BW.uiT>90){BW.uiT=now;bwUi(now)}
+ BW.raf=requestAnimationFrame(bwLoop)}
+
+// ---- DOM side of the arena: fighter cards (HP, energy, status), move buttons, message line
+const bwCard=i=>{const p=BW.pl[i];return`<div class="bwc ${i==BW.me?'me':'foe'}" id="bwcd${i}" data-i="${i}"${i==BW.me?'':' data-do="brt"'}><div class="bwh">${thumbHTML(p.breed,p.variant,13,p.acc)}<b>${p.bot?'🤖 ':i==BW.me?'⭐ ':''}${esc(p.n)}</b></div><div class="bwhp"><i></i><span></span></div><div class="bwe"></div><div class="bws"></div></div>`};
+function bwActs(){const me=BW.pl[BW.me],sk=me.sk.map(id=>BRD.SK[id]),B=BRD.BASIC;
+ const btn=(k,cls,o,cost,n)=>`<button class="bact ${cls}" data-do="bact" data-k="${k}" id="bact-${k}"><span class="bi">${o.ic}</span><span class="bn"><b>${esc(bwN(o))}</b>${cost?`<em>⚡${cost}</em>`:`<em class="fr">${TT('free','ฟรี')}</em>`}</span><small>${esc(bwD(o))}</small><kbd>${n}</kbd></button>`;
+ return btn('atk','a',B.atk,0,1)+btn('grd','g',B.grd,0,2)+btn('s0','s',sk[0],sk[0].cost,3)+btn('s1','s',sk[1],sk[1].cost,4)}
+function bwActsUi(){const root=$('#bacts');if(!root)return;const me=BW.pl[BW.me],timeUp=performance.now()>=BW.askEnd;
+ for(const k of['atk','grd','s0','s1']){const b=$('#bact-'+k,root);if(!b)continue;const sk=k[0]=='s'?BRD.SK[me.sk[+k[1]]]:null,poor=!!sk&&BW.en[BW.me]<sk.cost,sel=BW.sent&&BW.pickK==k;
+  b.classList.toggle('pick',sel);b.classList.toggle('off',!sel&&(!BW.al[BW.me]||BW.ph!='ask'||BW.sent||poor||timeUp))}}
+function bwMsg(){const el=$('#bwmsg');if(!el)return;let s='';
+ if(BW.ph=='count')s=TT('Get ready…','เตรียมตัว…');
+ else if(!BW.al[BW.me])s='💫 '+TT('Your dog is knocked out — watching the rest of the fight','น้องหมาของคุณสลบแล้ว — ดูการต่อสู้ที่เหลือ');
+ else if(BW.ph=='play')s=BW.say||TT('Fight!','ลุย!');
+ else if(BW.ph=='ask'){if(BW.sent)s='✔ '+TT('Move locked in — waiting for the others…','เลือกท่าแล้ว — รอคนอื่นอยู่…');
+  else if(performance.now()>=BW.askEnd)s='⏰ '+TT("Time's up!",'หมดเวลา!');
+  else s=TT('Choose your move!','เลือกท่าของคุณ!')+(BW.N>2&&BW.tgt>=0&&BW.pl[BW.tgt]?'   🎯 '+BW.pl[BW.tgt].n:'')}
+ if(el.textContent!=s)el.textContent=s}
+function bwUi(now,force){
+ const rd=$('#bwrd');if(rd){const s=BW.round?TT('Round','รอบ')+' '+BW.round+'/'+BW.n:TT('Get ready','เตรียมตัว');if(rd.textContent!=s)rd.textContent=s}
+ const tm=$('#bwtime');if(tm){const k=BW.ph=='ask'?clamp((BW.askEnd-now)/BW.ms,0,1):0;tm.style.width=k*100+'%';tm.style.background=k<.25?'#ff6b6b':k<.5?'#ffc94d':'#6fd1a5';
+  if(BW.ph=='ask'&&!BW.sent&&BW.al[BW.me]){const s=Math.ceil(k*BW.ms/1000);if(s>0&&s<=3&&BW.tick!=s){BW.tick=s;sfx('tick')}}}
+ if(BW.ph=='count'){const k=cdText(),ov=$('#bwov');if(ov){if(k>0){if(BW.tick!=k){BW.tick=k;sfx('tick');ov.textContent=k;ov.classList.remove('off','go')}}else if(!ov.classList.contains('go')){ov.textContent=TT('FIGHT!','สู้!');ov.classList.add('go');sfx('go');setTimeout(()=>ov&&ov.classList.add('off'),800)}}}
+ for(let i=0;i<BW.N;i++){const el=$('#bwcd'+i);if(!el)continue;const hp=Math.max(0,Math.round(BW.vhp[i])),mx=BW.mx[i],st=BW.st[i]||{},al=!!BW.al[i]&&!BW.gone[i],
+   isTgt=i!=BW.me&&al&&BW.tgt==i&&BW.ph=='ask'&&!BW.sent,sig=[hp,BW.en[i],al,isTgt,st.sh,st.u,st.w,st.s,st.r,BW.gone[i]].join();
+  if(!force&&BW.sig[i]===sig)continue;BW.sig[i]=sig;
+  el.classList.toggle('out',!al);el.classList.toggle('sel',isTgt);
+  const bar=$('.bwhp i',el),r=hp/mx;bar.style.width=Math.round(r*100)+'%';bar.style.background=r>.5?'#6fd1a5':r>.25?'#ffc94d':'#ff6b6b';$('.bwhp span',el).textContent=al?hp+'/'+mx:(BW.gone[i]?'🚪':'K.O.');
+  const en=clamp(BW.en[i]|0,0,5);$('.bwe',el).innerHTML=al?'⚡<b>'+'●'.repeat(en)+'</b><i>'+'●'.repeat(5-en)+'</i>':'';
+  $('.bws',el).textContent=al?[st.sh>0?'🛡'+st.sh:'',st.u?'⬆':'',st.r?'🔥':'',st.s?'😱':'',st.w?'💤':''].filter(Boolean).join(' '):''}
+ bwActsUi();bwMsg()}
+
+// ---- the board as the server last told us
+function bwSet(m){BW.hp=m.hp.slice();BW.en=m.en.slice();BW.al=m.al.slice();BW.st=m.st.map(s=>s||{});BW.dm=m.dm.slice();BW.shown=m.hp.slice();
+ BW.gone.forEach((g,i)=>{if(g)BW.al[i]=0});BW.down=BW.al.map(a=>!a)}
+
+// ---- events -> animation. Same durations as the server uses to schedule the next round (BRD.EVMS).
+function bwFloat(i,txt,col,size,dy){const{x,y}=bwXY(i),top=BW.top[i]||80;BW.fx.push({x:x+Math.round(Math.random()*20-10),y:y-top*.7+(dy||0),txt,col,size:size||24,t0:performance.now(),ms:1000})}
+const bwLabel=(i,txt)=>{BW.lbl[i]={txt,t0:performance.now(),ms:1150}};
+function bwLunge(i,t,ms){if(t==null||t<0||!BW.pl[t])return;const a=bwXY(i),b=bwXY(t),d=b.x-a.x;BW.lunge[i]={t0:performance.now(),ms,dx:Math.sign(d||1)*Math.min(Math.abs(d)*.62,150)}}
+function bwTargetOf(i){for(let k=BW.ei;k<BW.evs.length;k++){const e=BW.evs[k];if(e.i==i&&e.t!=null&&e.t>=0&&(e.k=='hit'||e.k=='miss'||e.k=='cancel'||e.k=='steal'))return e.t;if(e.k=='act'&&e.i==i)break}return null}
+function bwSay(s){BW.say=s;bwMsg()}
+function bwApply(e){const now=performance.now(),B=BRD.BASIC;
+ switch(e.k){
+ case'act':{
+  if(e.a=='grd'){BW.guard[e.i]=1;bwLabel(e.i,B.grd.ic+' '+bwN(B.grd));BW.pose[e.i]={s:'SIT',until:now+900};sfx('bshield')}
+  else if(e.a=='atk'){bwLabel(e.i,B.atk.ic+' '+bwN(B.atk));bwLunge(e.i,e.t,380);sfx('whoosh')}
+  else{const s=BRD.SK[e.s];bwLabel(e.i,s.ic+' '+bwN(s));if(s.tgt=='self')BW.pose[e.i]={s:'PLAY',until:now+500};else bwLunge(e.i,bwTargetOf(e.i),380);sfx(s.tgt=='self'?'bbuff':'whoosh')}
+  bwSay(bwNm(e.i)+' · '+BW.lbl[e.i].txt);break}
+ case'hit':{BW.shown[e.t]=Math.max(0,BW.shown[e.t]-e.d);BW.hurt[e.t]={t0:now,ms:480};if(e.ab)bwFloat(e.t,'🛡 −'+e.ab,'#2563eb',20,26);
+  bwFloat(e.t,'−'+e.d,e.c?'#ff2d2d':'#e11d48',e.c?38:28);if(e.c)bwFloat(e.t,'CRIT!','#f59e0b',22,-32);sfx(e.c?'bcrit':'bhit');break}
+ case'miss':BW.dodge[e.t]=now;bwFloat(e.t,TT('MISS','พลาด'),'#6b7280',24);sfx('bmiss');break;
+ case'cancel':bwFloat(e.i,'🥺 '+TT('melted','ใจอ่อน'),'#ec4899',22);sfx('bbuff');break;
+ case'heal':BW.shown[e.i]=Math.min(BW.mx[e.i],BW.shown[e.i]+e.d);bwFloat(e.i,'+'+e.d,'#16a34a',30);sfx('bheal');break;
+ case'shield':bwFloat(e.i,'🛡 '+e.v,'#2563eb',24);sfx('bshield');break;
+ case'buff':{const x={zoom:['💨',TT('Dodge!','หลบ!')],eyes:['🥺',TT('Puppy eyes','ตาแป๋ว')],up:['⬆',TT('ATK up','โจมตีขึ้น')],rage:['🔥',TT('RAGE!','บ้าพลัง!')]}[e.s]||['✨',''];bwFloat(e.i,x[0]+' '+x[1],'#d97706',22);sfx('bbuff');break}
+ case'debuff':bwFloat(e.t,e.s=='scared'?'😱 '+TT('Scared','กลัว'):'💤 '+TT('Weak','อ่อนแรง'),'#7c3aed',22);sfx('bbuff');break;
+ case'steal':bwFloat(e.t,'−'+e.n+'⚡','#9333ea',22);bwFloat(e.i,'+'+e.n+'⚡','#9333ea',22,-24);sfx('bbuff');break;
+ case'ko':BW.down[e.t]=true;bwFloat(e.t,'K.O.!','#ef4444',40,-12);sfx('bko');bwSay('💥 '+bwNm(e.t)+' K.O.!');break;
+ case'fizzle':bwFloat(e.i,'💫','#9ca3af',22);break}}
+function bwStep(){clearTimeout(BW.stepT);if(!BW.evs)return;
+ if(BW.ei>=BW.evs.length){const m=BW.snap,over=BW.al.filter(Boolean).length<=1||BW.round>=BW.n;BW.evs=null;bwSet(m);bwSay(over?'🏁 '+TT('Fight over!','จบการต่อสู้!'):TT('Next round…','รอบต่อไป…'));return}
+ const e=BW.evs[BW.ei++];bwApply(e);BW.stepT=setTimeout(bwStep,BRD.EVMS[e.k]||300)}
+function bwFlush(){clearTimeout(BW.stepT);if(BW.evs){BW.evs=null;if(BW.snap)bwSet(BW.snap)}}       // skip whatever is still being animated and show the real board
+
+// ---- rounds
+function bwAsk(m){bwFlush();BW.ph='ask';MP.state='ask';BW.round=m.r;BW.ms=m.ms;BW.askEnd=performance.now()+m.ms;BW.sent=false;BW.pickK=null;BW.tick=9;BW.say='';BW.guard=[];BW.pose=[];BW.lbl=[];
+ bwSet(m);
+ if(!(BW.tgt>=0&&BW.tgt!=BW.me&&BW.al[BW.tgt])){const foes=BW.order.slice(1).filter(i=>BW.al[i]).sort((a,b)=>BW.hp[a]-BW.hp[b]);BW.tgt=foes.length?foes[0]:-1}   // default target: the weakest enemy
+ const ov=$('#bwov');if(ov)ov.classList.add('off');sfx('pop');bwUi(performance.now(),true)}
+function bwPlay(m){bwFlush();BW.ph='play';MP.state='play';BW.snap=m;BW.evs=m.ev;BW.ei=0;BW.say='';bwUi(performance.now(),true);bwStep()}
+H.mp_ba=m=>{MP.seen=performance.now();if(MP.g=='brawl'&&BW.on)bwAsk(m)};
+H.mp_bx=m=>{MP.seen=performance.now();if(MP.g=='brawl'&&BW.on)bwPlay(m)};
+H.mp_bok=m=>{MP.seen=performance.now()};
+H.mp_bno=m=>{MP.seen=performance.now();if(MP.g!='brawl'||!BW.on||m.r!=BW.round)return;BW.sent=false;BW.pickK=null;toast(m.why=='en'?TT('Not enough energy ⚡','พลังงานไม่พอ ⚡'):TT('Pick a target first','เลือกเป้าหมายก่อน'),1500);sfx('err');bwUi(performance.now(),true)};
+const _bwGone=H.mp_gone;H.mp_gone=m=>{_bwGone(m);if(MP.g!='brawl'||!BW.on)return;const i=BW.pl.findIndex(p=>p.n==m.n&&!p.bot);if(i<0||i==BW.me)return;BW.gone[i]=true;BW.al[i]=0;BW.down[i]=true;bwUi(performance.now(),true)};
+
+// ---- player input
+function bwSelect(i){if(BW.ph!='ask'||BW.sent||!BW.al[BW.me]||i==BW.me||!BW.al[i]||BW.gone[i])return;if(BW.tgt!=i){BW.tgt=i;sfx('bsel');bwUi(performance.now(),true)}}
+DO.brt=d=>bwSelect(+d.i);
+function bwCycle(dir){const foes=BW.order.slice(1).filter(i=>BW.al[i]);if(!foes.length)return;const k=foes.indexOf(BW.tgt);bwSelect(foes[(k+dir+foes.length)%foes.length])}
+DO.bact=d=>{if(MP.g!='brawl'||!BW.on||BW.ph!='ask'||BW.sent||!BW.al[BW.me])return;if(performance.now()>=BW.askEnd)return;
+ const k=d.k,me=BW.pl[BW.me],sk=k=='s0'||k=='s1'?BRD.SK[me.sk[k=='s0'?0:1]]:null;
+ if(sk&&BW.en[BW.me]<sk.cost){sfx('err');return toast(TT('Not enough energy ⚡','พลังงานไม่พอ ⚡'),1400)}
+ const need=k=='atk'||(sk&&sk.tgt=='one');if(need&&!(BW.tgt>=0&&BW.al[BW.tgt]))return toast(TT('Pick a target first','เลือกเป้าหมายก่อน'),1400);
+ BW.sent=true;BW.pickK=k;send({t:'mp_bp',r:BW.round,a:k,to:need?BW.tgt:-1});bwUi(performance.now(),true)};
+addEventListener('keydown',e=>{if(MP.g!='brawl'||!BW.on||!modOpen('mp')||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+ const k={'1':'atk','2':'grd','3':'s0','4':'s1'}[e.key];if(k){e.preventDefault();DO.bact({k})}else if(e.key=='ArrowLeft'||e.key=='ArrowRight'){e.preventDefault();bwCycle(e.key=='ArrowRight'?1:-1)}});
+
+// ================================================================ start / stop
+function startBrawl(m){
+ const N=m.pl.length,me=m.me,order=[me,...m.pl.map((_,i)=>i).filter(i=>i!=me)],slot=[];order.forEach((i,s)=>slot[i]=s);
+ clearTimeout(BW.stepT);cancelAnimationFrame(BW.raf);
+ Object.assign(BW,{on:true,ph:'count',N,pl:m.pl,me,order,slot,n:m.cfg.rounds,ms:m.cfg.qms,round:0,hp:m.pl.map(p=>p.hp),shown:m.pl.map(p=>p.hp),vhp:m.pl.map(p=>p.hp),mx:m.pl.map(p=>p.hp),en:m.pl.map(p=>p.en),
+  al:m.pl.map(()=>1),st:m.pl.map(()=>({})),dm:m.pl.map(()=>0),tgt:-1,sent:false,pickK:null,askEnd:0,evs:null,snap:null,ei:0,say:'',fx:[],lbl:[],lunge:[],hurt:[],dodge:[],down:m.pl.map(()=>false),guard:[],pose:[],gone:[],top:[],sig:[],tick:9,last:performance.now(),uiT:0,
+  font:(getComputedStyle(document.documentElement).getPropertyValue('--ui')||'sans-serif').trim()||'sans-serif'});
+ mpModal('⚔️ '+t('Dog Brawl'),`<div class="bwroot"><div class="bwtop"><span class="pill" id="bwrd">${TT('Get ready','เตรียมตัว')}</span><div class="dtimer"><i id="bwtime"></i></div></div>
+  <div class="bwcards" style="--n:${N}">${order.map(bwCard).join('')}</div>
+  <div class="racewrap bwarena"><canvas id="bwc" width="640" height="260"></canvas><div class="raceov" id="bwov">3</div></div>
+  <div class="bwr"><div class="bwmsg" id="bwmsg"></div><div class="bacts" id="bacts">${bwActs()}</div><div class="row bwfoot"><button class="btn sm ghost" data-do="brhelp">❓ ${TT('Rules','กติกา')}</button><button class="btn sm ghost" data-do="mpleave">🚪 ${TT('Leave','ออก')}</button></div></div></div>`,'br');
+ const ov=modOpen('mp'),pn=$('.panel',ov);pn.classList.remove('sm');pn.classList.add('br');       // (the lobby opened this window as a narrow one)
+ paintThumbs(ov);const cv=$('#bwc',ov);BW.bg=bwBg();
+ cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect(),s=clamp(Math.floor((e.clientX-r.left)/r.width*BW.N),0,BW.N-1);bwSelect(BW.order[s])});
+ BW.raf=requestAnimationFrame(bwLoop);bwUi(performance.now(),true)}
+function bwStop(){const was=BW.on;BW.on=false;BW.ph='idle';cancelAnimationFrame(BW.raf);clearTimeout(BW.stepT);BW.evs=null;
+ if(was){const pn=$('#mods .ov[data-mod=mp] .panel');if(pn){pn.classList.remove('br');pn.classList.add('sm')}}}
+{const reset=MP.reset;MP.reset=function(){bwStop();return reset.apply(this,arguments)};
+ const end=H.mp_end;H.mp_end=function(m){if(m.g=='brawl')bwStop();return end.apply(this,arguments)}}
 
 ;
 // Cozy Dogs - human avatar glue: frame cache, drawing (home corner / park leash walk), busts + thumbnails for the UI, leash.
@@ -3176,7 +3521,7 @@ function checkHungry(){S.hungry={};if(S.owner==S.name)for(const d of Object.valu
 H.dogs=m=>{if(m.full){const keep=new Set(m.dogs.map(d=>d.id));for(const id of Object.keys(S.dogs))if(!keep.has(id))delete S.dogs[id];if(S.sel&&!S.dogs[S.sel]){S.sel=null;UI.care()}}
  const selBefore=S.sel&&S.dogs[S.sel]?S.dogs[S.sel].acc:null;for(const d of m.dogs){const old=S.dogs[d.id];setDog(d);if(old&&old.state!=d.state&&d.state=='EAT')sfx('eat')}
  checkHungry();if(S.sel&&S.dogs[S.sel]){if(S.dogs[S.sel].acc!=selBefore)UI.care();else UI.careBars()}};
-H.dogs_all=m=>{S.allDogs=m.dogs;if(modOpen('pdogs'))renderParkDogs();if(modOpen('dogs'))renderDogs();if(modOpen('prof'))renderProfile()};
+H.dogs_all=m=>{S.allDogs=m.dogs;if(modOpen('pdogs'))renderParkDogs();if(modOpen('bpick'))renderBrawlPick();if(modOpen('dogs'))renderDogs();if(modOpen('prof'))renderProfile()};
 H.items=m=>{const old=new Set(S.items.map(i=>i.uid));S.items=m.items;rebuildItems();if(S.pendingSelect){const n=m.items.find(i=>!old.has(i.uid));if(n){selectItem(n.uid)}S.pendingSelect=null}
  if(World.selItem&&!m.items.some(i=>i.uid==World.selItem))World.selItem=null;if(S.edit)UI.edit();UI.loc()};
 H.deco=m=>{S.deco=m.deco;ROOM.setDeco(S.deco);if(modOpen('shop'))renderShop();sfx('ok')};
@@ -3185,7 +3530,7 @@ H.players=m=>{S.players=m.list;UI.online()};
 H.chat=m=>{Park.onChat(m);if(!Park.on&&m.from==S.owner)S.avBub={m:m.m,at:performance.now()};S.chat.push(m);if(S.chat.length>60)S.chat.shift();const el=$('#chat');UI.chat();if(el.classList.contains('min')){const hd=$('.hd span',el);if(hd)hd.textContent='💬 '+t('Chat')+' •'}};
 H.event=m=>ticker(m.text);
 H.notify=m=>{toast(locMsg(m.m));sfx('notify')};
-H.toast=m=>{toast(locMsg(m.m));if(/ไม่พอ|ไม่มี|ไม่ได้|เต็ม|Not enough|แล้ว$/.test(m.m)&&!/learned|ปลด|เป็นเพื่อน|ส่ง/.test(m.m))sfx('err')};
+H.toast=m=>{if(S.capBusy)capUnlock();toast(locMsg(m.m));if(/ไม่พอ|ไม่มี|ไม่ได้|เต็ม|Not enough|แล้ว$/.test(m.m)&&!/learned|ปลด|เป็นเพื่อน|ส่ง/.test(m.m))sfx('err')};
 H.levelup=m=>{sfx('level');toast('⭐ '+TT('Level Up!','เลเวลอัป!')+' Lv.'+m.lvl+'  +50🪙 +1💎',4200);const r=cv.getBoundingClientRect();for(let i=0;i<5;i++)setTimeout(()=>burst(rnd(150,650),rnd(250,450),pick(['⭐','🎉','✨']),4),i*150)};
 H.buy_ok=m=>{sfx('coin');const it=S.cat.items[m.id]||S.cat.food[m.id]||S.cat.acc[m.id];toast('🛍️ '+(it?it.n:m.id)+' ×'+m.n)};
 H.equip_ok=m=>{sfx('ok');const d=(S.allDogs||[]).find(x=>x.id==m.dog);if(d)d.acc=m.acc;const s=S.dogs[m.dog];if(s)s.acc=m.acc;if(modOpen('prof'))renderProfile();UI.care()};
