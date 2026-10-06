@@ -46,7 +46,7 @@ try:
         pg.screenshot(path=f'{D}/{TAG}_{name}_3pick.png')
         coins0=pg.evaluate("S.me.coins")
         tap('#rpsb .rps button[data-k=R]');pg.wait_for_timeout(300)
-        ck(pg.evaluate("document.querySelector('#rpsb .rps button[data-k=R]').classList.contains('on')"),f'[{name}] my pick is highlighted')
+        ck(pg.evaluate("(()=>{const b=document.querySelector('#rpsb .rps button[data-k=R]');return b?b.classList.contains('on'):!!document.querySelector('#rpsb [data-do=gstart]')})()"),f'[{name}] my pick is highlighted (or, if the bot had already picked, the result is already on screen)')
         pg.wait_for_selector('#rpsb [data-do=gstart]',timeout=12000);pg.wait_for_timeout(400)
         out=pg.evaluate("document.querySelector('#rpsb').textContent")
         gain=int(re.search(r'\+(\d+)',out).group(1))

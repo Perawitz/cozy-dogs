@@ -172,6 +172,7 @@ function tradeMsg(ws,c,m){const now=Date.now();
  switch(m.t){
   case 'trade_req':{if(c.guest)return toast(ws,'Guest แลกของไม่ได้ — สมัครบัญชีก่อนนะ'),true;const n=realName(m.name),ow=n&&wsOf(n),oc=ow&&conns.get(ow);
    if(!oc||n==c.name)return toast(ws,'ผู้เล่นคนนั้นไม่ได้ออนไลน์'),true;if(oc.guest)return toast(ws,'Guest แลกของไม่ได้'),true;
+   if(c.mp||c.game||oc.mp||oc.game)return toast(ws,'ตอนนี้ผู้เล่นคนใดคนหนึ่งกำลังเล่นเกมอยู่ ลองใหม่ทีหลังนะ'),true;
    if(c.trade||oc.trade)return toast(ws,'มีคนกำลังแลกของอยู่'),true;if(now-(c.lastReq||0)<3000)return true;c.lastReq=now;
    for(const [k,v] of invites)if(now-v.t>60000)invites.delete(k);const iv=invites.get(n);if(iv&&now-iv.t<30000&&iv.from!=c.name)return toast(ws,n+' กำลังมีคำขออื่นอยู่'),true;
    invites.set(n,{from:c.name,t:now});send(ow,{t:'trade_inv',from:c.name,lvl:lvl(player(c.name))});toast(ws,'📨 ส่งคำขอแลกของถึง '+n+' แล้ว');return true}

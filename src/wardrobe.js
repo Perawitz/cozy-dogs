@@ -81,13 +81,13 @@ const Wardrobe=(()=>{
   renderSave()}
  function saved(m){const n=(m.bought||[]).length;
   if(m.same&&!n){W.saving=false;toast('👕 '+TT('You are already wearing this look','ใส่ลุคนี้อยู่แล้ว'));return}
-  sfx(n?'coin':'level');toast('✨ '+TT('Look saved!','บันทึกลุคแล้ว!')+(n?'  🛍️ −'+m.cost+'🪙':''),3000);
+  sfx(n?'coin':'level');toast('✨ '+TT('Look saved!','บันทึกลุคแล้ว!')+(n?'  🛍️ −'+m.cost+'💰':''),3000);
   W.base=clone(m.av);if(W.saving){W.saving=false;W.draft=clone(m.av);closeMod('wardrobe');
    if(Park.on){const q=Park.m[Park.me];if(q){q.av=m.av;q.emote={e:'👋',at:performance.now()}}}
    else{S.avTap=performance.now()+2600;const a=AVA.homeAvatar(performance.now());if(a){sparkle(a.x,a.y-48,16);burst(a.x,a.y-(a.top||90)-12,'✨',4)}}}
   else refresh()}
  function failed(m){W.saving=false;sfx('err');
-  if(m&&m.code=='coins')toast('🪙 '+TT('Not enough coins','เหรียญไม่พอ')+' ('+(m.cost|0)+')');else toast(TT('Could not save this look','บันทึกลุคนี้ไม่ได้'));refresh()}
+  if(m&&m.code=='coins')toast('💰 '+TT('Not enough coins','เหรียญไม่พอ')+' ('+(m.cost|0)+')');else toast(TT('Could not save this look','บันทึกลุคนี้ไม่ได้'));refresh()}
  // ---------- actions ----------
  const touch=(keepScroll=true)=>{renderPane(keepScroll);renderSave()};
  DO.wardrobe=()=>open();

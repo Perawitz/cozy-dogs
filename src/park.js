@@ -21,8 +21,8 @@ H.park_s=m=>{Park.rx++;for(const a of m.m)snap(a);if(m.b){const b=Park.ball,e=Ma
 H.park_fx=m=>{const now=performance.now();
  if(!m.n){if(m.k=='tr_new'){Park.tr=true;ticker('🗺️ '+TT('A treasure is buried somewhere in the park! Dig for it ⛏️','มีสมบัติถูกฝังไว้ในสวน! ไปขุดหาดู ⛏️'))}else if(m.k=='tr_gone'){Park.tr=false;Park.hint=null}
   else if(m.k=='fb_new'){Park.fb={x:m.x,y:m.y,land:now+m.ms};sfx('whoosh');ticker('🥏 '+TT('Frisbee! Run and catch it!','จานร่อน! วิ่งไปรับเร็ว!'))}else if(m.k=='fb_gone')Park.fb=null;return}
- if(m.k=='tr_found'){Park.tr=false;Park.hint=null;const q=Park.m[m.n];if(q){sfx('level');for(let i=0;i<4;i++)setTimeout(()=>burst(q.rx,q.ry-40,pick(['💎','⭐','🪙']),4),i*140)}ticker('💎 '+m.n+' '+TT('found the treasure!','ขุดเจอสมบัติ!'));return}
- if(m.k=='fb_got'){const q=Park.m[m.n];if(Park.fb){burst(Park.fb.x,Park.fb.y-20,'🥏',3);Park.fb=null}if(m.n==Park.me&&q){sfx('coin');floatText(q.rx,q.ry-70,'+'+m.c+'🪙','#ffe27a')}else if(q)sfx('pop');return}
+ if(m.k=='tr_found'){Park.tr=false;Park.hint=null;const q=Park.m[m.n];if(q){sfx('level');for(let i=0;i<4;i++)setTimeout(()=>burst(q.rx,q.ry-40,pick(['💎','⭐','💰']),4),i*140)}ticker('💎 '+m.n+' '+TT('found the treasure!','ขุดเจอสมบัติ!'));return}
+ if(m.k=='fb_got'){const q=Park.m[m.n];if(Park.fb){burst(Park.fb.x,Park.fb.y-20,'🥏',3);Park.fb=null}if(m.n==Park.me&&q){sfx('coin');floatText(q.rx,q.ry-70,'+'+m.c+'💰','#ffe27a')}else if(q)sfx('pop');return}
  const p=Park.m[m.n];if(!p)return;
  if(m.k=='emote'){p.emote={e:m.v,at:now};if(m.n!=Park.me)sfx('pop')}
  else if(m.k=='pose'){p.pose=m.v||null;if(m.v){p.tx=p.ax;p.ty=p.ay}if(m.v=='bark')sfx('bark')}
@@ -31,10 +31,10 @@ H.park_fx=m=>{const now=performance.now();
 H.park_item=m=>{if(m.add){Park.items[m.add.id]=Object.assign(m.add,{born:performance.now()});return}
  const it=Park.items[m.del];delete Park.items[m.del];if(!it||!m.by)return;const col=m.k=='star'?'#8fd8ff':'#fff';
  burst(it.x,it.y-20,m.k=='star'?'✨':'⭐',3);sparkle(it.x,it.y-20,10,col);
- if(m.by==Park.me){sfx('coin');const r=m.r||{};floatText(it.x,it.y-40,'+'+(r.g?r.g+'💎':(r.c||0)+'🪙'),'#ffe27a')}};
-H.park_dig_r=m=>{const q=Park.m[Park.me];if(!q)return;const x=q.rx,y=q.ry-60,L={dirt:['🟤','Just dirt…','มีแต่ดิน…'],coin:['🪙','A coin!','เจอเหรียญ!'],bone:['🦴','A bone!','เจอกระดูก!'],cookie:['🍪','A cookie!','เจอคุกกี้!'],boot:['🥾','An old boot…','รองเท้าเก่า…'],gem:['💎','A gem!','เจอเพชร!'],ticket:['🎟','A ticket!','เจอตั๋ว!'],treasure:['🏆','TREASURE!','สมบัติ!!!']}[m.k]||['🟤','','']; 
+ if(m.by==Park.me){const r=m.r||{};if(r.g||r.c){sfx('coin');floatText(it.x,it.y-40,'+'+(r.g?r.g+'💎':r.c+'💰'),'#ffe27a')}else floatText(it.x,it.y-40,TT('Daily limit reached','ครบโควต้าวันนี้แล้ว'),'#ffffff')}};      // after the daily cap a treat is still picked up, but gives nothing: say so
+H.park_dig_r=m=>{const q=Park.m[Park.me];if(!q)return;const x=q.rx,y=q.ry-60,L={dirt:['🟤','Just dirt…','มีแต่ดิน…'],coin:['💰','A coin!','เจอเหรียญ!'],bone:['🦴','A bone!','เจอกระดูก!'],cookie:['🍪','A cookie!','เจอคุกกี้!'],boot:['🥾','An old boot…','รองเท้าเก่า…'],gem:['💎','A gem!','เจอเพชร!'],ticket:['🎟','A ticket!','เจอตั๋ว!'],treasure:['🏆','TREASURE!','สมบัติ!!!']}[m.k]||['🟤','','']; 
  floatText(x,y,L[0]+' '+TT(L[1],L[2]),m.k=='dirt'?'#ffffff':'#ffe27a');if(m.k!='dirt'){sfx(m.k=='treasure'?'level':'coin');burst(q.rx,q.ry-30,L[0],3)}
- if(m.r&&m.k=='treasure')floatText(x,y-26,'+'+m.r.c+'🪙 +'+m.r.g+'💎 +'+m.r.tk+'🎟','#ffe27a');else if(m.r&&m.r.c)floatText(x,y-26,'+'+m.r.c+'🪙','#ffe27a');
+ if(m.r&&m.k=='treasure')floatText(x,y-26,'+'+m.r.c+'💰 +'+m.r.g+'💎 +'+m.r.tk+'🎟','#ffe27a');else if(m.r&&m.r.c)floatText(x,y-26,'+'+m.r.c+'💰','#ffe27a');
  if(m.hint){Park.hint={k:m.hint,at:performance.now()}}};
 H.pong=m=>{const r=performance.now()-m.c;Park.ping=Park.ping?Park.ping*.6+r*.4:r;UI.parkinfo()};
 Park.onChat=m=>{if(!Park.on||!Park.m[m.from])return;Park.bubbles[m.from]={m:m.m,at:performance.now()}};
@@ -69,6 +69,7 @@ function parkPointer(e){const[wx,wy]=toWorld(e);let best=null,bd=1e9,viaHuman=fa
  if(best&&best.me&&viaHuman){sfx('pop');best.emote={e:'👋',at:performance.now()};DO.wardrobe();return}
  const[x,y]=parkGround(e);parkMoveTo(x,y,Park.run||e.shiftKey);Park.marks.push({x,y,t:performance.now()});sfx('click')}
 addEventListener('keydown',e=>{if(!Park.on||e.target.tagName=='INPUT'||$('#mods .ov'))return;const k=e.key.toLowerCase();if('wasd'.includes(k)&&k.length==1||k.startsWith('arrow')){Park.keys[k]=true;e.preventDefault()}});
+addEventListener('blur',()=>{Park.keys={}});document.addEventListener('visibilitychange',()=>{if(document.hidden)Park.keys={}});      // alt-tab with a key held must not leave the dog walking
 addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(Park.keys[k]){delete Park.keys[k];if(!Object.keys(Park.keys).length){const m=Park.m[Park.me];if(m)parkMoveTo(m.rx,m.ry,Park.run)}}});
 // ---------- simulation (client prediction + dead reckoning)
 function stepPark(dt,now){const C=Park.cfg;
@@ -92,7 +93,7 @@ function drawPDog(c,m,t,now){const b=DOGS.BR[m.breed];if(!b)return;const sc=b.si
  if(m.wade){c.save();c.translate(m.rx,m.ry+1);c.fillStyle='rgba(90,175,225,.5)';c.beginPath();c.ellipse(0,0,30*sc,8*sc,0,0,7);c.fill();c.strokeStyle='rgba(255,255,255,'+(.55+.3*Math.sin(t*6))+')';c.lineWidth=2;c.beginPath();c.ellipse(0,1,(26+Math.sin(t*4)*4)*sc,(6+Math.sin(t*4)*1.5)*sc,0,0,7);c.stroke();c.restore()}
  m._top=info.top*sc;m._w=info.w;m._hit=[m.rx,m.ry-m._top*.45,Math.max(28,m._top*.55)]}
 function drawPTag(c,m,t,now){const b=DOGS.BR[m.breed];if(!b||m._top==null)return;const x=m.rx,y=m.ry,top=m._top;
- c.font='bold 11px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';const label=m.n+' · Lv'+m.lvl,w=c.measureText(label).width+16;
+ c.font='bold 11px '+UIF();c.textAlign='center';const label=m.n+' · Lv'+m.lvl,w=c.measureText(label).width+16;
  c.fillStyle=m.me?'#ff8fb0':'rgba(255,250,241,.94)';c.strokeStyle=b.r&&b.r!='C'?RCOL[b.r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=m.me?'#fff':'#5a3d33';c.fillText(label,x,y+21);
  const bub=Park.bubbles[m.n];let by=y-top-12;
  if(bub&&now-bub.at<4500){const a=Math.min(1,(4500-(now-bub.at))/600);if(m.av&&m._htop!=null&&m.hx!=null)AVA.bubble(c,m.hx,m.hy-m._htop-8,bub.m,a);else{AVA.bubble(c,x,by,bub.m,a);by-=30}}
@@ -107,7 +108,7 @@ function drawParkExtras(c,t,now){
   else{c.strokeStyle='rgba(255,230,120,'+(.5+.4*Math.sin(t*8))+')';c.lineWidth=3;c.beginPath();c.ellipse(f.x,f.y,22+Math.sin(t*6)*3,8,0,0,7);c.stroke();disc(c,f.x,f.y-6,.4)}c.restore();
   if(k<1){c.save();c.fillStyle='rgba(255,230,120,.35)';c.beginPath();c.ellipse(f.x,f.y,22*clamp(k,0,1),8*clamp(k,0,1),0,0,7);c.fill();c.restore()}}
  const me=Park.m[Park.me],h=Park.hint;if(me&&h&&now-h.at<5000){const o={hot:['🔥',TT('Burning hot!','ร้อนแรง!'),'#ff5a3c'],warm:['♨️',TT('Warm','อุ่น ๆ'),'#ff9a3c'],cool:['🌬️',TT('Cool','เย็น'),'#6fb8ff'],cold:['🧊',TT('Cold','เย็นเฉียบ'),'#8fd8ff']}[h.k];
-  if(o){const a=Math.min(1,(5000-(now-h.at))/700);c.save();c.globalAlpha=a;c.font='bold 14px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';const y=me.ry-(me._top||60)-48-((now-h.at)/5000)*10;c.strokeText(o[0]+' '+o[1],me.rx,y);c.fillStyle=o[2];c.fillText(o[0]+' '+o[1],me.rx,y);c.restore()}}}
+  if(o){const a=Math.min(1,(5000-(now-h.at))/700);c.save();c.globalAlpha=a;c.font='bold 14px '+UIF();c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';const y=me.ry-(me._top||60)-48-((now-h.at)/5000)*10;c.strokeText(o[0]+' '+o[1],me.rx,y);c.fillStyle=o[2];c.fillText(o[0]+' '+o[1],me.rx,y);c.restore()}}}
 function renderPark(c,t,now,dt){const e=env(),season=parkSeason(),P=PA.pal(season,e.weather);stepPark(dt,now);
  c.save();c.scale(World.scale,World.scale);c.imageSmoothingEnabled=false;
  PA.sky(c,t,e);c.drawImage(PA.layer(season,e.weather),0,0,800,600);PA.pondLive(c,t,e,P);

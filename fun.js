@@ -61,7 +61,7 @@ setInterval(safe('fetch',()=>{const now=Date.now();
   if(!any)fetching.delete(name)}}),250);
 
 // =====================================================================  lucky wheel
-const WHEEL=[{r:{c:20},w:24,l:'🪙 20'},{r:{c:50},w:20,l:'🪙 50'},{r:{c:100},w:12,l:'🪙 100'},{r:{g:1},w:12,l:'💎 1'},{r:{tk:1},w:12,l:'🎟 1'},{r:{c:250},w:5,l:'🪙 250'},{r:{g:3},w:4,l:'💎 3'},{r:{inv:{cake:2}},w:11,l:'🎂 ×2'}];
+const WHEEL=[{r:{c:20},w:24,l:'💰 20'},{r:{c:50},w:20,l:'💰 50'},{r:{c:100},w:12,l:'💰 100'},{r:{g:1},w:12,l:'💎 1'},{r:{tk:1},w:12,l:'🎟 1'},{r:{c:250},w:5,l:'💰 250'},{r:{g:3},w:4,l:'💎 3'},{r:{inv:{cake:2}},w:11,l:'🎂 ×2'}];
 const SPINMAX=4;
 const spinState=p=>p.spin&&p.spin.date==today()?p.spin:(p.spin={date:today(),n:0});
 const spinInfo=p=>{const sp=spinState(p);return{t:'spin_info',wheel:WHEEL.map(w=>w.l),free:sp.n==0,left:Math.max(0,SPINMAX-sp.n),tk:p.tickets}};
@@ -98,13 +98,13 @@ const mailMsg=p=>{for(const m of p.mail)if(!m.r)m.seen=true;return{t:'mail',list
 function partyStart(ws,c){const p=player(c.name),now=Date.now();if(c.view!=c.name)return toast(ws,'ต้องอยู่ที่บ้านตัวเองถึงจะจัดปาร์ตี้ได้');
  if(p.party&&p.party.until>now)return toast(ws,'กำลังมีปาร์ตี้อยู่แล้ว 🎉');
  if(p.party&&now-p.party.last<20*60e3)return toast(ws,'จัดปาร์ตี้ได้อีกครั้งในอีก '+Math.ceil((20*60e3-(now-p.party.last))/60e3)+' นาที');
- if(p.coins<40)return toast(ws,'Coins ไม่พอ (ค่าจัดปาร์ตี้ 40🪙)');
+ if(p.coins<40)return toast(ws,'Coins ไม่พอ (ค่าจัดปาร์ตี้ 40💰)');
  p.coins-=40;p.party={until:now+5*60e3,last:now,guests:[],ended:false};dirty();bump(c.name,'party',1,ws);
  toView(c.name,{t:'party',owner:c.name,ms:5*60e3});sendMe(ws);
  for(const f of p.friends){const ow=wsOf(f);if(ow)send(ow,{t:'party_inv',from:c.name,ms:5*60e3})}}
 function onVisit(ws,c,owner){const o=db.players[owner];if(!o||owner==c.name)return;const now=Date.now(),p=player(c.name);
  if(o.party&&o.party.until>now&&!o.party.guests.includes(c.name)&&o.party.guests.length<12){o.party.guests.push(c.name);
-  if(!p.pg||p.pg.date!=today())p.pg={date:today(),n:0};if(p.pg.n<5){p.pg.n++;give(p,{c:8});send(ws,{t:'toast',m:'🎉 ร่วมปาร์ตี้ของ '+owner+' +8🪙'})}
+  if(!p.pg||p.pg.date!=today())p.pg={date:today(),n:0};if(p.pg.n<5){p.pg.n++;give(p,{c:8});send(ws,{t:'toast',m:'🎉 ร่วมปาร์ตี้ของ '+owner+' +8💰'})}
   if(o.party.guests.length<=10){o.coins+=2}bump(c.name,'partyguest',1,ws);const ow=wsOf(owner);if(ow){send(ow,{t:'ev',k:'guest',n:c.name});sendMe(ow)};dirty();sendMe(ws)}
  if(!wsOf(owner)&&!c.guest){const day=today();if(!o.mail.some(m=>m.k=='visit'&&m.from==c.name&&m.day==day))mailTo(owner,{k:'visit',from:c.name,day})}}
 
@@ -162,7 +162,7 @@ if(process.env.CD_TEST){      // test-only helpers; never enabled unless the ser
 }
 function handle(ws,c,m){const f=HND[m.t];if(!f)return false;f(ws,c,m);return true}
 
-function onEnter(ws,c,p){const now=Date.now();for(const d of p.dogs){d.fetch=null;if(d.wish&&d.wish.exp<now)d.wish=null;if(d.wishNext===undefined||d.wishNext>now+4e5)d.wishNext=now+rnd(...WFIRST)*1000}
+function onEnter(ws,c,p){const now=Date.now();for(const d of p.dogs){if(d.fetch){d.fetch=null;d.until=0}if(d.wish&&d.wish.exp<now)d.wish=null;if(d.wishNext===undefined||d.wishNext>now+4e5)d.wishNext=now+rnd(...WFIRST)*1000}
  contestRoll();if(p.party&&p.party.until<=now)p.party.ended=true;
  const e=C.season();if(e)send(ws,{t:'ev',k:'season',id:e})}
 const onClose=()=>{};

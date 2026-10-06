@@ -4,7 +4,7 @@ const TIPS={th:['ลูบหัวน้องหมาทุกวันเพ
  en:['Pet your dogs daily to grow Bond 💕','Every dog has its own personality.','Buy furniture, then drag it into your room 🛋️','Train to unlock tricks — spin, jump, roll!','Send friends a gift once a day 🎁','Play at night — the fireplace is so cozy 🔥','Visit the Dog Park 🌳 grab treats, kick the ball, trade with friends.','A new community goal starts every Monday 🌍']};
 function applyLang(){$$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));const fb=$('#fetchbtn');if(fb)fb.title=t('Fetch');$('#tip').textContent=pick(TIPS[S.set.lang]||TIPS.th);document.documentElement.lang=S.set.lang}
 DO.lang=(d,el,e)=>{e.preventDefault();S.set.lang=S.set.lang=='th'?'en':'th';saveSet();applyLang()};
-DO.ltab=d=>{$('#fLogin').classList.toggle('hidden',d.v!='login');$('#fReg').classList.toggle('hidden',d.v!='reg');$('#tLogin').classList.toggle('on',d.v=='login');$('#tReg').classList.toggle('on',d.v=='reg')};
+DO.ltab=d=>{$('#fForgot').classList.add('hidden');$('#fLogin').classList.toggle('hidden',d.v!='login');$('#fReg').classList.toggle('hidden',d.v!='reg');$('#tLogin').classList.toggle('on',d.v=='login');$('#tReg').classList.toggle('on',d.v=='reg')};
 UI.all=function(){UI.starterpill();UI.fetchbtn();UI.cur();UI.pcard();UI.loc();UI.dock();UI.online();UI.chat();UI.bars();UI.care();UI.goalpill();UI.parkbar();UI.parkinfo()};
 // ---------- login scene ----------
 const Login={dogs:[],items:[],deco:{wall:'cream',floor:'wood',light:'sunset'},ready:false};
@@ -23,19 +23,35 @@ function loginFrame(ms,dt){if(!Login.ready)return;const w=innerWidth,h=innerHeig
  renderWorld(bgx,{deco:Login.deco,items:Login.items,dogs:Login.dogs,avatar:Login.avatar,env:{hour:18.7,weather:'sunny',season:S.cat.season}},t,now,dt);World.scale=sc0}
 // ---------- auth ----------
 function setErr(id,m){$(id).textContent=m||''}
-async function ensureConn(){if(S.ws&&S.ws.readyState==1)return;await connect()}
-async function doAuth(msg,errId){setErr(errId,'');try{await ensureConn();send(msg)}catch{setErr(errId,S.set.lang=='th'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ (รัน node server.js แล้วหรือยัง?)':'Cannot reach server. Is it running?')}}
+async function ensureConn(){if(S.ws&&S.ws.readyState==1)return;await connect(false,40000)}      // 40 s: a free host that was asleep needs a while to wake up
+const loginBusy=on=>{$$('#login button[type=submit],#login [data-do=guest]').forEach(b=>b.disabled=!!on);clearTimeout(loginBusy.t);if(on)loginBusy.t=setTimeout(()=>loginBusy(false),15000)};
+async function doAuth(msg,errId){setErr(errId,'');loginBusy(true);try{await ensureConn();if(!send(msg))throw 0}catch{loginBusy(false);setErr(errId,S.set.lang=='th'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ (ถ้าเปิดบน Render รอสักครู่แล้วลองใหม่ / ถ้ารันเอง ตรวจว่า node server.js ทำงานอยู่)':'Cannot reach the server. Try again in a moment.')}}
 $('#fLogin').onsubmit=e=>{e.preventDefault();doAuth({t:'login',user:$('#lUser').value,pass:$('#lPass').value},'#lErr')};
 $('#fReg').onsubmit=e=>{e.preventDefault();doAuth({t:'register',user:$('#rUser').value,email:$('#rMail').value,pass:$('#rPass').value},'#rErr')};
 DO.guest=()=>doAuth({t:'guest'},'#lErr');
-H.auth=m=>{if(!m.ok){setErr($('#fReg').classList.contains('hidden')?'#lErr':'#rErr',m.err);if(S.pendingResume||S.autoResume){S.token=null;LS.set('cd_token',null);S.autoResume=false;S.pendingResume=false;show('login')}sfx('err');return}
- if(Park.on)Park.leaveLocal();S.name=m.name;S.guest=m.guest;if(m.token){S.token=m.token;LS.set('cd_token',m.token)}S.loaded=true;S.autoResume=false;S.pendingResume=false;hideBanner()};
+// forgot password: user name + the recovery code saved at sign-up + a new password
+DO.forgot=()=>{$('#fLogin').classList.add('hidden');$('#fReg').classList.add('hidden');$('#fForgot').classList.remove('hidden');$('#fUser').value=$('#lUser').value;setErr('#fErr','');setTimeout(()=>{try{($('#fUser').value?$('#fCode'):$('#fUser')).focus()}catch{}},30)};
+$('#fForgot').onsubmit=e=>{e.preventDefault();doAuth({t:'reset',user:$('#fUser').value,code:$('#fCode').value,pass:$('#fPass').value},'#fErr')};
+H.auth=m=>{loginBusy(false);if(!m.ok){setErr(!$('#fForgot').classList.contains('hidden')?'#fErr':$('#fReg').classList.contains('hidden')?'#lErr':'#rErr',m.err);
+  if(S.pendingResume||S.autoResume){const again=S.pendingResume&&S.loaded;S.autoResume=false;S.pendingResume=false;
+   if(m.exp){S.token=null;LS.set('cd_token',null);show('login')}              // only when the server says the login is really over do we forget it
+   else if(again)setTimeout(dropAndReconnect,4000);                             // busy / hiccup while reconnecting: keep the login and try again in a moment
+   else show('login')}                                                           // at start-up: keep it too, a reload tries again
+  sfx('err');return}
+ reconnecting=false;if(Park.on)Park.leaveLocal();S.name=m.name;S.guest=m.guest;if(m.token){S.token=m.token;LS.set('cd_token',m.token)}S.loaded=true;S.autoResume=false;S.pendingResume=false;hideBanner()};
 function show(id){S.scr=id;$$('.scr').forEach(s=>s.classList.toggle('on',s.id==id));if(id=='game')layout()}
-H.kick=()=>{wantConn=false;toast(S.set.lang=='th'?'มีการเข้าสู่ระบบจากที่อื่น':'Logged in elsewhere');setTimeout(()=>location.reload(),1200)};
+H.kick=m=>{if(m&&m.idle)return;      // the server dropped a quiet connection: the normal reconnect (resume) follows by itself
+ wantConn=false;clearTimeout(reconnectTimer);      // opened on another device: do NOT reload by ourselves (two devices used to kick each other in an endless loop)
+ modal('kicked','📱 '+TT('Opened on another device','เปิดเล่นจากอีกเครื่อง'),`<div class="center"><p style="font-weight:800">${TT('This account was opened on another device, so this one was disconnected.','บัญชีนี้ถูกเปิดเล่นจากอีกเครื่อง เครื่องนี้เลยถูกตัดการเชื่อมต่อ')}</p><button class="btn pink" data-do="relogin" style="margin-top:10px;font-size:18px;padding:10px 24px">${TT('Play here again','กลับมาเล่นที่เครื่องนี้')}</button><p class="muted" style="margin-top:8px;font-size:12px">${TT('(the other device will be disconnected)','(อีกเครื่องจะถูกตัดออกแทน)')}</p></div>`,'sm',{lock:1})};
+DO.relogin=()=>location.reload();
+{const _cm=DO.closemod;DO.closemod=d=>{if(d.id=='kicked')return location.reload();_cm(d)}}
 // ---------- game messages ----------
 H.welcome=m=>{S.welcome=m;DOGS.setBreeds(m.breeds);S.cat=localizeCat({items:m.cat.items,food:m.cat.food,acc:m.cat.acc,walls:m.cat.walls,floors:m.cat.floors,lights:m.cat.lights,tricks:m.cat.tricks,season:m.cat.season})};
 let firstMe=true;
-H.me=m=>{const prevInv=JSON.stringify(S.me.inv),prevSt=(S.me.stReady||0)+'/'+(S.me.stDone?1:0);Object.assign(S.me,m);UI.cur();UI.pcard();UI.dock();UI.starterpill();UI.fetchbtn();if(S.loaded&&(S.me.stReady||0)+'/'+(S.me.stDone?1:0)!=prevSt&&!S.me.stDone)send({t:'starter'});if(modOpen('house'))send({t:'house_info'});
+H.me=m=>{const prevInv=JSON.stringify(S.me.inv),prevSt=(S.me.stReady||0)+'/'+(S.me.stDone?1:0),prevRec=S.me.rec;Object.assign(S.me,m);
+ if(prevRec!==S.me.rec&&modOpen('settings'))renderSettings();
+ if(m.rec===false&&!S.recAsked){S.recAsked=true;let n=0;const iv=setInterval(()=>{if(S.me.rec!==false||S.guest||++n>60)return clearInterval(iv);if(!MP.g&&!Park.on&&!$('#mods .ov')){clearInterval(iv);recPwModal(true)}},2000)}      // an old account without a recovery code is offered one once per visit, as soon as no other window (daily reward, game...) is open
+UI.cur();UI.pcard();UI.dock();UI.starterpill();UI.fetchbtn();if(S.loaded&&(S.me.stReady||0)+'/'+(S.me.stDone?1:0)!=prevSt&&!S.me.stDone)send({t:'starter'});if(modOpen('house'))send({t:'house_info'});
  if(prevInv!=JSON.stringify(S.me.inv)){if(S.feedOpen||S.sel)UI.care();if(S.edit)UI.edit()}
  for(const id of['shop','capsule','profile'])if(modOpen(id))({shop:renderShop,capsule:()=>0,profile:()=>DO.profile()})[id]();
  if(modOpen('prof'))renderProfile();if(modOpen('daily'))DO.daily();if(modOpen('wardrobe'))Wardrobe.refresh();
@@ -53,10 +69,10 @@ H.deco=m=>{S.deco=m.deco;ROOM.setDeco(S.deco);if(modOpen('shop'))renderShop();sf
 H.fx=m=>{const d=m.dog&&S.dogs[m.dog];if(d&&d._pos){const[x,y,L]=d._pos;if(m.pet){burst(x,y-L-d._top*.8,'❤️',4);sfx('pet')}else if(m.e=='✨'){sparkle(x,y-30,14)}else burst(x,y-L-d._top*.8,m.e,3)}else burst(m.x||400,m.y||300,m.e,3)};
 H.players=m=>{S.players=m.list;UI.online()};
 H.chat=m=>{Park.onChat(m);if(!Park.on&&m.from==S.owner)S.avBub={m:m.m,at:performance.now()};S.chat.push(m);if(S.chat.length>60)S.chat.shift();const el=$('#chat');UI.chat();if(el.classList.contains('min')){const hd=$('.hd span',el);if(hd)hd.textContent='💬 '+t('Chat')+' •'}};
-H.event=m=>ticker(m.text);
-H.notify=m=>{toast(locMsg(m.m));sfx('notify')};
+H.event=m=>ticker(locEvent(m.text));
+H.notify=m=>{toast(S.set.lang=='th'?locMsg(m.m):locEvent(m.m));sfx('notify')};
 H.toast=m=>{if(S.capBusy)capUnlock();toast(locMsg(m.m));if(/ไม่พอ|ไม่มี|ไม่ได้|เต็ม|Not enough|แล้ว$/.test(m.m)&&!/learned|ปลด|เป็นเพื่อน|ส่ง/.test(m.m))sfx('err')};
-H.levelup=m=>{sfx('level');toast('⭐ '+TT('Level Up!','เลเวลอัป!')+' Lv.'+m.lvl+'  +50🪙 +1💎',4200);const r=cv.getBoundingClientRect();for(let i=0;i<5;i++)setTimeout(()=>burst(rnd(150,650),rnd(250,450),pick(['⭐','🎉','✨']),4),i*150)};
+H.levelup=m=>{sfx('level');toast('⭐ '+TT('Level Up!','เลเวลอัป!')+' Lv.'+m.lvl+'  +50💰 +1💎',4200);const r=cv.getBoundingClientRect();for(let i=0;i<5;i++)setTimeout(()=>burst(rnd(150,650),rnd(250,450),pick(['⭐','🎉','✨']),4),i*150)};
 H.buy_ok=m=>{sfx('coin');const it=S.cat.items[m.id]||S.cat.food[m.id]||S.cat.acc[m.id];toast('🛍️ '+(it?it.n:m.id)+' ×'+m.n)};
 H.equip_ok=m=>{sfx('ok');const d=(S.allDogs||[]).find(x=>x.id==m.dog);if(d)d.acc=m.acc;const s=S.dogs[m.dog];if(s)s.acc=m.acc;if(modOpen('prof'))renderProfile();UI.care()};
 H.quests=m=>{S.quests=m;if(modOpen('quests'))renderQuests()};
@@ -72,9 +88,9 @@ H.park_av=m=>{const q=Park.m[m.n];if(q)q.av=m.av;if(m.n==S.name)S.me.av=m.av};
 (function boot(){buildIcons();DOGS.setBreeds(EMBED.breeds);S.cat=localizeCat(Object.assign({},EMBED.cat,{season:(()=>{const m=new Date().getMonth()+1;return m==10?'halloween':m==12?'christmas':''})()}));
  applyLang();initLogin();ROOM.setDeco(Login.deco);UI.cur();
  const lu=LS.get('cd_user','');$('#lUser').value=lu;
- if(S.token){S.autoResume=true;connect().then(()=>send({t:'resume',token:S.token})).catch(()=>{S.autoResume=false})}
+ if(S.token){S.autoResume=true;connect(false,40000).then(()=>send({t:'resume',token:S.token})).catch(()=>{S.autoResume=false;setErr('#lErr',S.set.lang=='th'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองรีเฟรชอีกครั้ง':'Cannot reach the server. Reload to try again.')})}
  // keep the clock / weather label fresh
  setInterval(()=>{if(S.scr=='game')UI.loc()},20000);
- setInterval(()=>{if(S.ws&&S.ws.readyState==1&&S.loaded)send({t:'hb'})},20000);   // heartbeat: lets the server drop dead connections
- addEventListener('beforeunload',()=>{});
+ setInterval(()=>{if(!S.loaded||!wantConn||reconnecting)return;if(S.ws&&S.ws.readyState==1){send({t:'hb'});if(Date.now()-lastRx>30000)dropAndReconnect()}else onDisconnect()},10000);   // heartbeat both ways: the server answers, so a dead connection is noticed within ~30 s (and the server can drop dead ones)
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){probeConn();if(AU.ctx&&AU.ctx.state!='running')actx()}});addEventListener('pageshow',probeConn);addEventListener('online',probeConn);   // back from the background / network changed: check at once
 })();

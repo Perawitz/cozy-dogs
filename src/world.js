@@ -39,10 +39,10 @@ function drawLabels(c,d,t,now,sel){const b=DOGS.BR[d.breed];if(!b||!d._pos)retur
  let em=null;if(tk!=null)em=DOGS.TEM[d.trick];else if(!mv&&DOGS.EM[d.state])em=DOGS.EM[d.state];
  if(S.hungry&&S.hungry[d.id])em='🍖';
  if(em){c.font='20px sans-serif';c.textAlign='center';c.fillText(em,x,y-L-top-8-Math.sin(t*3)*3)}
- if((S.set.names||sel)&&d.name){c.font='bold 11px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';const w=c.measureText(d.name).width+16,r=b.r;c.fillStyle=sel?'#ff8fb0':'rgba(255,250,241,.92)';c.strokeStyle=r&&r!='C'?RCOL[r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=sel?'#fff':'#5a3d33';c.fillText(d.name,x,y+21)}
+ if((S.set.names||sel)&&d.name){c.font='bold 11px '+UIF();c.textAlign='center';const w=c.measureText(d.name).width+16,r=b.r;c.fillStyle=sel?'#ff8fb0':'rgba(255,250,241,.92)';c.strokeStyle=r&&r!='C'?RCOL[r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=sel?'#fff':'#5a3d33';c.fillText(d.name,x,y+21)}
  if(d.wish&&S.owner==S.name&&typeof drawWish=='function')drawWish(c,d,t,now,x,y-L-top)}
 function fxDraw(c,t,dt){for(let i=World.fxs.length-1;i>=0;i--){const f=World.fxs[i];f.life-=dt;if(f.life<=0){World.fxs.splice(i,1);continue}f.x+=f.vx*dt;f.y+=f.vy*dt;f.vy+=(f.g||0)*dt;const a=Math.min(1,f.life/(f.max*.4));
-  c.save();c.globalAlpha=a;c.translate(f.x,f.y);if(f.type=='text'){c.font='bold '+(f.size||18)+'px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';c.strokeText(f.txt,0,0);c.fillStyle=f.col||'#fff';c.fillText(f.txt,0,0)}
+  c.save();c.globalAlpha=a;c.translate(f.x,f.y);if(f.type=='text'){c.font='bold '+(f.size||18)+'px '+UIF();c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';c.strokeText(f.txt,0,0);c.fillStyle=f.col||'#fff';c.fillText(f.txt,0,0)}
   else if(f.type=='dust'){c.fillStyle=f.col||'#eadcc0';const s=(f.size||4)*(1+(1-f.life/f.max)*.8);c.fillRect(-s/2,-s/2,s,s)}
   else if(f.type=='spark'){c.fillStyle=f.col||'#fff6a8';const s=f.size||3;c.fillRect(-s/2,-s*1.5,s,s*3);c.fillRect(-s*1.5,-s/2,s*3,s)}
   else{c.font=(f.size||24)+'px sans-serif';c.textAlign='center';c.rotate(Math.sin(t*5+f.x)*.2);c.fillText(f.txt,0,0)}c.restore()}}
@@ -114,6 +114,10 @@ function discardItem(){if(!World.selItem)return;const bar=$('#itembar'),b=$('[da
 // ---------- photo ----------
 function photo(){const f=$('#flash');f.style.transition='none';f.style.opacity=.9;requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0});sfx('shake');
  const W=720,H=720*.75,pad=22,o=document.createElement('canvas');o.width=W+pad*2;o.height=H+pad*2+64;const c=o.getContext('2d');c.fillStyle='#fffaf1';c.fillRect(0,0,o.width,o.height);c.imageSmoothingEnabled=true;c.drawImage(cv,pad,pad,W,H);
- c.strokeStyle='#5a3d33';c.lineWidth=4;c.strokeRect(pad,pad,W,H);c.fillStyle='#5a3d33';c.font='bold 26px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';c.fillText('Cozy Dogs 🐾 '+S.owner+"'s house",o.width/2,pad*2+H+14);c.font='bold 15px sans-serif';c.fillStyle='#8c6d5f';c.fillText(new Date().toLocaleString(),o.width/2,pad*2+H+42);
- const a=document.createElement('a');a.download='cozy-dogs-'+Date.now()+'.png';a.href=o.toDataURL('image/png');a.click();toast('📷 '+(S.set.lang=='th'?'บันทึกรูปแล้ว!':'Photo saved!'))}
+ c.strokeStyle='#5a3d33';c.lineWidth=4;c.strokeRect(pad,pad,W,H);c.fillStyle='#5a3d33';c.font='bold 26px '+UIF();c.textAlign='center';c.fillText('Cozy Dogs 🐾 '+S.owner+"'s house",o.width/2,pad*2+H+14);c.font='bold 15px sans-serif';c.fillStyle='#8c6d5f';c.fillText(new Date().toLocaleString(),o.width/2,pad*2+H+42);
+ const th=S.set.lang=='th',url=o.toDataURL('image/png');
+ if(matchMedia('(pointer:coarse)').matches){      // phones / in-app browsers cannot download: share it, or show it so it can be saved with a long press
+  o.toBlob(async b=>{try{const f=new File([b],'cozy-dogs.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Cozy Dogs'});return}}catch(e){if(e&&e.name=='AbortError')return}
+   modal('photo','📷 '+(th?'รูปถ่าย':'Photo'),`<div class="center"><img src="${url}" alt="" style="width:100%;border-radius:10px;border:3px solid var(--ink)"><p class="muted" style="margin-top:8px;font-weight:800">${th?'กดค้างที่รูป แล้วเลือก “บันทึกรูปภาพ”':'Press and hold the picture, then choose “Save image”'}</p></div>`,'sm')});return}
+ const a=document.createElement('a');a.download='cozy-dogs-'+Date.now()+'.png';a.href=url;a.click();toast('📷 '+(th?'บันทึกรูปแล้ว!':'Photo saved!'))}
 layout();requestAnimationFrame(loop);

@@ -22,5 +22,9 @@ playwright install chromium
 | `decor.py` | โหมดตกแต่งบ้าน: เลือก/พลิก/เก็บเข้ากระเป๋า/ลบ (แตะ 2 ครั้ง)/ลากจากลิ้นชักไปวาง/ปุ่ม Delete | `python3 browser_tests/decor.py . t5 3145` |
 | `race.py` | Dog Race สองเบราว์เซอร์: คนที่เข้าห้องทีหลังแต่เข้าเส้นชัยก่อนต้องได้ที่ 1 (บั๊กอันดับเดิม) | `python3 browser_tests/race.py . t6 3146` |
 | `rps.py` | เป่ายิ้งฉุบ: อยู่ในหมวดออนไลน์ → ค้นหา → บอทมาเล่น → เลือก → ผลและเหรียญ → เล่นอีก/ยกเลิก | `python3 browser_tests/rps.py . t7 3147 desk,portrait,land` |
+| `recovery.py` | รหัสกู้คืน: สมัครแล้วเห็นรหัส (คัดลอก/บันทึกไฟล์) → ตั้งค่า → ลืมรหัสผ่าน → ล็อกอินด้วยรหัสใหม่ → บัญชีเก่าถูกชวนสร้างรหัส (4 ขนาดจอ รวมจอเล็ก 320px) | `python3 browser_tests/recovery.py . t9 3149 desk,portrait,land,tiny` |
+| `thai_canvas.py` | ข้อความไทยบน Canvas (บอลลูนแชต): จำลองบั๊ก iPhone ที่ไม่ยอมจัดกลาง แล้วเช็กว่าตัวแก้ทำให้ข้อความอยู่กลางกรอบ + ตัดข้อความไม่ผ่ากลางอีโมจิ | `python3 browser_tests/thai_canvas.py . t10 3150` |
+| `reconnect.py` | การเชื่อมต่อ: Guest หลุดแล้วกลับมาเป็นคนเดิม, สายตาย, เปิดสองเครื่องไม่รีโหลดวน, token, แตะพื้นหลังหน้าต่าง, ปุ่ม ✕ แลกของ, แปลข้อความอีเวนต์ | `python3 browser_tests/reconnect.py . t11 3151` |
+| `mobile_layout.py` | หน้าตามือถือ: หน้า login แนวนอน, แถบบน 6 ความกว้าง, แถบตกแต่ง, เครื่องที่ไม่มี roundRect | `python3 browser_tests/mobile_layout.py . t12 3152` |
 
 หมายเหตุ: ทดสอบด้วย Chromium เท่านั้น (ไม่ได้ลอง Safari/iOS และเครื่องมือถือจริง) · ก่อนรันให้ `node build.js` เพื่อให้ `public/index.html` ตรงกับซอร์สล่าสุด

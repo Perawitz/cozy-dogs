@@ -55,6 +55,14 @@ function localizeCat(C){
 }
 
 // ---- a few server toasts still carry English words: translate them here while the language is Thai
+const EVT_TH={'found a ball!':'เจอลูกบอล!','fell asleep on the sofa.':'หลับบนโซฟาแล้ว','wants to play!':'อยากเล่นแล้ว!','discovered a new place!':'ค้นพบที่ใหม่ๆ!','brought you a toy!':'เอาของเล่นมาให้คุณ!','is looking out the window.':'กำลังมองออกไปนอกหน้าต่าง','is chasing a butterfly 🦋':'กำลังไล่จับผีเสื้อ 🦋','is rolling around happily!':'กลิ้งไปมาอย่างมีความสุข!'};
+function locEvent(s){      // the little ticker messages come from the server in one language; show them in the player's
+ if(typeof s!='string')return s;let m;const th=S.set.lang=='th';
+ if(th){if(m=/^🐶 (.+?) (found a ball!|fell asleep on the sofa\.|wants to play!|discovered a new place!|brought you a toy!|is looking out the window\.|is chasing a butterfly 🦋|is rolling around happily!)$/.exec(s))return'🐶 '+m[1]+' '+EVT_TH[m[2]];
+  if(m=/^⛏️ (.+?) dug up (a shiny gem 💎|a buried coin 💰|a buried coin 💰)(.*)$/.exec(s))return'⛏️ '+m[1]+' '+(m[2][2]=='s'||m[2].includes('gem')?'ขุดเจอเพชรแวววาว 💎':'ขุดเจอเหรียญที่ถูกฝังไว้ 💰')+m[3]}
+ else{const r=/^💤 (.+?) และ (.+?) นอนด้วยกัน(.*)$/.exec(s);if(r)return'💤 '+r[1]+' and '+r[2]+' are napping together'+r[3];
+  if(m=/^🐶 (.+?) หิวแล้ว!$/.exec(s))return'🐶 '+m[1]+' is hungry!'}
+ return s}
 function locMsg(s){
  if(S.set.lang!='th'||typeof s!='string')return s;
  let m;

@@ -52,11 +52,11 @@ function html(av,size,o){o=o||{};return`<canvas class="avc ${o.cls||''}" width="
 function paint(root){(root||document).querySelectorAll('canvas[data-av]').forEach(c=>{if(c.dataset.done)return;c.dataset.done=1;let av,o;try{av=JSON.parse(c.dataset.av);o=JSON.parse(c.dataset.ao||'{}')}catch{return}
  const src=thumb(av,Object.assign({size:c.width/2},o));c.getContext('2d').drawImage(src,0,0,c.width,c.height)})}
 // ---------- speech bubble (shared by home + park) ----------
-const FONT=()=>'bold 12px '+getComputedStyle(document.body).fontFamily;
-function bubble(c,x,by,text,a){const tx=text.length>26?text.slice(0,25)+'…':text;c.save();c.font=FONT();c.textAlign='center';const tw=c.measureText(tx).width+18;c.globalAlpha=a==null?1:a;
+const FONT=()=>'bold 12px '+UIF();
+function bubble(c,x,by,text,a){const cs=Array.from(String(text)),tx=cs.length>26?cs.slice(0,25).join('')+'…':cs.join('');c.save();c.font=FONT();c.textAlign='center';const tw=c.measureText(tx).width+18;c.globalAlpha=a==null?1:a;
  c.fillStyle='#fff';c.strokeStyle='#5a3d33';c.lineWidth=2;c.lineJoin='round';c.beginPath();c.roundRect(x-tw/2,by-24,tw,22,9);c.fill();c.stroke();
  c.beginPath();c.moveTo(x-5,by-3);c.lineTo(x,by+4);c.lineTo(x+5,by-3);c.fill();c.stroke();c.fillStyle='#fff';c.fillRect(x-4,by-4,8,3);c.fillStyle='#5a3d33';c.fillText(tx,x,by-9);c.restore()}
-function pill(c,x,y,text,o){o=o||{};c.save();c.font='bold 11px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';const w=c.measureText(text).width+16;
+function pill(c,x,y,text,o){o=o||{};c.save();c.font='bold 11px '+UIF();c.textAlign='center';const w=c.measureText(text).width+16;
  c.fillStyle=o.fill||'rgba(255,250,241,.94)';c.strokeStyle=o.stroke||'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y,w,17,8);c.fill();c.stroke();c.fillStyle=o.ink||'#5a3d33';c.fillText(text,x,y+12);c.restore()}
 // ---------- the owner at home (stands in a corner of the room) ----------
 const AV_S=.9,HOME={hit:null};
@@ -69,7 +69,7 @@ function homeTop(a){return a.y-(a.top||90)}
 function drawHomeTag(c,a,t,now){const top=homeTop(a);
  if(S.set.names&&a.name)pill(c,a.x,a.y+9,a.name,{stroke:'#6fb8ff'});
  const b=S.avBub;if(b&&now-b.at<4500)bubble(c,a.x,top-10,b.m,Math.min(1,(4500-(now-b.at))/600));
- else if(a.own&&!LS.get('cd_avhint',false)&&!S.edit){const y=top-14+Math.sin(t*3)*3;c.save();c.font='bold 12px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';const tx='👕 '+TT('Tap to change outfit','แตะเพื่อเปลี่ยนชุด'),w=c.measureText(tx).width+18;
+ else if(a.own&&!LS.get('cd_avhint',false)&&!S.edit){const y=top-14+Math.sin(t*3)*3;c.save();c.font='bold 12px '+UIF();c.textAlign='center';const tx='👕 '+TT('Tap to change outfit','แตะเพื่อเปลี่ยนชุด'),w=c.measureText(tx).width+18;
   c.fillStyle='#fff3c4';c.strokeStyle='#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(a.x-w/2,y-22,w,22,10);c.fill();c.stroke();c.fillStyle='#5a3d33';c.fillText(tx,a.x,y-7);c.restore()}}
 function pickHome(x,y){const h=HOME.hit;if(!h||!S.ownerAv)return false;const dx=(x-h[0])/h[2],dy=(y-h[1])/h[3];return dx*dx+dy*dy<=1}
 // ---------- the person walking the dog (park) ----------

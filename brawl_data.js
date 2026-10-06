@@ -37,7 +37,7 @@ const SK={
  zoom:  {ic:'💨',cost:2,tgt:'self',up:1.1,n:['Zoomies','วิ่งซิ่งหลบ'],d:['Dodge every attack this round, then +10% ATK for 2 rounds','หลบทุกการโจมตีในรอบนี้ แล้วโจมตี +10% อีก 2 รอบ']},
  eyes:  {ic:'🥺',cost:2,tgt:'self',p:.65,n:['Puppy Eyes','ตาแป๋ว'],d:['Each attacker has a 65% chance to melt and skip you','ผู้โจมตีแต่ละตัวมีโอกาส 65% ใจอ่อนไม่ลงมือกับคุณ']},
  treat: {ic:'🍖',cost:2,tgt:'self',heal:.1,up:1.5,n:['Treat Time','ขนมวิเศษ'],d:['Heal 10% HP and +50% ATK for 2 rounds','ฟื้น HP 10% และโจมตี +50% นาน 2 รอบ']},
- rage:  {ic:'🔥',cost:3,tgt:'self',up:1.9,n:['Mad Dog','โหมดบ้าพลัง'],d:['+90% ATK but half DEF for 2 rounds','โจมตี +90% แต่ป้องกันลดครึ่ง นาน 2 รอบ']}};
+ rage:  {ic:'🔥',cost:3,tgt:'self',up:1.9,n:['Mad Dog','โหมดบ้าพลัง'],d:['+90% ATK for the next 2 rounds, but DEF is halved for 3 rounds (this round included)','โจมตี +90% ใน 2 รอบถัดไป แต่ป้องกันลดครึ่ง 3 รอบ (นับรอบนี้ด้วย)']}};
 // the two basic moves every dog has
 const BASIC={atk:{ic:'🐕',n:['Bite','กัด'],d:['A normal attack on one enemy','โจมตีศัตรูหนึ่งตัวตามปกติ']},
              grd:{ic:'🛡️',n:['Guard','ป้องกัน'],d:['Take half damage this round and gain +1 extra energy','รับดาเมจครึ่งเดียวในรอบนี้ และได้พลังงานเพิ่ม +1']}};

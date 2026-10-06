@@ -80,7 +80,10 @@ try:
         if touch:
             cdp=ctx.new_cdp_session(pg);sx,sy=bb['x']+bb['width']/2,bb['y']+bb['height']/2
             cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':sx,'y':sy}]})
-            for k in range(1,9): cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':sx+(tx-sx)*k/8,'y':sy+(ty-sy)*k/8}]});pg.wait_for_timeout(30)
+            # a finger goes UP out of the drawer first (a sideways swipe on the drawer scrolls it - v6.2.1: touch-action pan-x), then across to the spot
+            my=min(sy-70,ty)
+            for k in range(1,5): cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':sx,'y':sy+(my-sy)*k/4}]});pg.wait_for_timeout(30)
+            for k in range(1,7): cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':sx+(tx-sx)*k/6,'y':my+(ty-my)*k/6}]});pg.wait_for_timeout(30)
             cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
         else:
             pg.mouse.move(bb['x']+bb['width']/2,bb['y']+bb['height']/2);pg.mouse.down();pg.mouse.move(tx,ty,steps=8);pg.mouse.up()

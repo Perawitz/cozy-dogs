@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Cozy Dogs</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B6%3C/text%3E%3C/svg%3E">
 <style>:root{--ink:#5a3d33;--ink2:#8c6d5f;--cream:#fff3df;--paper:#fffaf1;--paper2:#fff1dc;--line:#ead6bb;--pink:#ff8fb0;--pink2:#ffd0de;--mint:#6fd1a5;--sky:#6fb8ff;--sun:#ffc94d;--lav:#b79bff;--red:#ff6b6b;--sh:rgba(70,40,30,.28);
  --C:#b8a99a;--R:#5aa8ff;--E:#b06aff;--L:#ffb52e;--M:#ff5cc0;--ui:'Nunito','Quicksand','Segoe UI','Noto Sans Thai','Leelawadee UI','Tahoma',system-ui,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:#2a1f2e;font-family:var(--ui);color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#2a1f2e;font-family:var(--ui);color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
 button{font-family:inherit;color:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;color:var(--ink)}
 input,textarea{user-select:text;-webkit-user-select:text}   /* body is user-select:none; iPhone Safari then refuses typing in any input without the -webkit- form */
@@ -13,23 +13,23 @@ input,textarea{user-select:text;-webkit-user-select:text}   /* body is user-sele
 .ic{width:auto;height:18px;image-rendering:pixelated;vertical-align:-4px}.ic.big{height:26px}.ic.sm{height:14px;vertical-align:-2px}
 .scr{position:fixed;inset:0;display:none}.scr.on{display:block}
 .panel{background:var(--paper);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink),0 10px 22px var(--sh)}
-.btn{border:3px solid var(--ink);border-radius:12px;background:var(--sun);box-shadow:0 4px 0 var(--ink);font-weight:900;padding:7px 14px;font-size:14px;color:var(--ink);transition:transform .06s,box-shadow .06s,filter .1s;position:relative;top:0}
-.btn:hover{filter:brightness(1.06)}.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn{border:3px solid var(--ink);border-radius:12px;background:var(--sun);box-shadow:0 4px 0 var(--ink);font-weight:900;padding:7px 14px;font-size:14px;color:var(--ink);transition:transform .06s,box-shadow .06s,filter .1s;position:relative;top:0}@media(hover:hover){.btn:hover{filter:brightness(1.06)}}.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 .btn.pink{background:var(--pink)}.btn.mint{background:var(--mint)}.btn.sky{background:var(--sky)}.btn.lav{background:var(--lav)}.btn.red{background:var(--red);color:#fff}.btn.ghost{background:var(--paper)}
 .btn.sm{padding:4px 10px;font-size:12px;border-radius:10px;box-shadow:0 3px 0 var(--ink)}.btn.sm:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .btn[disabled],.btn.dis{filter:grayscale(.8) brightness(1.05);opacity:.7;pointer-events:none}
 /* ---------- login ---------- */
 #login{background:#2a1f2e;overflow:hidden}
 #bgc{position:absolute;inset:0;width:100%;height:100%}
-.loginwrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;background:radial-gradient(ellipse at center,rgba(40,20,40,.15),rgba(30,15,35,.62))}
+.loginwrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:18px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:radial-gradient(ellipse at center,rgba(40,20,40,.15),rgba(30,15,35,.62))}
 .logo{text-align:center;animation:bob 3.2s ease-in-out infinite}
 .logo h1{margin:0;font-size:clamp(44px,9vw,84px);font-weight:900;letter-spacing:2px;color:#fff4dc;text-shadow:0 2px 0 #ffb86b,0 4px 0 #e8845a,0 6px 0 #5a3d33,3px 3px 0 #5a3d33,-3px 3px 0 #5a3d33,0 12px 20px rgba(0,0,0,.4);line-height:1}
 .logo p{margin:8px 0 0;color:#ffe9c9;font-weight:800;letter-spacing:3px;font-size:13px;text-transform:uppercase;text-shadow:0 2px 0 #5a3d33}
 @keyframes bob{50%{transform:translateY(-6px)}}
+.loginwrap>:first-child{margin-top:auto}.loginwrap>:last-child{margin-bottom:auto}   /* centred when it fits, scrollable when it does not (landscape phone, on-screen keyboard) */
 .logincard{width:min(380px,100%);padding:16px}
 .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border:3px solid var(--ink);background:var(--paper2);border-radius:10px;padding:7px;font-weight:900;font-size:14px}.tabs button.on{background:var(--pink);box-shadow:0 3px 0 var(--ink)}
 .fld{display:block;margin-bottom:9px}.fld span{display:block;font-size:12px;font-weight:800;color:var(--ink2);margin-bottom:3px}
-.fld input{width:100%;padding:9px 11px;border:3px solid var(--ink);border-radius:10px;font-size:15px;background:#fff;user-select:text;-webkit-user-select:text;outline:none}.fld input:focus{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink2)}
+.fld input{width:100%;padding:9px 11px;border:3px solid var(--ink);border-radius:10px;font-size:16px;background:#fff;user-select:text;-webkit-user-select:text;outline:none}      /* 16px: iOS zooms the whole page in on a smaller input and the page cannot be zoomed back */.fld input:focus{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink2)}
 .err{color:#d13c4c;font-weight:800;font-size:13px;min-height:18px;margin:2px 0 6px}
 .row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.sp{flex:1}
 .tip{color:#ffe9c9;font-size:12px;font-weight:700;text-shadow:0 2px 0 #5a3d33;text-align:center;max-width:380px}
@@ -54,8 +54,7 @@ input,textarea{user-select:text;-webkit-user-select:text}   /* body is user-sele
 #ticker.on{opacity:1;top:60px}
 .dock{left:50%;bottom:8px;transform:translateX(-50%);display:flex;gap:6px;padding:7px 9px;max-width:98vw;overflow-x:auto;scrollbar-width:none}
 .dock::-webkit-scrollbar{display:none}
-.dk{flex:none;width:58px;border:3px solid var(--ink);border-radius:12px;background:var(--paper2);padding:3px 0 2px;box-shadow:0 3px 0 var(--ink);position:relative;display:flex;flex-direction:column;align-items:center;transition:transform .08s,background .15s}
-.dk:hover{background:var(--pink2);transform:translateY(-3px)}.dk:active{transform:translateY(1px);box-shadow:0 1px 0 var(--ink)}.dk.on{background:var(--sun)}
+.dk{flex:none;width:58px;border:3px solid var(--ink);border-radius:12px;background:var(--paper2);padding:3px 0 2px;box-shadow:0 3px 0 var(--ink);position:relative;display:flex;flex-direction:column;align-items:center;transition:transform .08s,background .15s}@media(hover:hover){.dk:hover{background:var(--pink2);transform:translateY(-3px)}}.dk:active{transform:translateY(1px);box-shadow:0 1px 0 var(--ink)}.dk.on{background:var(--sun)}
 .dk .e{font-size:24px;line-height:28px}.dk .l{font-size:10px;font-weight:900;color:var(--ink)}
 .dk .bd,.bd{position:absolute;right:-6px;top:-8px;min-width:19px;height:19px;border-radius:10px;background:var(--red);color:#fff;border:2px solid var(--ink);font-size:11px;font-weight:900;display:grid;place-items:center;padding:0 3px;animation:pulse 1.4s infinite}
 @keyframes pulse{50%{transform:scale(1.15)}}
@@ -73,16 +72,16 @@ input,textarea{user-select:text;-webkit-user-select:text}   /* body is user-sele
 .xbtn{position:absolute;right:6px;top:4px;border:0;background:transparent;font-size:18px;font-weight:900}
 .chat{right:10px;bottom:84px;width:min(260px,calc(100vw - 20px));padding:6px;display:flex;flex-direction:column;gap:4px}
 .chat .log{height:96px;overflow:auto;font-size:12px;font-weight:700;padding:2px 4px;scrollbar-width:thin;user-select:text}.chat .log div{margin:1px 0;word-break:break-word}.chat .log b{color:#d95a8a}
-.chat .em{display:flex;gap:2px;justify-content:space-between}.chat .em button{border:0;background:transparent;font-size:18px;padding:0 2px;transition:transform .1s}.chat .em button:hover{transform:scale(1.3)}
+.chat .em{display:flex;gap:2px;justify-content:space-between}.chat .em button{border:0;background:transparent;font-size:18px;padding:0 2px;transition:transform .1s}@media(hover:hover){.chat .em button:hover{transform:scale(1.3)}}
 .chat form{display:flex;gap:4px}.chat input{flex:1;min-width:0;border:2px solid var(--ink);border-radius:8px;padding:4px 7px;font-size:12px;font-weight:700;user-select:text}
 .chat.min .log,.chat.min form{display:none}.chat .hd{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:12px;cursor:pointer;padding:0 3px}
 .online{right:10px;top:60px;width:150px;padding:6px 8px;font-size:12px;font-weight:800;max-height:35vh;overflow:auto}.online h5{margin:0 0 4px;font-size:11px;color:var(--ink2);text-transform:uppercase;letter-spacing:1px;cursor:pointer}
-.online .pl{display:flex;align-items:center;gap:5px;padding:3px 4px;border-radius:8px;cursor:pointer}.online .pl:hover{background:var(--pink2)}.online .pl i{width:8px;height:8px;border-radius:50%;background:var(--mint);flex:none}.online .pl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.online .pl small{color:var(--ink2)}
+.online .pl{display:flex;align-items:center;gap:5px;padding:3px 4px;border-radius:8px;cursor:pointer}@media(hover:hover){.online .pl:hover{background:var(--pink2)}}.online .pl i{width:8px;height:8px;border-radius:50%;background:var(--mint);flex:none}.online .pl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.online .pl small{color:var(--ink2)}
 .bar2{left:50%;transform:translateX(-50%);padding:8px 14px;display:flex;gap:10px;align-items:center;font-weight:900;flex-wrap:wrap;justify-content:center}
 #visitbar{top:60px}#editbar{bottom:8px;width:min(860px,98vw);flex-direction:column;align-items:stretch;gap:6px;padding:8px 10px}
 #editbar .hd{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .drawer{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
-.inv{flex:none;width:76px;border:3px solid var(--ink);border-radius:10px;background:#fff;text-align:center;padding:3px 2px;position:relative;touch-action:none;cursor:grab}.inv.dis{opacity:.4}.inv canvas{width:60px;height:50px}.inv b{font-size:10px;display:block;line-height:1.1;height:22px;overflow:hidden}
+.inv{flex:none;width:76px;border:3px solid var(--ink);border-radius:10px;background:#fff;text-align:center;padding:3px 2px;position:relative;touch-action:pan-x;cursor:grab}.inv.dis{opacity:.4}.inv canvas{width:60px;height:50px}.inv b{font-size:10px;display:block;line-height:1.1;height:22px;overflow:hidden}
 .inv em{position:absolute;right:-5px;top:-7px;background:var(--pink);border:2px solid var(--ink);border-radius:9px;font-size:11px;padding:0 5px;font-style:normal;font-weight:900}
 .pill{border:2px solid var(--ink);background:var(--paper2);border-radius:14px;padding:2px 10px;font-weight:900;font-size:12px}.pill.on{background:var(--sun)}
 #itembar{position:absolute;display:none;gap:6px;pointer-events:auto;z-index:5;white-space:nowrap}#itembar.on{display:flex}#itembar .btn.arm{outline:3px solid #fff;animation:armpulse .4s ease-in-out infinite alternate}@keyframes armpulse{from{filter:brightness(1)}to{filter:brightness(1.3)}}
@@ -141,7 +140,7 @@ input,textarea{user-select:text;-webkit-user-select:text}   /* body is user-sele
 .mc .f,.mc .b{position:absolute;inset:0;backface-visibility:hidden;border:3px solid var(--ink);border-radius:12px;display:grid;place-items:center;overflow:hidden}.mc .b{background:repeating-linear-gradient(45deg,#ff9bb8 0 8px,#ffb8cc 8px 16px)}.mc .b::after{content:'🐾';font-size:26px}.mc .f{background:#fff;transform:rotateY(180deg)}.mc .f canvas{width:100%;height:100%}.mc.ok .f{background:#d7f7e3}
 #catchc{width:min(480px,100%);aspect-ratio:4/3;border:3px solid var(--ink);border-radius:12px;touch-action:none;background:#bfe6ff}
 .opts4{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:min(420px,100%)}
-.gmcard{display:flex;gap:12px;align-items:center;padding:10px 12px;border:3px solid var(--ink);border-radius:14px;background:#fff;cursor:pointer;margin-bottom:10px;transition:transform .1s}.gmcard:hover{transform:translateY(-2px);background:var(--pink2)}.gmcard .e{font-size:38px}
+.gmcard{display:flex;gap:12px;align-items:center;padding:10px 12px;border:3px solid var(--ink);border-radius:14px;background:#fff;cursor:pointer;margin-bottom:10px;transition:transform .1s}@media(hover:hover){.gmcard:hover{transform:translateY(-2px);background:var(--pink2)}}.gmcard .e{font-size:38px}
 .rps{display:flex;gap:12px;justify-content:center}.rps button{width:92px;height:92px;font-size:44px;border:3px solid var(--ink);border-radius:16px;background:#fff;box-shadow:0 4px 0 var(--ink)}.rps button:active{transform:translateY(3px);box-shadow:0 1px 0}.rps button.on{background:var(--sun)}
 /* daily */
 .days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.day .rw{white-space:normal;display:block;line-height:1.3}.day{border:3px solid var(--ink);border-radius:10px;background:#fff;text-align:center;padding:5px 0;font-size:11px;font-weight:900}.day b{display:block;font-size:12px}.day.now{background:var(--sun);transform:translateY(-3px);box-shadow:0 3px 0 rgba(90,61,51,.35)}.day.done{background:#d7f7e3}.day .e{font-size:20px;display:block}
@@ -159,12 +158,11 @@ input,textarea{user-select:text;-webkit-user-select:text}   /* body is user-sele
 .goalpill .e{font-size:22px}.goalpill .gp{flex:1;min-width:0}.goalpill b{font-size:11px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.goalpill .prog{margin-top:2px;height:9px}.goalpill .pc{font-size:12px;font-weight:900}
 #parkbar{left:50%;bottom:8px;transform:translateX(-50%);width:max-content;display:none;align-items:center;gap:5px;padding:6px 9px;flex-wrap:wrap;justify-content:center;max-width:98vw}
 .inpark #parkbar{display:flex}.inpark #parkbar.hidden{display:none!important}
-#parkbar .eb{border:3px solid var(--ink);border-radius:11px;background:var(--paper2);font-size:21px;line-height:1;padding:3px 6px;box-shadow:0 3px 0 var(--ink);transition:transform .08s}
-#parkbar .eb:hover{background:var(--pink2);transform:translateY(-3px)}#parkbar .eb:active{transform:translateY(1px);box-shadow:0 1px 0 var(--ink)}#parkbar .eb.tr{background:#e8f7ee}
+#parkbar .eb{border:3px solid var(--ink);border-radius:11px;background:var(--paper2);font-size:21px;line-height:1;padding:3px 6px;box-shadow:0 3px 0 var(--ink);transition:transform .08s}@media(hover:hover){#parkbar .eb:hover{background:var(--pink2);transform:translateY(-3px)}}#parkbar .eb:active{transform:translateY(1px);box-shadow:0 1px 0 var(--ink)}#parkbar .eb.tr{background:#e8f7ee}
 #parkbar .sep{width:3px;height:26px;background:var(--line);border-radius:2px}
 #parkinfo{left:50%;top:56px;transform:translateX(-50%);padding:3px 14px;font-weight:900;font-size:12px;white-space:nowrap}
 .inpark #dock,.inpark #care,.inpark #visitbar,.inpark #editbar,.inpark #itembar,.inpark #goalpill{display:none!important}
-.online .tb{font-size:13px;padding:0 3px;border-radius:6px;opacity:.55}.online .tb:hover{opacity:1;background:#fff}
+.online .tb{font-size:13px;padding:0 3px;border-radius:6px;opacity:.55}@media(hover:hover){.online .tb:hover{opacity:1;background:#fff}}
 .goalhead{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}.goalhead .ge{font-size:44px;width:68px;height:68px;border:3px solid var(--ink);border-radius:16px;background:var(--pink2);display:grid;place-items:center}
 .gbar{position:relative;height:26px;border:3px solid var(--ink);border-radius:14px;background:#f1e4cf;margin:18px 16px 0}.gbar i{display:block;height:100%;border-radius:10px;background:linear-gradient(#9cf0c4,var(--mint));transition:width .6s}
 .gbar .mk{position:absolute;top:-14px;transform:translateX(-50%);font-size:22px;filter:grayscale(1) opacity(.55)}.gbar .mk.ok{filter:none;animation:pulse 1.4s infinite}
@@ -244,16 +242,14 @@ canvas#cv.throw{cursor:crosshair}
 .wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:9px 8px}
 .wc{position:relative;border:3px solid var(--ink);border-radius:13px;background:#fff;padding:5px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:1px;box-shadow:0 3px 0 var(--ink);transition:transform .08s,background .12s}
 .wc canvas{width:60px;height:60px;display:block}
-.wc .wn{font-size:10.5px;font-weight:900;line-height:1.1;min-height:23px;display:flex;align-items:center;text-align:center;padding:0 3px}
-.wc:hover{background:var(--pink2);transform:translateY(-2px)}.wc:active{transform:translateY(1px);box-shadow:0 1px 0 var(--ink)}
+.wc .wn{font-size:10.5px;font-weight:900;line-height:1.1;min-height:23px;display:flex;align-items:center;text-align:center;padding:0 3px}@media(hover:hover){.wc:hover{background:var(--pink2);transform:translateY(-2px)}}.wc:active{transform:translateY(1px);box-shadow:0 1px 0 var(--ink)}
 .wc.on{background:var(--sun);box-shadow:0 3px 0 var(--ink),inset 0 0 0 3px #fff}
 .wc.dis{opacity:.45}
 .wpr,.wown{position:absolute;right:-6px;top:-9px;font-style:normal;font-size:10.5px;font-weight:900;padding:0 6px 0 4px;border-radius:10px;border:2px solid var(--ink);background:#ffe27a;display:flex;align-items:center;gap:2px;line-height:15px;box-shadow:0 2px 0 rgba(90,61,51,.35)}
 .wpr .ic{height:11px;vertical-align:0}.wown{background:#b8f0cf;padding:0 5px}
 .wc.prem .wn{color:#8a5a00}
 .swr{display:flex;flex-wrap:wrap;gap:8px}
-.swb{width:31px;height:31px;border-radius:50%;border:3px solid var(--ink);background:var(--c);box-shadow:0 2px 0 var(--ink),inset 0 -6px 0 rgba(0,0,0,.12),inset 0 3px 0 rgba(255,255,255,.4);padding:0;position:relative;transition:transform .08s}
-.swb:hover{transform:scale(1.12)}.swb.on{outline:3px solid var(--sky);outline-offset:2px;transform:scale(1.1)}
+.swb{width:31px;height:31px;border-radius:50%;border:3px solid var(--ink);background:var(--c);box-shadow:0 2px 0 var(--ink),inset 0 -6px 0 rgba(0,0,0,.12),inset 0 3px 0 rgba(255,255,255,.4);padding:0;position:relative;transition:transform .08s}@media(hover:hover){.swb:hover{transform:scale(1.12)}}.swb.on{outline:3px solid var(--sky);outline-offset:2px;transform:scale(1.1)}
 .swb.rb{background:conic-gradient(#ff5c6c,#ffd24a,#6fd1a5,#4a9fff,#b79bff,#ff5c6c)}
 .wtgs{display:flex;gap:8px;flex-wrap:wrap}.wt{border:3px solid var(--ink);border-radius:12px;background:#fff;padding:6px 12px;font-weight:900;font-size:13px;box-shadow:0 3px 0 var(--ink)}.wt.on{background:var(--pink2)}
 .wnote{margin:0 0 7px;font-size:12px}
@@ -261,8 +257,7 @@ canvas#cv.throw{cursor:crosshair}
 .wwall{position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(#ffe9d0,#ffdcb5);border-bottom:3px solid var(--ink)}
 .wfloor{position:absolute;left:0;right:0;bottom:0;height:54%;background:repeating-linear-gradient(90deg,#ecbf84 0 30px,#e0ac6c 30px 32px)}
 .wmid{position:absolute;left:50%;top:66%;transform:translate(-50%,-50%);font-size:30px;filter:drop-shadow(0 3px 0 rgba(60,32,22,.25))}
-.wspot{position:absolute;border:3px dashed var(--ink2);border-radius:12px;background:rgba(255,255,255,.78);display:flex;flex-direction:column;align-items:center;padding:2px 7px;font-weight:900;transition:transform .08s}
-.wspot:hover{transform:scale(1.06)}.wspot span{font-size:26px;line-height:1.1;filter:grayscale(1) opacity(.5)}.wspot small{font-size:9.5px;color:var(--ink2)}
+.wspot{position:absolute;border:3px dashed var(--ink2);border-radius:12px;background:rgba(255,255,255,.78);display:flex;flex-direction:column;align-items:center;padding:2px 7px;font-weight:900;transition:transform .08s}@media(hover:hover){.wspot:hover{transform:scale(1.06)}}.wspot span{font-size:26px;line-height:1.1;filter:grayscale(1) opacity(.5)}.wspot small{font-size:9.5px;color:var(--ink2)}
 .wspot.on{border-style:solid;background:var(--sun)}.wspot.on span{filter:none}
 .wspot.bl{left:5%;top:26%}.wspot.br{right:5%;top:26%}.wspot.fl{left:5%;bottom:5%}.wspot.fr{right:5%;bottom:5%}
 .wsave{flex:none;display:flex;align-items:center;gap:10px;padding:10px 4px 12px;border-top:3px dashed var(--line);margin-top:2px;flex-wrap:wrap;background:var(--paper)}
@@ -291,9 +286,9 @@ canvas#cv.throw{cursor:crosshair}
 .bwtop{display:flex;align-items:center;gap:8px}.bwtop .pill{white-space:nowrap}.bwtop .dtimer{flex:1;margin:0}
 .bwcards{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:6px}
 .bwc{border:3px solid var(--ink);border-radius:12px;background:#fff;padding:4px 5px 3px;min-width:0;position:relative;transition:filter .2s,background .15s}
-.bwc.me{background:var(--sun)}.bwc.foe{cursor:pointer}.bwc.foe:hover{background:var(--pink2)}
+.bwc.me{background:var(--sun)}.bwc.foe{cursor:pointer}@media(hover:hover){.bwc.foe:hover{background:var(--pink2)}}
 .bwc.sel{outline:4px solid #ff3b5c;outline-offset:1px;background:var(--pink2)}.bwc.sel::after{content:'🎯';position:absolute;right:1px;top:-13px;font-size:16px}
-.bwc.out{filter:grayscale(1);opacity:.55;cursor:default}.bwc.out:hover{background:#fff}
+.bwc.out{filter:grayscale(1);opacity:.55;cursor:default}@media(hover:hover){.bwc.out:hover{background:#fff}}
 .bwh{display:flex;align-items:center;gap:4px;font-size:12px;min-width:0}.bwh b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.bwh canvas{width:26px;height:26px;flex:none}
 .bwhp{position:relative;height:15px;border:2px solid var(--ink);border-radius:8px;background:#f1e4cf;overflow:hidden;margin:2px 0}.bwhp i{position:absolute;inset:0 auto 0 0;width:100%;background:#6fd1a5;transition:width .1s,background .2s}
 .bwhp span{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:900;color:#3b2a24;text-shadow:0 0 3px #fff,0 0 3px #fff}
@@ -305,8 +300,7 @@ canvas#cv.throw{cursor:crosshair}
 .bact{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:0 6px;text-align:left;padding:6px 8px 7px;min-height:60px;border:3px solid var(--ink);border-radius:14px;background:#fff;box-shadow:0 4px 0 var(--ink);cursor:pointer;touch-action:manipulation;font-family:inherit;color:var(--ink)}
 .bact .bi{grid-row:1/3;font-size:26px;text-align:center;line-height:1}.bact .bn{display:flex;justify-content:space-between;gap:4px;font-size:14px;align-items:baseline}.bact .bn em{font-style:normal;color:#b45309;font-weight:900;white-space:nowrap;font-size:13px}.bact .bn em.fr{color:#1f8f55}
 .bact small{font-size:11px;line-height:1.15;color:var(--ink2);font-weight:700}
-.bact.a{background:#ffe3e8}.bact.g{background:#e3f2ff}.bact.s{background:#e6fbe9}
-.bact:hover{filter:brightness(1.04)}.bact:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.bact.a{background:#ffe3e8}.bact.g{background:#e3f2ff}.bact.s{background:#e6fbe9}@media(hover:hover){.bact:hover{filter:brightness(1.04)}}.bact:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 .bact.off{opacity:.45;filter:grayscale(.6);cursor:not-allowed}.bact.off:active{transform:none;box-shadow:0 4px 0 var(--ink)}
 .bact.pick{outline:4px solid #ff3b5c;outline-offset:1px;opacity:1;filter:none}
 .bact kbd{position:absolute;right:7px;bottom:2px;font-size:9px;opacity:.45;font-family:inherit;font-weight:900}
@@ -314,7 +308,7 @@ canvas#cv.throw{cursor:crosshair}
 .bwfoot{margin-top:2px}
 /* fighter chooser + rules */
 .bpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin:8px 0}
-.bpc{border:3px solid var(--ink);border-radius:12px;background:#fff;padding:5px 4px;text-align:center;cursor:pointer;min-width:0}.bpc:hover{background:var(--pink2)}.bpc.sel{background:var(--sun);box-shadow:0 0 0 3px #ff3b5c}
+.bpc{border:3px solid var(--ink);border-radius:12px;background:#fff;padding:5px 4px;text-align:center;cursor:pointer;min-width:0}@media(hover:hover){.bpc:hover{background:var(--pink2)}}.bpc.sel{background:var(--sun);box-shadow:0 0 0 3px #ff3b5c}
 .bpc canvas{width:60px;height:60px;display:block;margin:0 auto}.bpc b{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bpc small{display:block;font-size:10px;font-weight:800;color:var(--ink2)}
 .bpd{border:3px solid var(--ink);border-radius:14px;background:var(--paper2);padding:8px 10px;margin-top:4px}.bpt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px;font-size:15px}
 .bstats{display:grid;gap:3px}.bstat{display:grid;grid-template-columns:62px 1fr 28px;align-items:center;gap:6px;font-size:12px;font-weight:900}.bstat b{text-align:right}
@@ -326,6 +320,21 @@ canvas#cv.throw{cursor:crosshair}
  .bwroot{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:"top cards" "arena ctl";align-items:start;gap:6px 10px}
  .bwtop{grid-area:top;align-self:center}.bwcards{grid-area:cards;gap:4px}.bwarena{grid-area:arena}.bwr{grid-area:ctl;gap:6px}
  .bact{min-height:46px;padding:4px 7px 5px}.bact small{display:none}.bact .bi{font-size:22px}.bwmsg{font-size:13px;min-height:18px}.bwfoot{margin-top:0}.bwc{padding:3px 4px 2px}.bwe{height:12px}.bws{min-height:12px}}
+
+/* recovery code (forgot password) */
+.flink{display:block;text-align:center;margin-top:10px;font-size:13px;font-weight:800;color:#d95a8b;text-decoration:underline;cursor:pointer}
+.fhelp{font-size:12.5px;font-weight:700;color:var(--ink2);margin:0 0 10px;line-height:1.4}
+.reccode{font:900 clamp(15px,5.4vw,22px) ui-monospace,Menlo,Consolas,monospace;letter-spacing:1.5px;background:#fff8e6;border:3px dashed var(--ink);border-radius:12px;padding:12px 6px;margin:10px 0;text-align:center;user-select:all;-webkit-user-select:all;white-space:nowrap}
+.ov[data-mod=rec],.ov[data-mod=recpw]{z-index:2}   /* the code window stays on top of the daily-reward pop-up that opens at the same time */
+
+:lang(th) .logo p,:lang(th) .online h5,:lang(th) .wsec{letter-spacing:0}
+@supports(height:1dvh){.mod{max-height:min(92dvh,760px)}.mod.wd{height:min(92dvh,670px)}@media(max-width:700px){.mod.wd{height:min(94dvh,760px)}}@media(max-height:620px) and (min-width:560px){.mod.wd{height:96dvh}}}
+@media(max-width:420px){.pcard{padding:3px 6px 3px 3px;gap:5px}.pcard .av{width:38px;height:38px}.pcard b{max-width:58px;font-size:12px}.xp{width:58px}.cur{gap:3px}.chip{padding:1px 4px 1px 3px;font-size:11px;gap:2px}.chip .ic.big{height:17px}}
+@media(max-width:350px){.pcard b{max-width:44px}.xp{width:44px}.chip{font-size:10px}}
+/* landscape phones: a slim decorate bar, so the floor stays visible while placing furniture */
+@media(max-height:480px){#editbar{padding:4px 8px;gap:2px;bottom:4px}#editbar .hd{gap:5px}#editbar .hd b{font-size:13px}.drawer{padding:2px 2px 4px;gap:4px}.inv{width:52px;padding:1px}.inv canvas{width:42px;height:32px}.inv b{display:none}.inv em{font-size:10px;right:-4px;top:-5px}}
+/* v6.2.1: the beginner tutorial panel waits while the room is being decorated (it used to sit on top of the item buttons) */
+body.editing .coach{display:none!important}
 </style></head>
 <body>
 <section id="login" class="scr on">
@@ -335,17 +344,26 @@ canvas#cv.throw{cursor:crosshair}
   <div class="panel logincard">
    <div class="tabs"><button class="on" data-do="ltab" data-v="login" id="tLogin" data-t="Login">Login</button><button data-do="ltab" data-v="reg" id="tReg" data-t="Register">Register</button></div>
    <form id="fLogin" autocomplete="on">
-    <label class="fld"><span data-t="Username">Username</span><input id="lUser" autocomplete="username" maxlength="16"></label>
+    <label class="fld"><span data-t="Username">Username</span><input id="lUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16"></label>
     <label class="fld"><span data-t="Password">Password</span><input id="lPass" type="password" autocomplete="current-password" maxlength="64"></label>
     <div class="err" id="lErr"></div>
     <div class="row"><button class="btn pink" type="submit" data-t="Login">Login</button><button class="btn ghost" type="button" data-do="guest" data-t="Play as Guest">Play as Guest</button></div>
+    <a href="#" class="flink" data-do="forgot" id="aForgot" data-t="Forgot password?">Forgot password?</a>
    </form>
    <form id="fReg" class="hidden" autocomplete="on">
-    <label class="fld"><span data-t="Username">Username</span><input id="rUser" autocomplete="username" maxlength="16" placeholder="3-16"></label>
+    <label class="fld"><span data-t="Username">Username</span><input id="rUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16" placeholder="3-16"></label>
     <label class="fld"><span data-t="Email">Email</span><input id="rMail" type="email" autocomplete="email" maxlength="60"></label>
     <label class="fld"><span data-t="Password">Password</span><input id="rPass" type="password" autocomplete="new-password" maxlength="64" placeholder="6+"></label>
     <div class="err" id="rErr"></div>
     <div class="row"><button class="btn mint" type="submit" data-t="Create account">Create account</button></div>
+   </form>
+   <form id="fForgot" class="hidden" autocomplete="off">
+    <p class="fhelp" data-t="Enter your username, the recovery code you saved when you signed up, and a new password.">Enter your username, the recovery code you saved when you signed up, and a new password.</p>
+    <label class="fld"><span data-t="Username">Username</span><input id="fUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16"></label>
+    <label class="fld"><span data-t="Recovery code">Recovery code</span><input id="fCode" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="32" placeholder="XXXX-XXXX-XXXX-XXXX"></label>
+    <label class="fld"><span data-t="New password">New password</span><input id="fPass" type="password" autocomplete="new-password" maxlength="64" placeholder="6+"></label>
+    <div class="err" id="fErr"></div>
+    <div class="row"><button class="btn mint" type="submit" data-t="Set new password">Set new password</button><button class="btn ghost" type="button" data-do="ltab" data-v="login" data-t="Back to login">Back to login</button></div>
    </form>
   </div>
   <div class="tip" id="tip"></div>
@@ -470,7 +488,7 @@ const SK={
  zoom:  {ic:'💨',cost:2,tgt:'self',up:1.1,n:['Zoomies','วิ่งซิ่งหลบ'],d:['Dodge every attack this round, then +10% ATK for 2 rounds','หลบทุกการโจมตีในรอบนี้ แล้วโจมตี +10% อีก 2 รอบ']},
  eyes:  {ic:'🥺',cost:2,tgt:'self',p:.65,n:['Puppy Eyes','ตาแป๋ว'],d:['Each attacker has a 65% chance to melt and skip you','ผู้โจมตีแต่ละตัวมีโอกาส 65% ใจอ่อนไม่ลงมือกับคุณ']},
  treat: {ic:'🍖',cost:2,tgt:'self',heal:.1,up:1.5,n:['Treat Time','ขนมวิเศษ'],d:['Heal 10% HP and +50% ATK for 2 rounds','ฟื้น HP 10% และโจมตี +50% นาน 2 รอบ']},
- rage:  {ic:'🔥',cost:3,tgt:'self',up:1.9,n:['Mad Dog','โหมดบ้าพลัง'],d:['+90% ATK but half DEF for 2 rounds','โจมตี +90% แต่ป้องกันลดครึ่ง นาน 2 รอบ']}};
+ rage:  {ic:'🔥',cost:3,tgt:'self',up:1.9,n:['Mad Dog','โหมดบ้าพลัง'],d:['+90% ATK for the next 2 rounds, but DEF is halved for 3 rounds (this round included)','โจมตี +90% ใน 2 รอบถัดไป แต่ป้องกันลดครึ่ง 3 รอบ (นับรอบนี้ด้วย)']}};
 // the two basic moves every dog has
 const BASIC={atk:{ic:'🐕',n:['Bite','กัด'],d:['A normal attack on one enemy','โจมตีศัตรูหนึ่งตัวตามปกติ']},
              grd:{ic:'🛡️',n:['Guard','ป้องกัน'],d:['Take half damage this round and gain +1 extra energy','รับดาเมจครึ่งเดียวในรอบนี้ และได้พลังงานเพิ่ม +1']}};
@@ -1803,6 +1821,18 @@ g.ROOM=api;
 ;
 // Cozy Dogs - core: state, i18n, helpers, pixel icons, audio, network
 'use strict';
+// iPhone fix (v6.2.1): Safari / the in-app browsers of Instagram, LINE, Facebook ... can IGNORE textAlign='center' for Thai
+// (stacked vowels and tone marks), so a chat bubble's text started in the middle of the bubble and ran out of it.
+// We do the centring ourselves: measure the text, switch to left alignment, and move x. Same picture everywhere else.
+(()=>{const P=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;if(!P||P.__thFix)return;P.__thFix=1;
+ if(!P.roundRect)P.roundRect=function(x,y,w,h,r){r=typeof r=='number'?r:Array.isArray(r)?(r[0]||0):(r&&r.x)||0;r=Math.max(0,Math.min(r,Math.abs(w)/2,Math.abs(h)/2));   // older iPhones / in-app browsers have no roundRect
+  this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
+ for(const fn of ['fillText','strokeText']){const o=P[fn];
+  P[fn]=function(s,x,y,mw){const al=this.textAlign;
+   if((al=='center'||al=='right'||al=='end')&&/[฀-๿]/.test(s)){const w=this.measureText(s).width;this.textAlign='left';
+    try{return mw==null?o.call(this,s,al=='center'?x-w/2:x-w,y):o.call(this,s,al=='center'?x-w/2:x-w,y,mw)}finally{this.textAlign=al}}
+   return o.apply(this,arguments)}}})();
+const UIF=()=>{const l=document.documentElement.lang;if(UIF.l!==l||!UIF.v){UIF.l=l;UIF.v=getComputedStyle(document.body).fontFamily}return UIF.v};      // the page font, looked up once (was looked up for every label in every frame)
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -1819,7 +1849,7 @@ const PERS_EM={PLAYFUL:'🎾',LAZY:'😴',ENERGETIC:'⚡',SHY:'🙈',FRIENDLY:'�
 // ---------------- i18n (English keys -> Thai) ----------------
 const TH={'Shop':'ร้านค้า','Dogs':'น้องหมา','Capsule':'กาชา','Collection':'สะสม','Quests':'ภารกิจ','Ranks':'อันดับ','Friends':'เพื่อน','Games':'เกม','Decorate':'ตกแต่ง','Photo':'ถ่ายรูป','Settings':'ตั้งค่า','Chat':'แชท',
  'Pet':'ลูบหัว','Feed':'ให้อาหาร','Play':'เล่น','Brush':'หวีขน','Bath':'อาบน้ำ','Train':'เทรน','Info':'ข้อมูล','Wear':'แต่งตัว','Hunger':'หิว','Energy':'พลัง','Happy':'สุข','Clean':'สะอาด','Bond':'ความผูกพัน',
- 'Login':'เข้าสู่ระบบ','Register':'สมัครสมาชิก','Guest':'เล่นแบบ Guest','Username':'ชื่อผู้ใช้','Password':'รหัสผ่าน','Email':'อีเมล','Play as Guest':'เล่นแบบ Guest','Create account':'สร้างบัญชี',
+ 'Login':'เข้าสู่ระบบ','Register':'สมัครสมาชิก','Guest':'เล่นแบบ Guest','Username':'ชื่อผู้ใช้','Password':'รหัสผ่าน','Email':'อีเมล','Play as Guest':'เล่นแบบ Guest','Create account':'สร้างบัญชี','Forgot password?':'ลืมรหัสผ่าน?','Recovery code':'รหัสกู้คืน','New password':'รหัสผ่านใหม่','Set new password':'ตั้งรหัสผ่านใหม่','Back to login':'กลับไปหน้าเข้าสู่ระบบ','Enter your username, the recovery code you saved when you signed up, and a new password.':'ใส่ชื่อผู้ใช้ รหัสกู้คืนที่จดไว้ตอนสมัคร และรหัสผ่านใหม่ที่ต้องการ',
  'Buy':'ซื้อ','Owned':'มีอยู่','Close':'ปิด','Done':'เสร็จ','Cancel':'ยกเลิก','Confirm':'ยืนยัน','Claim':'รับ','Claimed':'รับแล้ว','Locked':'ล็อก','Visit':'เยี่ยมบ้าน','Go Home':'กลับบ้าน','Gift':'ส่งของขวัญ','Remove':'ลบ','Add':'เพิ่ม','Accept':'ตอบรับ','Decline':'ปฏิเสธ',
  'Food':'อาหาร','Toys':'ของเล่น','Furniture':'เฟอร์นิเจอร์','Rugs':'พรม','Wall':'ผนัง','Accessories':'เครื่องแต่งตัว','Styles':'ธีมห้อง','Season':'เทศกาล','Wallpaper':'วอลเปเปอร์','Floor':'พื้น','Lighting':'แสงไฟ',
  'All':'ทั้งหมด','At home':'อยู่บ้าน','Away':'ไม่อยู่บ้าน','Favorites':'ตัวโปรด','Release':'ปล่อยกลับธรรมชาติ','Rename':'เปลี่ยนชื่อ','Tricks':'ลูกเล่น','Personality':'นิสัย','Favorite food':'อาหารโปรด','Favorite toy':'ของเล่นโปรด',
@@ -1854,7 +1884,7 @@ const ic=(n,cls='')=>`<img class="ic ${cls}" src="${ICON[n]}" alt="">`;
 
 // ---------------- audio ----------------
 const AU={ctx:null,master:null,music:null,mg:null,started:false,timer:null,step:0,next:0};
-function actx(){if(!AU.ctx){try{AU.ctx=new(window.AudioContext||window.webkitAudioContext)();AU.master=AU.ctx.createGain();AU.master.connect(AU.ctx.destination);AU.sfx=AU.ctx.createGain();AU.sfx.connect(AU.master);AU.mus=AU.ctx.createGain();AU.mus.connect(AU.master);applyVol()}catch{}}if(AU.ctx&&AU.ctx.state=='suspended')AU.ctx.resume();return AU.ctx}
+function actx(){if(!AU.ctx){try{AU.ctx=new(window.AudioContext||window.webkitAudioContext)();AU.master=AU.ctx.createGain();AU.master.connect(AU.ctx.destination);AU.sfx=AU.ctx.createGain();AU.sfx.connect(AU.master);AU.mus=AU.ctx.createGain();AU.mus.connect(AU.master);applyVol()}catch{}}if(AU.ctx&&AU.ctx.state!='running'){try{const r=AU.ctx.resume();r&&r.catch&&r.catch(()=>{})}catch{}}return AU.ctx}      // iOS also uses 'interrupted' (phone call, silent switch, app switch), not only 'suspended'
 function applyVol(){if(!AU.ctx)return;AU.master.gain.value=S.set.vol;AU.sfx.gain.value=S.set.sound?1:0;AU.mus.gain.value=S.set.music?.55:0}
 function tone(f,d=.1,type='sine',v=.12,when=0,slide=0,dest){const a=actx();if(!a||!S.set.sound&&!dest)return;const o=a.createOscillator(),g=a.createGain(),t0=a.currentTime+when;o.type=type;o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide),t0+d);
  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.008);g.gain.exponentialRampToValueAtTime(.0008,t0+d);o.connect(g);g.connect(dest||AU.sfx);o.start(t0);o.stop(t0+d+.05)}
@@ -1878,21 +1908,33 @@ function musicStep(tm,bar,beat){const a=AU.ctx,ch=CH[bar%4],dst=AU.mus;
  if(beat==6)key(ch[0]-12+7,.9,.1);
  if([2,3,5,7].includes(beat)&&Math.random()<.7){const m=ch[1+Math.floor(Math.random()*4)]+12+(Math.random()<.3?12:0);key(m,.7,.05)}
  if(Math.random()<.35){tick(.03,3500)}}
-function musicTick(){const a=AU.ctx;if(!a||!S.set.music)return;const spb=60/78/2;while(AU.next<a.currentTime+.4){const sw=AU.step%2?spb*.16:0;musicStep(AU.next+sw,Math.floor(AU.step/8),AU.step%8);AU.next+=spb;AU.step++}}
+function musicTick(){const a=AU.ctx;if(!a||!S.set.music)return;const spb=60/78/2;if(AU.next<a.currentTime)AU.next=a.currentTime+.1;while(AU.next<a.currentTime+.4){      // after the page was in the background: do not play all the missed notes at once
+  const sw=AU.step%2?spb*.16:0;musicStep(AU.next+sw,Math.floor(AU.step/8),AU.step%8);AU.next+=spb;AU.step++}}
 function startMusic(){const a=actx();if(!a||AU.timer)return;AU.next=a.currentTime+.1;AU.timer=setInterval(musicTick,120);AU.started=true}
 function stopMusic(){clearInterval(AU.timer);AU.timer=null}
-const firstTouch=()=>{actx();if(S.set.music)startMusic();removeEventListener('pointerdown',firstTouch)};addEventListener('pointerdown',firstTouch);
+// iOS only unlocks sound from touchend / click (not pointerdown) and may suspend it again later: keep trying on every tap until the audio is really running
+const UNLOCK=['pointerdown','touchend','click','keydown'];
+const firstTouch=()=>{const a=actx();if(!a)return;if(S.set.music&&!AU.timer)startMusic();if(a.state=='running')for(const ev of UNLOCK)removeEventListener(ev,firstTouch,true)};
+for(const ev of UNLOCK)addEventListener(ev,firstTouch,true);
 
 // ---------------- network ----------------
 const H={};   // message handlers: H.type=fn(msg)
-let reconnectTimer=null,wantConn=false;
+let reconnectTimer=null,wantConn=false,reconnecting=false,lastRx=Date.now();
 function wsURL(){return location.protocol=='file:'?'ws://localhost:3000':(location.protocol=='https:'?'wss://':'ws://')+location.host}
-function send(o){if(S.ws&&S.ws.readyState==1)S.ws.send(JSON.stringify(o))}
-function connect(first){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket(wsURL())}catch(e){return rej(e)}S.ws=ws;
- ws.onopen=()=>{wantConn=true;res(ws)};ws.onerror=()=>rej(new Error('ws'));
- ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}const f=H[m.t];if(f)f(m);else if(window.DEBUG)console.log('unhandled',m.t)};
- ws.onclose=()=>{if(S.ws!==ws)return;if(S.loaded&&wantConn)onDisconnect()}})}
-function onDisconnect(){try{MP.abort()}catch{}showBanner(t('Reconnecting')+'…',true);clearTimeout(reconnectTimer);let n=0;const tryIt=async()=>{try{await connect();S.pendingResume=true;if(S.token)send({t:'resume',token:S.token});else send({t:'guest'});hideBanner()}catch{reconnectTimer=setTimeout(tryIt,Math.min(8000,1500+n++*700))}};reconnectTimer=setTimeout(tryIt,1200)}
+function send(o){if(S.ws&&S.ws.readyState==1){S.ws.send(JSON.stringify(o));return true}return false}
+function connect(first,wait){return new Promise((res,rej)=>{let ws,done=false;try{ws=new WebSocket(wsURL())}catch(e){return rej(e)}S.ws=ws;
+ const to=setTimeout(()=>{if(done)return;done=true;try{ws.close()}catch{}rej(new Error('timeout'))},wait||9000);      // a connection attempt that hangs (bad network) must end, so the next try can start
+ ws.onopen=()=>{if(done)return;done=true;clearTimeout(to);wantConn=true;lastRx=Date.now();res(ws)};ws.onerror=()=>{if(done)return;done=true;clearTimeout(to);rej(new Error('ws'))};
+ ws.onmessage=e=>{lastRx=Date.now();let m;try{m=JSON.parse(e.data)}catch{return}const f=H[m.t];if(f)f(m);else if(window.DEBUG)console.log('unhandled',m.t)};
+ ws.onclose=()=>{clearTimeout(to);if(!done){done=true;rej(new Error('closed'))}if(S.ws!==ws)return;if(S.loaded&&wantConn&&!reconnecting)onDisconnect()}})}
+H.hb=()=>{};
+// reconnect: ONE loop with a growing delay (a failed attempt's onclose used to start a second loop and reset the delay)
+function onDisconnect(){if(reconnecting)return;reconnecting=true;try{MP.abort()}catch{}showBanner(t('Reconnecting')+'…',true);clearTimeout(reconnectTimer);let n=0;
+ const tryIt=async()=>{try{await connect();reconnecting=false;S.pendingResume=true;if(S.token)send({t:'resume',token:S.token});else send({t:'guest'})}catch{reconnectTimer=setTimeout(tryIt,Math.min(8000,1500+n++*700))}};reconnectTimer=setTimeout(tryIt,1200)}
+// a connection can look open but be dead (phone slept, Wi-Fi -> 4G): drop it and reconnect
+function dropAndReconnect(){if(!S.loaded||!wantConn||reconnecting)return;const o=S.ws;if(o){o.onclose=null;o.onmessage=null;o.onerror=null;try{o.close()}catch{}}onDisconnect()}
+function probeConn(){if(!S.loaded||!wantConn||reconnecting)return;if(!S.ws||S.ws.readyState!=1){onDisconnect();return}const t0=Date.now();send({t:'hb'});setTimeout(()=>{if(lastRx<t0)dropAndReconnect()},4000)}
+
 
 ;
 // Cozy Dogs - world: canvas, render loop, dogs, FX, picking, decorate mode, photo
@@ -1936,10 +1978,10 @@ function drawLabels(c,d,t,now,sel){const b=DOGS.BR[d.breed];if(!b||!d._pos)retur
  let em=null;if(tk!=null)em=DOGS.TEM[d.trick];else if(!mv&&DOGS.EM[d.state])em=DOGS.EM[d.state];
  if(S.hungry&&S.hungry[d.id])em='🍖';
  if(em){c.font='20px sans-serif';c.textAlign='center';c.fillText(em,x,y-L-top-8-Math.sin(t*3)*3)}
- if((S.set.names||sel)&&d.name){c.font='bold 11px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';const w=c.measureText(d.name).width+16,r=b.r;c.fillStyle=sel?'#ff8fb0':'rgba(255,250,241,.92)';c.strokeStyle=r&&r!='C'?RCOL[r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=sel?'#fff':'#5a3d33';c.fillText(d.name,x,y+21)}
+ if((S.set.names||sel)&&d.name){c.font='bold 11px '+UIF();c.textAlign='center';const w=c.measureText(d.name).width+16,r=b.r;c.fillStyle=sel?'#ff8fb0':'rgba(255,250,241,.92)';c.strokeStyle=r&&r!='C'?RCOL[r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=sel?'#fff':'#5a3d33';c.fillText(d.name,x,y+21)}
  if(d.wish&&S.owner==S.name&&typeof drawWish=='function')drawWish(c,d,t,now,x,y-L-top)}
 function fxDraw(c,t,dt){for(let i=World.fxs.length-1;i>=0;i--){const f=World.fxs[i];f.life-=dt;if(f.life<=0){World.fxs.splice(i,1);continue}f.x+=f.vx*dt;f.y+=f.vy*dt;f.vy+=(f.g||0)*dt;const a=Math.min(1,f.life/(f.max*.4));
-  c.save();c.globalAlpha=a;c.translate(f.x,f.y);if(f.type=='text'){c.font='bold '+(f.size||18)+'px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';c.strokeText(f.txt,0,0);c.fillStyle=f.col||'#fff';c.fillText(f.txt,0,0)}
+  c.save();c.globalAlpha=a;c.translate(f.x,f.y);if(f.type=='text'){c.font='bold '+(f.size||18)+'px '+UIF();c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';c.strokeText(f.txt,0,0);c.fillStyle=f.col||'#fff';c.fillText(f.txt,0,0)}
   else if(f.type=='dust'){c.fillStyle=f.col||'#eadcc0';const s=(f.size||4)*(1+(1-f.life/f.max)*.8);c.fillRect(-s/2,-s/2,s,s)}
   else if(f.type=='spark'){c.fillStyle=f.col||'#fff6a8';const s=f.size||3;c.fillRect(-s/2,-s*1.5,s,s*3);c.fillRect(-s*1.5,-s/2,s*3,s)}
   else{c.font=(f.size||24)+'px sans-serif';c.textAlign='center';c.rotate(Math.sin(t*5+f.x)*.2);c.fillText(f.txt,0,0)}c.restore()}}
@@ -2011,8 +2053,12 @@ function discardItem(){if(!World.selItem)return;const bar=$('#itembar'),b=$('[da
 // ---------- photo ----------
 function photo(){const f=$('#flash');f.style.transition='none';f.style.opacity=.9;requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0});sfx('shake');
  const W=720,H=720*.75,pad=22,o=document.createElement('canvas');o.width=W+pad*2;o.height=H+pad*2+64;const c=o.getContext('2d');c.fillStyle='#fffaf1';c.fillRect(0,0,o.width,o.height);c.imageSmoothingEnabled=true;c.drawImage(cv,pad,pad,W,H);
- c.strokeStyle='#5a3d33';c.lineWidth=4;c.strokeRect(pad,pad,W,H);c.fillStyle='#5a3d33';c.font='bold 26px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';c.fillText('Cozy Dogs 🐾 '+S.owner+"'s house",o.width/2,pad*2+H+14);c.font='bold 15px sans-serif';c.fillStyle='#8c6d5f';c.fillText(new Date().toLocaleString(),o.width/2,pad*2+H+42);
- const a=document.createElement('a');a.download='cozy-dogs-'+Date.now()+'.png';a.href=o.toDataURL('image/png');a.click();toast('📷 '+(S.set.lang=='th'?'บันทึกรูปแล้ว!':'Photo saved!'))}
+ c.strokeStyle='#5a3d33';c.lineWidth=4;c.strokeRect(pad,pad,W,H);c.fillStyle='#5a3d33';c.font='bold 26px '+UIF();c.textAlign='center';c.fillText('Cozy Dogs 🐾 '+S.owner+"'s house",o.width/2,pad*2+H+14);c.font='bold 15px sans-serif';c.fillStyle='#8c6d5f';c.fillText(new Date().toLocaleString(),o.width/2,pad*2+H+42);
+ const th=S.set.lang=='th',url=o.toDataURL('image/png');
+ if(matchMedia('(pointer:coarse)').matches){      // phones / in-app browsers cannot download: share it, or show it so it can be saved with a long press
+  o.toBlob(async b=>{try{const f=new File([b],'cozy-dogs.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Cozy Dogs'});return}}catch(e){if(e&&e.name=='AbortError')return}
+   modal('photo','📷 '+(th?'รูปถ่าย':'Photo'),`<div class="center"><img src="${url}" alt="" style="width:100%;border-radius:10px;border:3px solid var(--ink)"><p class="muted" style="margin-top:8px;font-weight:800">${th?'กดค้างที่รูป แล้วเลือก “บันทึกรูปภาพ”':'Press and hold the picture, then choose “Save image”'}</p></div>`,'sm')});return}
+ const a=document.createElement('a');a.download='cozy-dogs-'+Date.now()+'.png';a.href=url;a.click();toast('📷 '+(th?'บันทึกรูปแล้ว!':'Photo saved!'))}
 layout();requestAnimationFrame(loop);
 
 ;
@@ -2028,7 +2074,8 @@ function showBanner(m){const b=$('#banner');b.textContent=m;b.style.display='blo
 // ---- modals
 function modal(id,title,body,cls='',opts={}){let ov=$(`#mods .ov[data-mod="${id}"]`);const had=!!ov;
  if(!ov){ov=document.createElement('div');ov.className='ov';ov.dataset.mod=id;if(opts.lock)ov.dataset.lock=1;ov.innerHTML=`<div class="panel mod ${cls}"><div class="mh"><span class="mt"></span><span class="sp"></span><button class="x" data-do="closemod" data-id="${id}">✕</button></div><div class="mb"></div></div>`;
-  ov.addEventListener('pointerdown',e=>{if(e.target===ov&&!ov.dataset.lock){ov.remove();ov.dispatchEvent(new Event('close'))}});$('#mods').append(ov);sfx('open')}
+  let down=false;ov.addEventListener('pointerdown',e=>{down=e.target===ov});      // close on the CLICK that follows a press on the dark background: closing on pointerdown let the same tap fall through onto the button underneath
+  ov.addEventListener('click',e=>{const was=down;down=false;if(was&&e.target===ov&&!ov.dataset.lock){ov.remove();ov.dispatchEvent(new Event('close'))}});$('#mods').append(ov);sfx('open')}
  $('.mt',ov).innerHTML=title;const mb=$('.mb',ov),sc=mb.scrollTop;mb.innerHTML=body;if(typeof AVA!='undefined')AVA.paint(mb);if(had)mb.scrollTop=sc;return ov}
 const modOpen=id=>$(`#mods .ov[data-mod="${id}"]`);
 function closeMod(id){const o=modOpen(id);if(o){o.remove();o.dispatchEvent(new Event('close'))}}
@@ -2069,19 +2116,19 @@ UI.online=function(){const l=S.players.filter(p=>p.name!=S.name);$('#online').in
 UI.chat=function(){const el=$('#chat'),min=el.classList.contains('min');const log=S.chat.slice(-30).map(c=>`<div><b>${esc(c.from)}</b> ${esc(c.m)}</div>`).join('');
  let lg=$('.log',el);
  if(!lg||!$('#chatf',el)){   // build the panel once
-  el.innerHTML=`<div class="hd" data-do="togchat"><span>💬 ${t('Chat')}</span><span>${min?'▲':'▼'}</span></div><div class="log">${log}</div><div class="em">${['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button data-do="emoji" data-e="${e}">${e}</button>`).join('')}</div><form id="chatf"><input maxlength="120" placeholder="…" autocomplete="off" enterkeyhint="send"><button class="btn sm pink">➤</button></form>`;
-  lg=$('.log',el);$('#chatf').onsubmit=e=>{e.preventDefault();const i=$('input',el);if(i.value.trim()){send({t:'chat',m:i.value});i.value=''}}}
+  el.innerHTML=`<div class="hd" data-do="togchat"><span>💬 ${t('Chat')}</span><span>${min?'▲':'▼'}</span></div><div class="log">${log}</div><div class="em">${['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button data-do="emoji" data-e="${e}">${e}</button>`).join('')}</div><form id="chatf"><input maxlength="120" placeholder="${TT('Type a message…','พิมพ์ข้อความ…')}" autocomplete="off" enterkeyhint="send"><button class="btn sm pink">➤</button></form>`;
+  lg=$('.log',el);$('#chatf').onsubmit=e=>{e.preventDefault();const i=$('input',el);if(i.value.trim()){if(send({t:'chat',m:i.value}))i.value='';else toast(TT('Not connected yet — your message is kept, try again in a moment','ยังไม่ได้เชื่อมต่อ — ข้อความยังอยู่ ลองส่งใหม่อีกครั้งนะ'))}}}
  else{   // later calls only refresh the log + header: rebuilding the <input> on every incoming message dropped focus and the typed text (and closed the phone keyboard)
-  lg.innerHTML=log;const sp=$$('.hd span',el);if(sp[0])sp[0].textContent='💬 '+t('Chat');if(sp[1])sp[1].textContent=min?'▲':'▼'}
+  lg.innerHTML=log;const ci=$('#chatf input',el);if(ci)ci.placeholder=TT('Type a message…','พิมพ์ข้อความ…');const sp=$$('.hd span',el);if(sp[0])sp[0].textContent='💬 '+t('Chat');if(sp[1])sp[1].textContent=min?'▲':'▼'}
  lg.scrollTop=lg.scrollHeight}
 DO.togchat=()=>{const el=$('#chat');el.classList.toggle('min');UI.chat();if(!el.classList.contains('min')&&matchMedia('(pointer:coarse)').matches){const i=$('input',el);if(i)i.focus()}};
 DO.togonline=()=>{$('#online').classList.toggle('hidden')};
 DO.emoji=d=>send({t:'emoji',e:d.e});
-DO.visit=d=>{if(S.edit)return toast('Finish decorating first');if(Park.on)Park.leaveLocal();send({t:'visit',id:d.n});closeMod('friends')};
+DO.visit=d=>{if(S.edit)return toast(TT('Finish decorating first','ตกแต่งให้เสร็จก่อนนะ'));if(Park.on)Park.leaveLocal();send({t:'visit',id:d.n});closeMod('friends')};
 DO.home=()=>{if(Park.on)Park.leaveLocal();send({t:'visit',id:S.name})};
 UI.bars=function(){const own=S.owner==S.name,v=$('#visitbar');if(typeof UI.fetchbtn=='function')UI.fetchbtn();
  v.classList.toggle('hidden',own);if(!own)v.innerHTML=`🏡 ${esc(S.owner)} <button class="btn sm sky" data-do="home">🏠 ${t('Go Home')}</button><button class="btn sm pink" data-do="gblike" title="Like">❤️</button><button class="btn sm lav" data-do="gbopen" data-n="${esc(S.owner)}" title="Guestbook">📖</button>`+['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button class="btn sm ghost" data-do="emoji" data-e="${e}">${e}</button>`).join('');
- if(S.edit&&S.sel){S.sel=null;UI.care()}const eb=$('#editbar');eb.style.display=S.edit?'flex':'none';eb.classList.toggle('hidden',!S.edit);if(S.edit)UI.edit()}
+ document.body.classList.toggle('editing',!!S.edit);if(S.edit&&S.sel){S.sel=null;UI.care()}const eb=$('#editbar');eb.style.display=S.edit?'flex':'none';eb.classList.toggle('hidden',!S.edit);if(S.edit)UI.edit()}
 // ---- decorate bar
 const ECATS=[['all','All'],['toy','Toys'],['furn','Furniture'],['rug','Rugs'],['wall','Wall'],['season','Season']];
 UI.edit=function(){const cat=S.editCat||'all',C=S.cat.items,inv=S.me.inv,placed={};for(const i of S.items)placed[i.type]=(placed[i.type]||0)+1;
@@ -2101,9 +2148,9 @@ UI.care=function(){const el=$('#care'),d=S.dogs[S.sel];if(!d){el.classList.add('
  const bar=(k,l,v,col)=>`<div class="bar"><b>${t(l)}</b><i><u data-bar="${k}" style="width:${v}%;background:${v<30?'#ff6b6b':col}"></u></i></div>`;
  el.innerHTML=`<button class="xbtn" data-do="desel">✕</button><div class="top"><div class="th">${thumbHTML(d.breed,d.variant,31,d.acc)}</div><div style="flex:1;min-width:0"><h4>${esc(d.name)} ${rarTag(b.r)}</h4><div class="sub">${esc(b.name)}${d.variant!='Normal'?' · '+t(d.variant):''}</div><div class="sub">${PERS_EM[d.pers]||''} ${nice(d.pers)}</div><div class="hearts" data-bondh>${hearts}</div></div></div>
  <div class="bars">${bar('hunger','Hunger',d.hunger,'#ffb36b')}${bar('energy','Energy',d.energy,'#6fb8ff')}${bar('happy','Happy',d.happy,'#ff8fb0')}${bar('clean','Clean',d.clean,'#6fd1a5')}</div>
- <div class="acts"><button class="btn pink" data-do="act" data-a="pet"><span>🤚</span>${t('Pet')}</button><button class="btn ${own?'':'dis'}" data-do="feedtog"><span>🍖</span>${t('Feed')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="play"><span>🎾</span>${t('Play')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="brush"><span>🪮</span>${t('Brush')}</button>
- <button class="btn sky ${own?'':'dis'}" data-do="act" data-a="bath"><span>🛁</span>${t('Bath')} <small>5🪙</small></button><button class="btn mint ${own?'':'dis'}" data-do="act" data-a="train"><span>🎓</span>${t('Train')}</button><button class="btn lav ${own?'':'dis'}" data-do="dogprof" data-id="${d.id}"><span>🎀</span>${t('Wear')}</button><button class="btn ghost" data-do="dogprof" data-id="${d.id}"><span>ℹ️</span>${t('Info')}</button></div>
- <div class="foodpick ${S.feedOpen?'on':''}">${FOODS.map(k=>{const f=F[k],n=S.me.inv[k]||0,fav=String(d.favFood).toLowerCase()==k,can=n>0||(k=='kibble'&&S.me.coins>=f.p);return`<div class="fp ${can?'':'dis'} ${fav?'fav':''}" data-do="feed" data-f="${k}" title="${f.n}"><span class="e">${f.e}</span>${f.n}<br><small>${n>0?'':f.p+'🪙'}</small>${n>0?`<em>${n}</em>`:''}</div>`}).join('')}</div>`;
+ <div class="acts"><button class="btn pink" data-do="act" data-a="pet"><span>🤚</span>${t('Pet')}</button><button class="btn ${own?'':'dis'}" data-do="feedtog"><span>🍖</span>${t('Feed')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="play"><span>🎾</span>${t('Play')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="brush"><span>🧹</span>${t('Brush')}</button>
+ <button class="btn sky ${own?'':'dis'}" data-do="act" data-a="bath"><span>🛁</span>${t('Bath')} <small>5💰</small></button><button class="btn mint ${own?'':'dis'}" data-do="act" data-a="train"><span>🎓</span>${t('Train')}</button><button class="btn lav ${own?'':'dis'}" data-do="dogprof" data-id="${d.id}"><span>🎀</span>${t('Wear')}</button><button class="btn ghost" data-do="dogprof" data-id="${d.id}"><span>ℹ️</span>${t('Info')}</button></div>
+ <div class="foodpick ${S.feedOpen?'on':''}">${FOODS.map(k=>{const f=F[k],n=S.me.inv[k]||0,fav=String(d.favFood).toLowerCase()==k,can=n>0||(k=='kibble'&&S.me.coins>=f.p);return`<div class="fp ${can?'':'dis'} ${fav?'fav':''}" data-do="feed" data-f="${k}" title="${f.n}"><span class="e">${f.e}</span>${f.n}<br><small>${n>0?'':f.p+'💰'}</small>${n>0?`<em>${n}</em>`:''}</div>`}).join('')}</div>`;
  paintThumbs(el)}
 UI.careBars=function(){const d=S.dogs[S.sel];if(!d||$('#care').classList.contains('hidden'))return;for(const k of['hunger','energy','happy','clean']){const u=$(`#care [data-bar="${k}"]`);if(u){u.style.width=d[k]+'%';u.style.background=d[k]<30?'#ff6b6b':{hunger:'#ffb36b',energy:'#6fb8ff',happy:'#ff8fb0',clean:'#6fd1a5'}[k]}}
  const h=$('#care [data-bondh]');if(h){const n=Math.floor(d.bond/10);if(h.dataset.n!=n){h.dataset.n=n;h.innerHTML=Array.from({length:10},(_,i)=>ic(i<n?'heart':'hearte','sm')).join('')}}}
@@ -2132,7 +2179,7 @@ function renderShop(){const tab=S.shopTab,C=S.cat,inv=S.me.inv,season=C.season;l
  const ov=modal('shop',`🛍️ ${t('Shop')} <span class="rw" style="font-size:14px;margin-left:10px">${ic('coin','sm')} ${S.me.coins}</span>`,tabs+(tab=='style'?body:`<div class="grid">${body}</div>`),'lg');
  paintItemThumbs(ov);$$('canvas[data-sw]',ov).forEach(c=>{const[k,id]=c.dataset.sw.split('|');c.getContext('2d').drawImage(ROOM.swatch(k,id,136,90),0,0)})}
 DO.buy=d=>{send({t:'shop_buy',id:d.id,n:+d.n||1})};
-DO.deco=d=>{if(S.owner!=S.name)return toast(S.set.lang=='th'?'ตกแต่งได้เฉพาะบ้านตัวเอง':'You can only decorate your own house');if(d.p&&+d.p>0)ask((S.set.lang=='th'?'ปลดล็อก ':'Unlock ')+nice(d.v)+' '+d.p+' 🪙 ?',()=>send({t:'deco',k:d.k,v:d.v}),{yes:t('Buy')});else send({t:'deco',k:d.k,v:d.v})};
+DO.deco=d=>{if(S.owner!=S.name)return toast(S.set.lang=='th'?'ตกแต่งได้เฉพาะบ้านตัวเอง':'You can only decorate your own house');if(d.p&&+d.p>0)ask((S.set.lang=='th'?'ปลดล็อก ':'Unlock ')+nice(d.v)+' '+d.p+' 💰 ?',()=>send({t:'deco',k:d.k,v:d.v}),{yes:t('Buy')});else send({t:'deco',k:d.k,v:d.v})};
 // ================= DOGS =================
 DO.dogs=()=>{send({t:'dogs_get'});S.dogF=S.dogF||'all';renderDogs()};
 DO.dogf=d=>{S.dogF=d.k;renderDogs()};
@@ -2152,19 +2199,20 @@ DO.doghome=(d,el,e)=>{e.stopPropagation();send({t:'dog_home',dog:d.id,on:d.on=='
 DO.dogprof=d=>openProfile(d.id);
 const POSES=[['stand','😊'],['walk','🚶'],['run','🏃'],['sit','🪑'],['sleep','💤'],['bark','🗨️'],['play','🎾'],['eat','🍖'],['happy','😆'],['sniff','👃'],['stretch','🥱'],['shy','🙈']];
 function openProfile(id){const d=(S.allDogs||[]).find(x=>x.id==id)||S.dogs[id];if(!d)return;S.profId=id;S.profPose=S.profPose||'stand';renderProfile()}
-function renderProfile(){const d=(S.allDogs||[]).find(x=>x.id==S.profId)||S.dogs[S.profId];if(!d)return;const b=DOGS.BR[d.breed],inv=S.me.inv,own=S.owner==S.name||true;const age=Math.max(0,Math.floor((Date.now()-d.born)/864e5));
+function renderProfile(){const d=(S.allDogs||[]).find(x=>x.id==S.profId)||S.dogs[S.profId];if(!d)return;if(document.activeElement&&document.activeElement.id=='pname'&&modOpen('prof'))return;      // do not wipe the name the player is typing when a server update arrives
+ const b=DOGS.BR[d.breed],inv=S.me.inv,own=S.owner==S.name;const age=Math.max(0,Math.floor((Date.now()-d.born)/864e5));
  const TR=S.cat.tricks,TE={sit:'🐶',shake:'🤝',spin:'🌀',jump:'⬆️',roll:'🔄',dead:'💀'};
  const accs=Object.entries(S.cat.acc).filter(([k])=>(inv[k]||0)>0);
  const bar=(l,v,c)=>`<div class="bar"><b style="width:56px">${t(l)}</b><i><u style="width:${v}%;background:${c}"></u></i></div>`;
  const html=`<div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:14px"><div style="flex:none;width:min(300px,100%)"><div class="panel" style="background:linear-gradient(#ffe9d0,#ffd6e4);padding:6px;position:relative"><canvas id="profc" width="300" height="230" style="width:100%;display:block;border-radius:8px;cursor:pointer" data-do="profpose"></canvas><div style="position:absolute;right:8px;top:6px">${rarTag(b.r)}</div></div>
  <div class="sel-row" style="margin-top:6px">${POSES.map(([k,e])=>`<button class="opt ${S.profPose==k?'on':''}" style="padding:2px 7px" data-do="profposeset" data-k="${k}">${e}</button>`).join('')}</div></div>
- <div style="flex:1;min-width:230px"><div class="row"><input id="pname" value="${esc(d.name)}" maxlength="12" style="flex:1;border:3px solid var(--ink);border-radius:10px;padding:6px 10px;font-weight:900;font-size:16px;user-select:text"><button class="btn sm sky" data-do="rename" data-id="${d.id}">${t('Rename')}</button></div>
+ <div style="flex:1;min-width:230px"><div class="row">${own?`<input id="pname" value="${esc(d.name)}" maxlength="12" style="flex:1;border:3px solid var(--ink);border-radius:10px;padding:6px 10px;font-weight:900;font-size:16px;user-select:text"><button class="btn sm sky" data-do="rename" data-id="${d.id}">${t('Rename')}</button>`:`<b style="font-size:20px">${esc(d.name)}</b>`}</div>
  <div class="kv" style="margin:10px 0"><b>${t('Breeds')}</b><span>${esc(b.name)}${d.variant!='Normal'?' ('+t(d.variant)+')':''}</span><b>${t('Personality')}</b><span>${PERS_EM[d.pers]||''} ${nice(d.pers)}</span><b>${t('Favorite food')}</b><span>${(S.cat.food[String(d.favFood).toLowerCase()]||{}).e||''} ${esc(t(d.favFood))}</span><b>${t('Favorite toy')}</b><span>${esc(t(d.favToy))}</span><b>${t('Age')}</b><span>${age} ${S.set.lang=='th'?'วัน':'d'}</span></div>
  ${bar('Hunger',d.hunger,'#ffb36b')}${bar('Energy',d.energy,'#6fb8ff')}${bar('Happy',d.happy,'#ff8fb0')}${bar('Clean',d.clean,'#6fd1a5')}
  <div class="hearts" style="margin:6px 0">${t('Bond')}: ${Array.from({length:10},(_,i)=>ic(i<Math.floor(d.bond/10)?'heart':'hearte','sm')).join('')} <b>${d.bond}</b></div></div></div>
  <h4 style="margin:12px 0 6px">🎓 ${t('Tricks')}</h4><div class="sel-row">${TR.map(([k,need])=>{const has=(d.tricks||[]).includes(k);return`<span class="opt ${has?'on':''}" style="${has?'':'opacity:.55'}">${TE[k]} ${nice(k)} ${has?'✔':'<small>♥'+need+'</small>'}</span>`}).join('')}</div>
- <h4 style="margin:12px 0 6px">🎀 ${t('Accessories')}</h4><div class="sel-row"><button class="opt ${!d.acc?'on':''}" data-do="equip" data-id="${d.id}" data-a="">✕</button>${accs.map(([k,a])=>`<button class="opt ${d.acc==k?'on':''}" data-do="equip" data-id="${d.id}" data-a="${k}">${a.e} ${a.n}${(inv[k]||0)>1?' ×'+inv[k]:''}</button>`).join('')||`<button class="opt" data-do="stab" data-k="acc">🛍️ ${t('Shop')}</button>`}</div>
- <div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn ${d.fav?'sun':'ghost'}" data-do="dogfav" data-id="${d.id}">⭐ ${t('Favorites')}</button><button class="btn mint" data-do="doghome" data-id="${d.id}" data-on="${d.away?1:0}">🏠 ${d.away?'+':'✔'}</button><button class="btn red" data-do="relone" data-id="${d.id}">🗑️ ${t('Release')}</button></div>`;
+ ${own?`<h4 style="margin:12px 0 6px">🎀 ${t('Accessories')}</h4><div class="sel-row"><button class="opt ${!d.acc?'on':''}" data-do="equip" data-id="${d.id}" data-a="">✕</button>${accs.map(([k,a])=>`<button class="opt ${d.acc==k?'on':''}" data-do="equip" data-id="${d.id}" data-a="${k}">${a.e} ${a.n}${(inv[k]||0)>1?' ×'+inv[k]:''}</button>`).join('')||`<button class="opt" data-do="stab" data-k="acc">🛍️ ${t('Shop')}</button>`}</div>
+ <div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn ${d.fav?'sun':'ghost'}" data-do="dogfav" data-id="${d.id}">⭐ ${t('Favorites')}</button><button class="btn mint" data-do="doghome" data-id="${d.id}" data-on="${d.away?1:0}">🏠 ${d.away?'+':'✔'}</button><button class="btn red" data-do="relone" data-id="${d.id}">🗑️ ${t('Release')}</button></div>`:''}`;
  const ov=modal('prof',`${esc(d.name)}`,html,'');startProfAnim(ov,d)}
 let profRAF=0;
 function startProfAnim(ov,d){cancelAnimationFrame(profRAF);const c=$('#profc',ov);if(!c)return;const g=c.getContext('2d'),b=DOGS.BR[d.breed],t0=performance.now();
@@ -2173,7 +2221,7 @@ function startProfAnim(ov,d){cancelAnimationFrame(profRAF);const c=$('#profc',ov
   DOGS.sprite(g,b,d.variant,t,Object.assign({seed:3,acc:d.acc,happy:true},P[S.profPose]||P.stand));g.restore();profRAF=requestAnimationFrame(loop)};loop()}
 DO.profposeset=d=>{S.profPose=d.k;renderProfile()};
 DO.profpose=()=>{const i=POSES.findIndex(p=>p[0]==S.profPose);S.profPose=POSES[(i+1)%POSES.length][0];renderProfile()};
-DO.rename=d=>{const v=$('#pname').value.trim();if(v)send({t:'rename',dog:d.id,name:v})};
+DO.rename=d=>{const i=$('#pname'),v=i.value.trim();if(v){try{i.blur()}catch{}send({t:'rename',dog:d.id,name:v})}};
 DO.equip=d=>{send({t:'equip',dog:d.id,acc:d.a||null})};
 DO.relone=d=>{const dg=(S.allDogs||[]).find(x=>x.id==d.id);if(dg&&dg.fav)return toast('⭐ '+(S.set.lang=='th'?'ปล่อยตัวโปรดไม่ได้':'Favorites cannot be released'));ask(S.set.lang=='th'?'ปล่อยน้องหมาตัวนี้?':'Release this dog?',()=>{send({t:'release',ids:[d.id]});closeMod('prof')},{cls:'red',yes:t('Release')})};
 // ================= CAPSULE =================
@@ -2252,17 +2300,44 @@ DO.settings=()=>renderSettings();
 function renderSettings(){const s=S.set,tg=(k,l)=>`<div class="toggle"><span>${t(l)}</span><div class="sw ${s[k]?'on':''}" data-do="tog" data-k="${k}"></div></div>`,opts=(k,list)=>`<div class="sel-row">${list.map(([v,l])=>`<button class="opt ${s[k]==v?'on':''}" data-do="setopt" data-k="${k}" data-v="${v}">${t(l)}</button>`).join('')}</div>`;
  modal('settings','⚙️ '+t('Settings'),`${tg('sound','Sound')}${tg('music','Music')}<div class="toggle"><span>${t('Volume')}</span><input class="slider" type="range" min="0" max="1" step=".05" value="${s.vol}" id="volr" style="width:55%"></div>${tg('names','Names')}${tg('particles','✨ Effects')}
  <div style="margin:10px 0 4px;font-weight:900">${t('Language')}</div>${opts('lang',[['th','ไทย'],['en','English']])}<div style="margin:10px 0 4px;font-weight:900">${t('Weather')}</div>${opts('weather',[['auto','Auto'],['sunny','Sunny'],['cloudy','Cloudy'],['rain','Rain'],['snow','Snow']])}<div style="margin:10px 0 4px;font-weight:900">${t('Time of day')}</div>${opts('time',[['auto','Auto'],['morning','Morning'],['noon','Noon'],['evening','Evening'],['night','Night']])}
+ ${S.guest||S.me.rec==null?'':`<div style="margin:12px 0 4px;font-weight:900">🔑 ${t('Recovery code')}</div><div class="toggle"><span>${S.me.rec?'✅ '+TT('Saved','ตั้งไว้แล้ว'):'⚠️ '+TT('Not set up','ยังไม่ได้ตั้ง')}</span><button class="btn sm sky" data-do="recnew" style="flex:none">${S.me.rec?TT('New code','สร้างรหัสใหม่'):TT('Create','สร้างรหัส')}</button></div><div class="muted" style="font-size:11.5px;font-weight:700">${TT('Use it on the login screen ("Forgot password?") to set a new password.','ใช้ที่หน้าเข้าสู่ระบบ ("ลืมรหัสผ่าน?") เพื่อตั้งรหัสผ่านใหม่')}</div>`}
  <div class="row" style="margin-top:16px"><button class="btn ghost" data-do="help">❓ ${S.set.lang=='th'?'วิธีเล่น':'Help'}</button><button class="btn red" data-do="logout">${t('Log out')}</button></div>`,'sm');
  const v=$('#volr');if(v)v.oninput=()=>{S.set.vol=+v.value;saveSet();applyVol()}}
 DO.tog=d=>{S.set[d.k]=!S.set[d.k];saveSet();applyVol();if(d.k=='music'){S.set.music?startMusic():stopMusic()}renderSettings()};
 DO.setopt=d=>{S.set[d.k]=d.v;saveSet();if(d.k=='lang'){applyLang();UI.all()}renderSettings();UI.loc()};
+// ---------- recovery code: shown once, copy / save as a file; the password is asked again before a new one is made
+function recPwModal(first){const has=S.me.rec;
+ const ov=modal('recpw','🔑 '+t('Recovery code'),`<p style="font-weight:800;font-size:14px;margin:2px 0 10px;line-height:1.45">${first?TT('This account has no recovery code yet. Without one, a forgotten password cannot be reset. Make one now?','บัญชีนี้ยังไม่มีรหัสกู้คืน ถ้าลืมรหัสผ่านจะกู้บัญชีไม่ได้ สร้างตอนนี้เลยไหม?'):has?TT('A new code replaces the old one - the old code stops working.','สร้างรหัสใหม่แล้ว รหัสเก่าจะใช้ไม่ได้อีก'):TT('Make a recovery code for this account.','สร้างรหัสกู้คืนสำหรับบัญชีนี้')}</p>
+  <form id="frecpw"><label class="fld"><span>${t('Password')}</span><input id="recPw" type="password" autocomplete="current-password" maxlength="64"></label><div class="err" id="recErr"></div>
+  <div class="row"><button class="btn ghost" type="button" data-do="closemod" data-id="recpw">${first?TT('Later','ไว้ทีหลัง'):t('Cancel')}</button><button class="btn pink" type="submit">🔑 ${TT('Create code','สร้างรหัส')}</button></div></form>`,'sm');
+ $('#frecpw',ov).onsubmit=e=>{e.preventDefault();const v=$('#recPw').value;if(!v)return;$('#recErr').textContent='';send({t:'rec_new',pass:v})};
+ setTimeout(()=>{const i=$('#recPw');if(i&&!matchMedia('(pointer:coarse)').matches)i.focus()},60)}
+DO.recnew=()=>recPwModal(false);
+H.rec_err=m=>{const e=$('#recErr');if(e)e.textContent=m.err||'';sfx('err')};
+H.rec=m=>{closeMod('recpw');S.recCode=m.code;
+ const lead=m.reset?TT('New password set! You are logged in. This is your NEW recovery code (the old one no longer works).','ตั้งรหัสผ่านใหม่เรียบร้อย เข้าสู่ระบบแล้ว! นี่คือรหัสกู้คืนอันใหม่ (อันเก่าใช้ไม่ได้แล้ว)'):m.fresh?TT('Welcome! Save this code - it is the only way to get your account back if you forget your password.','ยินดีต้อนรับ! จดรหัสนี้ไว้ — ถ้าลืมรหัสผ่าน นี่คือทางเดียวที่จะกู้บัญชีกลับมา'):TT('Your new recovery code (the old one no longer works):','รหัสกู้คืนอันใหม่ของคุณ (อันเก่าใช้ไม่ได้แล้ว):');
+ const ov=modal('rec','🔑 '+TT('Your recovery code','รหัสกู้คืนของคุณ'),`<div class="center"><p style="font-weight:800;font-size:14px;margin:2px 0;line-height:1.45">${lead}</p><div class="reccode" id="recCode">${esc(m.code)}</div>
+  <div class="row" style="justify-content:center"><button class="btn sky sm" data-do="reccopy">📋 ${TT('Copy','คัดลอก')}</button><button class="btn sky sm" data-do="recsave">💾 ${TT('Save as file','บันทึกเป็นไฟล์')}</button></div>
+  <p class="muted" style="font-size:12px;font-weight:700;margin:10px 0 12px;line-height:1.4">⚠️ ${TT('Shown only once. Anyone who has this code can set a new password for your account - do not share it. You can make a new one in Settings.','แสดงครั้งเดียวเท่านั้น ใครมีรหัสนี้ก็ตั้งรหัสผ่านใหม่ของบัญชีคุณได้ อย่าให้ใคร · สร้างใหม่ได้ในตั้งค่า')}</p>
+  <button class="btn pink" data-do="recdone">✅ ${TT('I saved it','ฉันจดไว้แล้ว')}</button></div>`,'sm',{lock:true});
+ ov.addEventListener('close',()=>{S.recCode=null})};
+DO.recdone=()=>closeMod('rec');
+DO.reccopy=()=>{const c=S.recCode||'',done=()=>toast('📋 '+TT('Copied','คัดลอกแล้ว'),1400);
+ const fb=()=>{const ta=document.createElement('textarea');ta.value=c;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;opacity:0;left:0;top:0;font-size:16px';document.body.append(ta);ta.focus();ta.select();try{ta.setSelectionRange(0,999)}catch{}let ok=false;try{ok=document.execCommand('copy')}catch{}ta.remove();if(ok)done();else toast('✍️ '+TT('Could not copy — please write the code down or take a screenshot','คัดลอกไม่ได้ — จดรหัสไว้หรือแคปหน้าจอเก็บไว้นะ'),4200)};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(c).then(done,fb);else fb()};
+DO.recsave=async()=>{if(!S.recCode)return;
+ if(matchMedia('(pointer:coarse)').matches){      // phones (and in-app browsers) cannot download a file: share it, or copy it
+  try{if(navigator.share){await navigator.share({title:'Cozy Dogs',text:'Cozy Dogs - recovery code\nUsername: '+S.name+'\nRecovery code: '+S.recCode});return}}catch(e){if(e&&e.name=='AbortError')return}
+  DO.reccopy();return}
+ const txt='Cozy Dogs - recovery code\r\nUsername: '+S.name+'\r\nRecovery code: '+S.recCode+'\r\n\r\nKeep this file private. Anyone with this code can set a new password for the account.\r\n',a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='cozy-dogs-recovery-'+S.name+'.txt';document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},600)};
 DO.logout=()=>{send({t:'logout',token:S.token});S.token=null;LS.set('cd_token',null);S.loaded=false;wantConn=false;try{S.ws.close()}catch{}location.reload()};
 DO.photo=()=>photo();
 DO.help=()=>modal('help','❓ '+(S.set.lang=='th'?'วิธีเล่น':'How to play'),(S.set.lang=='th'?`<div class="list"><div class="li"><span style="font-size:28px">👆</span><div class="g"><b>แตะน้องหมา</b><small>เลือกน้องหมาเพื่อดูแล แตะซ้ำเพื่อลูบหัว</small></div></div><div class="li"><span style="font-size:28px">🍖</span><div class="g"><b>ดูแลทุกวัน</b><small>ให้อาหาร เล่น หวีขน อาบน้ำ เพื่อเพิ่ม Bond และปลดล็อกลูกเล่น</small></div></div><div class="li"><span style="font-size:28px">🛋️</span><div class="g"><b>ตกแต่งบ้าน</b><small>ซื้อเฟอร์นิเจอร์ที่ร้านค้า แล้วลากวางในโหมดตกแต่ง</small></div></div><div class="li"><span style="font-size:28px">🎰</span><div class="g"><b>กาชา</b><small>สุ่มรับหมาใหม่ครบ 50 สายพันธุ์ มี Pity การันตี Legendary</small></div></div><div class="li"><span style="font-size:28px">📜</span><div class="g"><b>ภารกิจ & เพื่อน</b><small>ทำเควสรายวัน เยี่ยมบ้านเพื่อน ส่งของขวัญ เล่นมินิเกมหาเหรียญ</small></div></div><div class="li"><span style="font-size:28px">🌳</span><div class="g"><b>สวนหมา · แลกของ · ชุมชน</b><small>พาน้องหมาไปเดินกับผู้เล่นอื่น เก็บขนม เตะบอล · กดที่หมาของเพื่อนเพื่อแลกของ · ช่วยกันทำเป้าหมายประจำสัปดาห์</small></div></div></div>`:`<div class="list"><div class="li"><span style="font-size:28px">👆</span><div class="g"><b>Tap a dog</b><small>Select it to care for it; tap again to pet.</small></div></div><div class="li"><span style="font-size:28px">🍖</span><div class="g"><b>Care daily</b><small>Feed, play, brush and bathe to grow Bond and unlock tricks.</small></div></div><div class="li"><span style="font-size:28px">🛋️</span><div class="g"><b>Decorate</b><small>Buy furniture in the shop, then drag it into your room.</small></div></div><div class="li"><span style="font-size:28px">🎰</span><div class="g"><b>Capsule</b><small>Collect all 50 breeds. Pity guarantees a Legendary.</small></div></div><div class="li"><span style="font-size:28px">📜</span><div class="g"><b>Quests & friends</b><small>Daily quests, visit friends, send gifts, play mini games.</small></div></div><div class="li"><span style="font-size:28px">🌳</span><div class="g"><b>Park · Trading · Community</b><small>Walk your dog with other players, grab treats, kick the ball · tap a friend's dog to trade · work on the weekly goal together.</small></div></div></div>`),'sm');
-DO.daily=()=>{const D=[{c:50},{c:80},{c:100},{c:150},{tk:1},{c:200},{g:10,c:300}],day=S.me.canClaim?((S.me.streak||0)%7)+1:S.me.streak||1;
- modal('daily','🎁 '+t('Daily Reward'),`<div class="days">${D.map((r,i)=>`<div class="day ${i+1==day&&S.me.canClaim?'now':i+1<day||(i+1==day&&!S.me.canClaim)?'done':''}"><b>${t('Day')} ${i+1}</b><span class="e">${r.g?'💎':r.tk?'🎟️':'🪙'}</span><span class="rw">${rewardTxt(r)}</span></div>`).join('')}</div><div class="center" style="margin-top:16px"><button class="btn pink ${S.me.canClaim?'':'dis'}" data-do="dclaim" style="font-size:18px;padding:10px 26px">${S.me.canClaim?t('Claim'):'✔ '+t('Claimed')}</button></div>`,'sm')};
+DO.daily=()=>{const D=[{c:50},{c:80},{c:100},{c:150},{tk:1},{c:200},{g:10,c:300}],day=S.me.canClaim?(S.me.dayNext||((S.me.streak||0)%7)+1):S.me.streak||1;
+ modal('daily','🎁 '+t('Daily Reward'),`<div class="days">${D.map((r,i)=>`<div class="day ${i+1==day&&S.me.canClaim?'now':i+1<day||(i+1==day&&!S.me.canClaim)?'done':''}"><b>${t('Day')} ${i+1}</b><span class="e">${r.g?'💎':r.tk?'🎟️':'💰'}</span><span class="rw">${rewardTxt(r)}</span></div>`).join('')}</div><div class="center" style="margin-top:16px"><button class="btn pink ${S.me.canClaim?'':'dis'}" data-do="dclaim" style="font-size:18px;padding:10px 26px">${S.me.canClaim?t('Claim'):'✔ '+t('Claimed')}</button></div>`,'sm')};
 DO.dclaim=()=>send({t:'daily'});
-H.daily_ok=m=>{sfx('level');S.me.canClaim=false;toast('🎁 +'+[m.r.c&&m.r.c+'🪙',m.r.g&&m.r.g+'💎',m.r.tk&&m.r.tk+'🎟'].filter(Boolean).join(' '));if(modOpen('daily')){S.me.streak=m.day;DO.daily()}};
+H.daily_ok=m=>{sfx('level');S.me.canClaim=false;toast('🎁 +'+[m.r.c&&m.r.c+'💰',m.r.g&&m.r.g+'💎',m.r.tk&&m.r.tk+'🎟'].filter(Boolean).join(' '));if(modOpen('daily')){S.me.streak=m.day;DO.daily()}};
 
 ;
 // Cozy Dogs - mini games: Memory Match, Cookie Catch, Guess the Breed, Rock-Paper-Scissors (rewards validated by server)
@@ -2275,12 +2350,12 @@ DO.gstart=d=>{({memory:gMemory,catch:gCatch,guess:gGuess,rps:gRps})[d.g]()};
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function gEnd(g,score,extra=''){S.mgState={g,score};send({t:'mg_end',g,score});S.mgBody=extra}
 H.mg_ok=m=>{const th=S.set.lang=='th',box=$('#mgres');const html=`<div class="big" style="margin:8px 0">${m.reward>0?'🎉 +'+m.reward+' '+ic('coin','big'):'—'}</div>${m.capped?`<div class="muted">${th?'ครบโควต้าเหรียญวันนี้แล้ว':'Daily coin cap reached'}</div>`:''}<div class="row" style="margin-top:10px"><button class="btn mint" data-do="gstart" data-g="${m.g}">${t('Again')}</button><button class="btn ghost" data-do="games">${t('Games')}</button></div>`;
- if(box)box.innerHTML=html;sfx(m.reward>0?'win':'lose');if(m.reward>0)toast('🎮 +'+m.reward+' 🪙')};
+ if(box)box.innerHTML=html;sfx(m.reward>0?'win':'lose');if(m.reward>0)toast('🎮 +'+m.reward+' 💰')};
 // ---- Memory Match
 function gMemory(){const ids=shuffle(Object.keys(DOGS.BR)).slice(0,8),cards=shuffle([...ids,...ids]);let open=[],moves=0,matched=0,lock=false;
- const ov=gwin('🃏 '+t('Memory Match'),`<div class="row" style="gap:20px;font-weight:900"><span>${t('Moves')}: <b id="mmv">0</b></span><span>${matched}/8</span></div><div class="mem" id="memg">${cards.map((id,i)=>`<button class="mc" data-i="${i}"><div class="in"><div class="b"></div><div class="f">${thumbHTML(id,'Normal',40,null)}</div></div></button>`).join('')}</div><div id="mgres" class="center"></div>`);paintThumbs(ov);send({t:'mg_start',g:'memory'});
+ const ov=gwin('🃏 '+t('Memory Match'),`<div class="row" style="gap:20px;font-weight:900"><span>${t('Moves')}: <b id="mmv">0</b></span><span><b id="mmt">0</b>/8</span></div><div class="mem" id="memg">${cards.map((id,i)=>`<button class="mc" data-i="${i}"><div class="in"><div class="b"></div><div class="f">${thumbHTML(id,'Normal',40,null)}</div></div></button>`).join('')}</div><div id="mgres" class="center"></div>`);paintThumbs(ov);send({t:'mg_start',g:'memory'});
  $('#memg',ov).onclick=e=>{const b=e.target.closest('.mc');if(!b||lock||b.classList.contains('fl'))return;sfx('flip');b.classList.add('fl');open.push(b);if(open.length==2){moves++;$('#mmv',ov).textContent=moves;const[a,c]=open;
-  if(cards[+a.dataset.i]==cards[+c.dataset.i]){a.classList.add('ok');c.classList.add('ok');matched++;open=[];sfx('ok');if(matched==8){setTimeout(()=>{$('#memg',ov).insertAdjacentHTML('afterend',`<div class="big">🎉 ${moves} ${t('Moves')}</div>`);gEnd('memory',moves)},500)}}
+  if(cards[+a.dataset.i]==cards[+c.dataset.i]){a.classList.add('ok');c.classList.add('ok');matched++;{const mt=$('#mmt',ov);if(mt)mt.textContent=matched}open=[];sfx('ok');if(matched==8){setTimeout(()=>{$('#memg',ov).insertAdjacentHTML('afterend',`<div class="big">🎉 ${moves} ${t('Moves')}</div>`);gEnd('memory',moves)},500)}}
   else{lock=true;setTimeout(()=>{a.classList.remove('fl');c.classList.remove('fl');open=[];lock=false},750)}}}}
 // ---- Cookie Catch
 function gCatch(){const ov=gwin('🍪 '+t('Cookie Catch'),`<div class="row" style="gap:20px;font-weight:900"><span>${t('Time')}: <b id="ctm">20</b></span><span>${t('Score')}: <b id="csc">0</b></span></div><canvas id="catchc" width="480" height="360"></canvas><div id="mgres" class="center"><div class="muted">${S.set.lang=='th'?'ลากเมาส์/นิ้ว หรือกดลูกศร ซ้าย-ขวา':'Drag, or use ← → keys'}</div><button class="btn pink" id="cgo" style="margin-top:6px">${t('Start')}</button></div>`);
@@ -2301,12 +2376,13 @@ function gGuess(){const ids=Object.keys(DOGS.BR),th=S.set.lang=='th';let round=0
   $$('.opts4 .btn',ov).forEach(b=>b.onclick=()=>{const ok=b.dataset.g==correct;if(ok)score++;sfx(ok?'ok':'err');$$('.opts4 .btn',ov).forEach(x=>{x.style.pointerEvents='none';if(x.dataset.g==correct)x.classList.replace('ghost','mint');else if(x==b&&!ok)x.classList.replace('ghost','red')});setTimeout(next,850)})};next()}
 // ---- Rock Paper Scissors (matchmaking via server)
 const RPS_E={R:'✊',P:'✋',S:'✌️'};
-function gRps(){gwin('✊ '+t('Rock Paper Scissors'),`<div id="rpsb" class="center"><div class="muted">${S.set.lang=='th'?'ค้นหาคู่ต่อสู้ออนไลน์… ถ้าไม่มีใคร บอทจะมาเล่นด้วย':'Looking for an opponent… a bot joins if nobody shows up'}</div><div style="font-size:50px;margin:10px" class="rotsm">🔎</div><button class="btn ghost" data-do="rpscancel">${t('Cancel')}</button></div>`,()=>send({t:'rps_cancel'}));S.rps=true;send({t:'rps_find'})}
+function gRps(){S.rpsActive=false;gwin('✊ '+t('Rock Paper Scissors'),`<div id="rpsb" class="center"><div class="muted">${S.set.lang=='th'?'ค้นหาคู่ต่อสู้ออนไลน์… ถ้าไม่มีใคร บอทจะมาเล่นด้วย':'Looking for an opponent… a bot joins if nobody shows up'}</div><div style="font-size:50px;margin:10px" class="rotsm">🔎</div><button class="btn ghost" data-do="rpscancel">${t('Cancel')}</button></div>`,()=>send({t:'rps_cancel'}));S.rps=true;send({t:'rps_find'})}
 DO.rpscancel=()=>{send({t:'rps_cancel'});closeMod('game')};
 H.rps_wait=()=>{};
-H.rps_start=m=>{S.rpsPick=null;if(!modOpen('game'))gRps();const b=$('#rpsb');if(!b)return;sfx('notify');b.innerHTML=`<div class="big">${esc(S.name)} <span class="muted">Lv${m.my}</span> ⚔️ ${esc(m.vs)} <span class="muted">Lv${m.lvl}</span></div><div class="muted" style="margin:6px">${t('Time')}: <b id="rpst">25</b></div><div class="rps">${['R','P','S'].map(k=>`<button data-k="${k}">${RPS_E[k]}</button>`).join('')}</div><div id="rpsr" class="muted" style="margin-top:10px"></div>`;
+H.rps_start=m=>{S.rpsPick=null;S.rpsActive=true;if(!modOpen('game'))gRps();const b=$('#rpsb');if(!b)return;sfx('notify');b.innerHTML=`<div class="big">${esc(S.name)} <span class="muted">Lv${m.my}</span> ⚔️ ${esc(m.vs)} <span class="muted">Lv${m.lvl}</span></div><div class="muted" style="margin:6px">${t('Time')}: <b id="rpst">25</b></div><div class="rps">${['R','P','S'].map(k=>`<button data-k="${k}">${RPS_E[k]}</button>`).join('')}</div><div id="rpsr" class="muted" style="margin-top:10px"></div>`;
  let n=25;const iv=setInterval(()=>{n--;const e=$('#rpst');if(e)e.textContent=n;if(n<=0||!$('#rpsb'))clearInterval(iv)},1000);$$('.rps button',b).forEach(x=>x.onclick=()=>{if(S.rpsPick)return;S.rpsPick=x.dataset.k;x.classList.add('on');sfx('flip');send({t:'rps_pick',v:x.dataset.k});$('#rpsr').textContent=S.set.lang=='th'?'รอคู่ต่อสู้…':'Waiting…'})};
-H.rps_result=m=>{const b=$('#rpsb');S.rps=false;sfx(m.r>0?'win':m.r<0?'lose':'pop');if(!b)return;const th=S.set.lang=='th';b.innerHTML=`<div style="display:flex;justify-content:center;gap:24px;align-items:center;font-size:64px"><div>${RPS_E[m.my]||'❔'}</div><div style="font-size:26px">VS</div><div>${RPS_E[m.op]||'❔'}</div></div><div class="big" style="margin:10px">${m.r>0?'🎉 '+(th?'ชนะ!':'You win!'):m.r<0?'😢 '+(th?'แพ้':'You lose'):'🤝 '+(th?'เสมอ':'Draw')}</div><div class="muted">+${m.gain} ${ic('coin','sm')}</div><div class="row" style="margin-top:10px"><button class="btn mint" data-do="gstart" data-g="rps">${t('Again')}</button><button class="btn ghost" data-do="games">${t('Games')}</button></div>`};
+H.rps_result=m=>{const b=$('#rpsb');S.rps=false;if(!S.rpsActive)return;S.rpsActive=false;sfx(m.r>0?'win':m.r<0?'lose':'pop');if(!b)return;      // a result of a match that was closed earlier must not paint over a new search
+ const th=S.set.lang=='th';b.innerHTML=`<div style="display:flex;justify-content:center;gap:24px;align-items:center;font-size:64px"><div>${RPS_E[m.my]||'❔'}</div><div style="font-size:26px">VS</div><div>${RPS_E[m.op]||'❔'}</div></div><div class="big" style="margin:10px">${m.r>0?'🎉 '+(th?'ชนะ!':'You win!'):m.r<0?'😢 '+(th?'แพ้':'You lose'):'🤝 '+(th?'เสมอ':'Draw')}</div><div class="muted">+${m.gain} ${ic('coin','sm')}</div><div class="row" style="margin-top:10px"><button class="btn mint" data-do="gstart" data-g="rps">${t('Again')}</button><button class="btn ghost" data-do="games">${t('Games')}</button></div>`};
 
 ;
 // Cozy Dogs - pixel-art park scenery: sky, hills, grass, path, pond, trees, benches, lamps, treats, ball, weather. Everything procedural.
@@ -2497,8 +2573,8 @@ H.park_s=m=>{Park.rx++;for(const a of m.m)snap(a);if(m.b){const b=Park.ball,e=Ma
 H.park_fx=m=>{const now=performance.now();
  if(!m.n){if(m.k=='tr_new'){Park.tr=true;ticker('🗺️ '+TT('A treasure is buried somewhere in the park! Dig for it ⛏️','มีสมบัติถูกฝังไว้ในสวน! ไปขุดหาดู ⛏️'))}else if(m.k=='tr_gone'){Park.tr=false;Park.hint=null}
   else if(m.k=='fb_new'){Park.fb={x:m.x,y:m.y,land:now+m.ms};sfx('whoosh');ticker('🥏 '+TT('Frisbee! Run and catch it!','จานร่อน! วิ่งไปรับเร็ว!'))}else if(m.k=='fb_gone')Park.fb=null;return}
- if(m.k=='tr_found'){Park.tr=false;Park.hint=null;const q=Park.m[m.n];if(q){sfx('level');for(let i=0;i<4;i++)setTimeout(()=>burst(q.rx,q.ry-40,pick(['💎','⭐','🪙']),4),i*140)}ticker('💎 '+m.n+' '+TT('found the treasure!','ขุดเจอสมบัติ!'));return}
- if(m.k=='fb_got'){const q=Park.m[m.n];if(Park.fb){burst(Park.fb.x,Park.fb.y-20,'🥏',3);Park.fb=null}if(m.n==Park.me&&q){sfx('coin');floatText(q.rx,q.ry-70,'+'+m.c+'🪙','#ffe27a')}else if(q)sfx('pop');return}
+ if(m.k=='tr_found'){Park.tr=false;Park.hint=null;const q=Park.m[m.n];if(q){sfx('level');for(let i=0;i<4;i++)setTimeout(()=>burst(q.rx,q.ry-40,pick(['💎','⭐','💰']),4),i*140)}ticker('💎 '+m.n+' '+TT('found the treasure!','ขุดเจอสมบัติ!'));return}
+ if(m.k=='fb_got'){const q=Park.m[m.n];if(Park.fb){burst(Park.fb.x,Park.fb.y-20,'🥏',3);Park.fb=null}if(m.n==Park.me&&q){sfx('coin');floatText(q.rx,q.ry-70,'+'+m.c+'💰','#ffe27a')}else if(q)sfx('pop');return}
  const p=Park.m[m.n];if(!p)return;
  if(m.k=='emote'){p.emote={e:m.v,at:now};if(m.n!=Park.me)sfx('pop')}
  else if(m.k=='pose'){p.pose=m.v||null;if(m.v){p.tx=p.ax;p.ty=p.ay}if(m.v=='bark')sfx('bark')}
@@ -2507,10 +2583,10 @@ H.park_fx=m=>{const now=performance.now();
 H.park_item=m=>{if(m.add){Park.items[m.add.id]=Object.assign(m.add,{born:performance.now()});return}
  const it=Park.items[m.del];delete Park.items[m.del];if(!it||!m.by)return;const col=m.k=='star'?'#8fd8ff':'#fff';
  burst(it.x,it.y-20,m.k=='star'?'✨':'⭐',3);sparkle(it.x,it.y-20,10,col);
- if(m.by==Park.me){sfx('coin');const r=m.r||{};floatText(it.x,it.y-40,'+'+(r.g?r.g+'💎':(r.c||0)+'🪙'),'#ffe27a')}};
-H.park_dig_r=m=>{const q=Park.m[Park.me];if(!q)return;const x=q.rx,y=q.ry-60,L={dirt:['🟤','Just dirt…','มีแต่ดิน…'],coin:['🪙','A coin!','เจอเหรียญ!'],bone:['🦴','A bone!','เจอกระดูก!'],cookie:['🍪','A cookie!','เจอคุกกี้!'],boot:['🥾','An old boot…','รองเท้าเก่า…'],gem:['💎','A gem!','เจอเพชร!'],ticket:['🎟','A ticket!','เจอตั๋ว!'],treasure:['🏆','TREASURE!','สมบัติ!!!']}[m.k]||['🟤','','']; 
+ if(m.by==Park.me){const r=m.r||{};if(r.g||r.c){sfx('coin');floatText(it.x,it.y-40,'+'+(r.g?r.g+'💎':r.c+'💰'),'#ffe27a')}else floatText(it.x,it.y-40,TT('Daily limit reached','ครบโควต้าวันนี้แล้ว'),'#ffffff')}};      // after the daily cap a treat is still picked up, but gives nothing: say so
+H.park_dig_r=m=>{const q=Park.m[Park.me];if(!q)return;const x=q.rx,y=q.ry-60,L={dirt:['🟤','Just dirt…','มีแต่ดิน…'],coin:['💰','A coin!','เจอเหรียญ!'],bone:['🦴','A bone!','เจอกระดูก!'],cookie:['🍪','A cookie!','เจอคุกกี้!'],boot:['🥾','An old boot…','รองเท้าเก่า…'],gem:['💎','A gem!','เจอเพชร!'],ticket:['🎟','A ticket!','เจอตั๋ว!'],treasure:['🏆','TREASURE!','สมบัติ!!!']}[m.k]||['🟤','','']; 
  floatText(x,y,L[0]+' '+TT(L[1],L[2]),m.k=='dirt'?'#ffffff':'#ffe27a');if(m.k!='dirt'){sfx(m.k=='treasure'?'level':'coin');burst(q.rx,q.ry-30,L[0],3)}
- if(m.r&&m.k=='treasure')floatText(x,y-26,'+'+m.r.c+'🪙 +'+m.r.g+'💎 +'+m.r.tk+'🎟','#ffe27a');else if(m.r&&m.r.c)floatText(x,y-26,'+'+m.r.c+'🪙','#ffe27a');
+ if(m.r&&m.k=='treasure')floatText(x,y-26,'+'+m.r.c+'💰 +'+m.r.g+'💎 +'+m.r.tk+'🎟','#ffe27a');else if(m.r&&m.r.c)floatText(x,y-26,'+'+m.r.c+'💰','#ffe27a');
  if(m.hint){Park.hint={k:m.hint,at:performance.now()}}};
 H.pong=m=>{const r=performance.now()-m.c;Park.ping=Park.ping?Park.ping*.6+r*.4:r;UI.parkinfo()};
 Park.onChat=m=>{if(!Park.on||!Park.m[m.from])return;Park.bubbles[m.from]={m:m.m,at:performance.now()}};
@@ -2545,6 +2621,7 @@ function parkPointer(e){const[wx,wy]=toWorld(e);let best=null,bd=1e9,viaHuman=fa
  if(best&&best.me&&viaHuman){sfx('pop');best.emote={e:'👋',at:performance.now()};DO.wardrobe();return}
  const[x,y]=parkGround(e);parkMoveTo(x,y,Park.run||e.shiftKey);Park.marks.push({x,y,t:performance.now()});sfx('click')}
 addEventListener('keydown',e=>{if(!Park.on||e.target.tagName=='INPUT'||$('#mods .ov'))return;const k=e.key.toLowerCase();if('wasd'.includes(k)&&k.length==1||k.startsWith('arrow')){Park.keys[k]=true;e.preventDefault()}});
+addEventListener('blur',()=>{Park.keys={}});document.addEventListener('visibilitychange',()=>{if(document.hidden)Park.keys={}});      // alt-tab with a key held must not leave the dog walking
 addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(Park.keys[k]){delete Park.keys[k];if(!Object.keys(Park.keys).length){const m=Park.m[Park.me];if(m)parkMoveTo(m.rx,m.ry,Park.run)}}});
 // ---------- simulation (client prediction + dead reckoning)
 function stepPark(dt,now){const C=Park.cfg;
@@ -2568,7 +2645,7 @@ function drawPDog(c,m,t,now){const b=DOGS.BR[m.breed];if(!b)return;const sc=b.si
  if(m.wade){c.save();c.translate(m.rx,m.ry+1);c.fillStyle='rgba(90,175,225,.5)';c.beginPath();c.ellipse(0,0,30*sc,8*sc,0,0,7);c.fill();c.strokeStyle='rgba(255,255,255,'+(.55+.3*Math.sin(t*6))+')';c.lineWidth=2;c.beginPath();c.ellipse(0,1,(26+Math.sin(t*4)*4)*sc,(6+Math.sin(t*4)*1.5)*sc,0,0,7);c.stroke();c.restore()}
  m._top=info.top*sc;m._w=info.w;m._hit=[m.rx,m.ry-m._top*.45,Math.max(28,m._top*.55)]}
 function drawPTag(c,m,t,now){const b=DOGS.BR[m.breed];if(!b||m._top==null)return;const x=m.rx,y=m.ry,top=m._top;
- c.font='bold 11px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';const label=m.n+' · Lv'+m.lvl,w=c.measureText(label).width+16;
+ c.font='bold 11px '+UIF();c.textAlign='center';const label=m.n+' · Lv'+m.lvl,w=c.measureText(label).width+16;
  c.fillStyle=m.me?'#ff8fb0':'rgba(255,250,241,.94)';c.strokeStyle=b.r&&b.r!='C'?RCOL[b.r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=m.me?'#fff':'#5a3d33';c.fillText(label,x,y+21);
  const bub=Park.bubbles[m.n];let by=y-top-12;
  if(bub&&now-bub.at<4500){const a=Math.min(1,(4500-(now-bub.at))/600);if(m.av&&m._htop!=null&&m.hx!=null)AVA.bubble(c,m.hx,m.hy-m._htop-8,bub.m,a);else{AVA.bubble(c,x,by,bub.m,a);by-=30}}
@@ -2583,7 +2660,7 @@ function drawParkExtras(c,t,now){
   else{c.strokeStyle='rgba(255,230,120,'+(.5+.4*Math.sin(t*8))+')';c.lineWidth=3;c.beginPath();c.ellipse(f.x,f.y,22+Math.sin(t*6)*3,8,0,0,7);c.stroke();disc(c,f.x,f.y-6,.4)}c.restore();
   if(k<1){c.save();c.fillStyle='rgba(255,230,120,.35)';c.beginPath();c.ellipse(f.x,f.y,22*clamp(k,0,1),8*clamp(k,0,1),0,0,7);c.fill();c.restore()}}
  const me=Park.m[Park.me],h=Park.hint;if(me&&h&&now-h.at<5000){const o={hot:['🔥',TT('Burning hot!','ร้อนแรง!'),'#ff5a3c'],warm:['♨️',TT('Warm','อุ่น ๆ'),'#ff9a3c'],cool:['🌬️',TT('Cool','เย็น'),'#6fb8ff'],cold:['🧊',TT('Cold','เย็นเฉียบ'),'#8fd8ff']}[h.k];
-  if(o){const a=Math.min(1,(5000-(now-h.at))/700);c.save();c.globalAlpha=a;c.font='bold 14px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';const y=me.ry-(me._top||60)-48-((now-h.at)/5000)*10;c.strokeText(o[0]+' '+o[1],me.rx,y);c.fillStyle=o[2];c.fillText(o[0]+' '+o[1],me.rx,y);c.restore()}}}
+  if(o){const a=Math.min(1,(5000-(now-h.at))/700);c.save();c.globalAlpha=a;c.font='bold 14px '+UIF();c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';const y=me.ry-(me._top||60)-48-((now-h.at)/5000)*10;c.strokeText(o[0]+' '+o[1],me.rx,y);c.fillStyle=o[2];c.fillText(o[0]+' '+o[1],me.rx,y);c.restore()}}}
 function renderPark(c,t,now,dt){const e=env(),season=parkSeason(),P=PA.pal(season,e.weather);stepPark(dt,now);
  c.save();c.scale(World.scale,World.scale);c.imageSmoothingEnabled=false;
  PA.sky(c,t,e);c.drawImage(PA.layer(season,e.weather),0,0,800,600);PA.pondLive(c,t,e,P);
@@ -2637,9 +2714,9 @@ const tName=id=>{const o=S.cat.items[id]||S.cat.food[id]||S.cat.acc[id];return o
 function renderTrade(){const v=S.trade;if(!v)return;const th=S.set.lang=='th';
  const chips=(inv)=>Object.entries(inv).map(([id,n])=>`<div class="tt on"><div class="ti">${tIcon(id)}</div><b>${esc(tName(id))}</b><span class="tn">×${n}</span></div>`).join('');
  const left=`<div class="tcol"><h4>🙋 ${th?'คุณเสนอ':'You offer'}</h4><div class="tgrid">${Object.keys(v.av).map(id=>{const sel=v.mine.inv[id]||0;return`<div class="tt ${sel?'on':''}"><div class="ti">${tIcon(id)}</div><b>${esc(tName(id))}</b><div class="tq"><button data-do="tadj" data-id="${id}" data-d="-1">−</button><span>${sel}/${v.av[id]}</span><button data-do="tadj" data-id="${id}" data-d="1">+</button></div></div>`}).join('')||`<div class="muted" style="grid-column:1/-1">${th?'ไม่มีไอเทมให้แลก (ของที่วางอยู่ในบ้านหรือใส่อยู่แลกไม่ได้)':'Nothing to offer (placed or worn items are excluded)'}</div>`}</div>
-  <label class="tcoin">🪙 <input id="tcoins" type="number" min="0" max="${v.coins}" value="${v.mine.coins}"> <small>/ ${fmt(v.coins)}</small></label>
+  <label class="tcoin">💰 <input id="tcoins" type="number" min="0" max="${v.coins}" value="${v.mine.coins}"> <small>/ ${fmt(v.coins)}</small></label>
   ${v.dogs.length?`<div class="muted" style="margin-top:6px">🐶 ${th?'เลือกน้องหมา (สูงสุด 3 ตัว)':'Dogs (max 3)'}</div><div class="tdogs">${v.dogs.map(d=>`<div class="td ${v.mine.dogs.some(x=>x.id==d.id)?'on':''}" data-do="tdog" data-id="${d.id}">${thumbHTML(d.breed,d.variant,26,null)}<small>${esc(d.name)}</small></div>`).join('')}</div>`:''}</div>`;
- const right=`<div class="tcol theirs"><h4>🎁 ${esc(v.with)} ${th?'เสนอ':'offers'} <small class="muted">Lv${v.wlvl}</small></h4><div class="tgrid">${chips(v.theirs.inv)||''}${v.theirs.dogs.map(d=>`<div class="tt on">${thumbHTML(d.breed,d.variant,22,null)}<b>${esc(d.name)}</b></div>`).join('')}</div>${v.theirs.coins?`<div class="tcoin" style="margin-top:8px">🪙 <b>${fmt(v.theirs.coins)}</b></div>`:''}${!Object.keys(v.theirs.inv).length&&!v.theirs.dogs.length&&!v.theirs.coins?`<div class="muted center" style="padding:24px 0">${th?'ยังไม่ได้เสนออะไร…':'Nothing offered yet…'}</div>`:''}</div>`;
+ const right=`<div class="tcol theirs"><h4>🎁 ${esc(v.with)} ${th?'เสนอ':'offers'} <small class="muted">Lv${v.wlvl}</small></h4><div class="tgrid">${chips(v.theirs.inv)||''}${v.theirs.dogs.map(d=>`<div class="tt on">${thumbHTML(d.breed,d.variant,22,null)}<b>${esc(d.name)}</b></div>`).join('')}</div>${v.theirs.coins?`<div class="tcoin" style="margin-top:8px">💰 <b>${fmt(v.theirs.coins)}</b></div>`:''}${!Object.keys(v.theirs.inv).length&&!v.theirs.dogs.length&&!v.theirs.coins?`<div class="muted center" style="padding:24px 0">${th?'ยังไม่ได้เสนออะไร…':'Nothing offered yet…'}</div>`:''}</div>`;
  const ov=modal('trade','🔁 '+t('Trade')+' · '+esc(v.with),`<div class="tcols">${left}${right}</div><div class="tstat">${v.theirOk?'✅ '+esc(v.with)+(th?' ยืนยันแล้ว':' confirmed'):'⏳ '+(th?'รอ ':'Waiting for ')+esc(v.with)+(th?' ยืนยัน':'')}</div><div class="row" style="margin-top:8px"><button class="btn ghost" data-do="tcancel">✖ ${t('Cancel')}</button><button class="btn ${v.myOk?'sun':'mint'}" data-do="tok">${v.myOk?(th?'↩ ยกเลิกการยืนยัน':'↩ Undo'):'✔ '+t('Confirm')}</button></div>`,'lg',{lock:1});
  paintItemThumbs(ov);paintThumbs(ov);const ci=$('#tcoins',ov);if(ci)ci.onchange=()=>tset({coins:clamp(Math.floor(+ci.value)||0,0,v.coins)})}
 function tset(ch){const v=S.trade;if(!v)return;const o=Object.assign({inv:Object.assign({},v.mine.inv),coins:v.mine.coins,dogs:v.mine.dogs.map(d=>d.id)},ch);send({t:'trade_set',inv:o.inv,coins:o.coins,dogs:o.dogs});sfx('click')}
@@ -2647,6 +2724,7 @@ DO.tadj=d=>{const v=S.trade;if(!v)return;const inv=Object.assign({},v.mine.inv),
 DO.tdog=d=>{const v=S.trade;if(!v)return;let ids=v.mine.dogs.map(x=>x.id);ids=ids.includes(d.id)?ids.filter(x=>x!=d.id):[...ids,d.id].slice(0,3);tset({dogs:ids})};
 DO.tok=()=>{if(S.trade)send({t:'trade_ok',v:!S.trade.myOk,ver:S.trade.ver})};
 DO.tcancel=()=>send({t:'trade_cancel'});
+{const _cm=DO.closemod;DO.closemod=d=>{if(d.id=='trade'&&S.trade)return DO.tcancel();_cm(d)}}      // the ✕ of the trade window cancels the trade (it used to leave it open on the server with no way back)
 
 ;
 // Cozy Dogs v5 - Thai strings for text that the server sends in English (quests, achievements, sets, perks, events, starter missions)
@@ -2719,6 +2797,14 @@ function localizeCat(C){
 }
 
 // ---- a few server toasts still carry English words: translate them here while the language is Thai
+const EVT_TH={'found a ball!':'เจอลูกบอล!','fell asleep on the sofa.':'หลับบนโซฟาแล้ว','wants to play!':'อยากเล่นแล้ว!','discovered a new place!':'ค้นพบที่ใหม่ๆ!','brought you a toy!':'เอาของเล่นมาให้คุณ!','is looking out the window.':'กำลังมองออกไปนอกหน้าต่าง','is chasing a butterfly 🦋':'กำลังไล่จับผีเสื้อ 🦋','is rolling around happily!':'กลิ้งไปมาอย่างมีความสุข!'};
+function locEvent(s){      // the little ticker messages come from the server in one language; show them in the player's
+ if(typeof s!='string')return s;let m;const th=S.set.lang=='th';
+ if(th){if(m=/^🐶 (.+?) (found a ball!|fell asleep on the sofa\.|wants to play!|discovered a new place!|brought you a toy!|is looking out the window\.|is chasing a butterfly 🦋|is rolling around happily!)$/.exec(s))return'🐶 '+m[1]+' '+EVT_TH[m[2]];
+  if(m=/^⛏️ (.+?) dug up (a shiny gem 💎|a buried coin 💰|a buried coin 💰)(.*)$/.exec(s))return'⛏️ '+m[1]+' '+(m[2][2]=='s'||m[2].includes('gem')?'ขุดเจอเพชรแวววาว 💎':'ขุดเจอเหรียญที่ถูกฝังไว้ 💰')+m[3]}
+ else{const r=/^💤 (.+?) และ (.+?) นอนด้วยกัน(.*)$/.exec(s);if(r)return'💤 '+r[1]+' and '+r[2]+' are napping together'+r[3];
+  if(m=/^🐶 (.+?) หิวแล้ว!$/.exec(s))return'🐶 '+m[1]+' is hungry!'}
+ return s}
 function locMsg(s){
  if(S.set.lang!='th'||typeof s!='string')return s;
  let m;
@@ -2740,7 +2826,7 @@ function locMsg(s){
 const ago=ts=>{const s=Math.max(0,(Date.now()-ts)/1000);return s<90?TT('just now','เมื่อสักครู่'):s<5400?Math.round(s/60)+TT(' min ago',' นาทีที่แล้ว'):s<129600?Math.round(s/3600)+TT(' h ago',' ชม.ที่แล้ว'):Math.round(s/86400)+TT(' d ago',' วันที่แล้ว')};
 const mmss=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 // ================= dog wishes =================
-const WISH={pet:['🤚','wants some pats','อยากให้ลูบหัว'],play:['🎾','wants to play','อยากเล่นด้วย'],brush:['🪮','wants a brushing','อยากให้หวีขน'],bath:['🛁','wants a bath','อยากอาบน้ำ'],train:['🎓','wants to practise','อยากฝึกเทรน'],feed:['🍖','is craving','อยากกิน']};
+const WISH={pet:['🤚','wants some pats','อยากให้ลูบหัว'],play:['🎾','wants to play','อยากเล่นด้วย'],brush:['🧹','wants a brushing','อยากให้หวีขน'],bath:['🛁','wants a bath','อยากอาบน้ำ'],train:['🎓','wants to practise','อยากฝึกเทรน'],feed:['🍖','is craving','อยากกิน']};
 const wishIcon=w=>w.k=='feed'&&S.cat.food[w.f]?S.cat.food[w.f].e:(WISH[w.k]||['💭'])[0];
 const wishText=w=>{const o=WISH[w.k];if(!o)return'';let s=TT(o[1],o[2]);if(w.k=='feed'){const f=S.cat.food[w.f];s+=' '+(f?f.e+' '+f.n:'')}return s};
 function drawWish(c,d,t,now,x,top){const w=d.wish;if(!w)return;const left=d.wishExp-now,bx=x+26,by=top-34+Math.sin(t*3+d.seed)*2.5;
@@ -2757,8 +2843,8 @@ function wishLine(){const el=$('#care'),d=S.dogs[S.sel];if(!d||el.classList.cont
  if(!w){w=document.createElement('div');w.className='wishline';const top=$('.top',el);if(top)top.after(w)}w.innerHTML=html}
 setInterval(wishLine,1000);
 H.wish_new=m=>{if(S.owner!=S.name)return;sfx('notify');ticker('💭 '+m.name+' '+wishText(m.w))};
-H.wish_done=m=>{sfx('level');const d=S.dogs[m.dog];toast('💖 '+m.name+' '+TT('is so happy!','มีความสุขมาก!')+' +'+(m.r.c||0)+'🪙'+(m.r.g?' +'+m.r.g+'💎':''),3800);
- if(d&&d._pos){const[x,y,L]=d._pos;burst(x,y-L-d._top,'💖',6);sparkle(x,y-30,16,'#ffb3c7');floatText(x,y-L-d._top-30,'+'+(m.r.c||0)+'🪙'+(m.r.g?' +'+m.r.g+'💎':''),'#ffe27a')}if(S.sel==m.dog)UI.care()};
+H.wish_done=m=>{sfx('level');const d=S.dogs[m.dog];toast('💖 '+m.name+' '+TT('is so happy!','มีความสุขมาก!')+' +'+(m.r.c||0)+'💰'+(m.r.g?' +'+m.r.g+'💎':''),3800);
+ if(d&&d._pos){const[x,y,L]=d._pos;burst(x,y-L-d._top,'💖',6);sparkle(x,y-30,16,'#ffb3c7');floatText(x,y-L-d._top-30,'+'+(m.r.c||0)+'💰'+(m.r.g?' +'+m.r.g+'💎':''),'#ffe27a')}if(S.sel==m.dog)UI.care()};
 // ================= fetch =================
 S.fetchMode=false;
 UI.fetchbtn=function(){const el=$('#fetchbtn');if(!el)return;const show=S.scr=='game'&&S.owner==S.name&&!Park.on&&!S.edit&&!MP.g;el.classList.toggle('hidden',!show);el.classList.toggle('on',!!S.fetchMode);if(!show&&S.fetchMode){S.fetchMode=false;cv.classList.remove('throw')}}
@@ -2774,7 +2860,7 @@ function partyOverlay(c,t,now){if(!S.party)return;if(now>S.party){S.party=0;retu
  c.save();for(let i=0;i<5;i++){const a=t*.9+i*1.26,x=400+Math.sin(a)*330,hue=(t*60+i*72)%360,gr=c.createLinearGradient(400,0,x,470);gr.addColorStop(0,`hsla(${hue},95%,72%,.30)`);gr.addColorStop(1,`hsla(${hue},95%,72%,0)`);c.fillStyle=gr;c.beginPath();c.moveTo(394,0);c.lineTo(406,0);c.lineTo(x+80,480);c.lineTo(x-80,480);c.closePath();c.fill()}
  c.strokeStyle='#8a8aa0';c.lineWidth=2;c.beginPath();c.moveTo(400,0);c.lineTo(400,38);c.stroke();const gr=c.createRadialGradient(394,44,2,400,52,18);gr.addColorStop(0,'#fff');gr.addColorStop(1,'#98a0c0');c.fillStyle=gr;c.beginPath();c.arc(400,52,17,0,7);c.fill();c.strokeStyle='#5a3d33';c.lineWidth=2;c.stroke();
  for(let k=0;k<9;k++){const a=t*2+k*.7;if(Math.sin(a*2)>0){c.fillStyle='#fff';c.fillRect(400+Math.cos(a)*14-1,52+Math.sin(a*1.3)*12-1,3,3)}}
- c.font='bold 15px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';const lab='🎉 PARTY '+mmss(S.party-now);c.strokeText(lab,400,92);c.fillStyle='#fff';c.fillText(lab,400,92);c.restore();
+ c.font='bold 15px '+UIF();c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';const lab='🎉 PARTY '+mmss(S.party-now);c.strokeText(lab,400,92);c.fillStyle='#fff';c.fillText(lab,400,92);c.restore();
  if(Math.random()<.4)fx('spark',rnd(60,740),rnd(0,30),{vx:rnd(-20,20),vy:rnd(40,90),g:60,life:2.2,max:2.2,size:rnd(3,5),col:pick(['#ff8fb0','#ffc94d','#6fd1a5','#6fb8ff','#b79bff'])})}
 function worldAfter(c,t,now){editOverlay(c,t);partyOverlay(c,t,now);fetchOverlay(c,t,now)}
 H.party=m=>{if(m.owner!=S.owner)return;S.party=m.ms>0?performance.now()+m.ms:0;if(m.ms>0){sfx('level');ticker('🎉 '+TT('Party time!','ปาร์ตี้เริ่มแล้ว!'))}if(modOpen('house'))renderHouse()};
@@ -2798,7 +2884,7 @@ function drawWheel(rot){const c=$('#wheelc');if(!c)return;const g=c.getContext('
 DO.dospin=()=>{if(S.spinning)return;const sp=S.spin;if(!sp||sp.left<=0||(!sp.free&&S.me.tickets<1))return toast(TT('No spins left','ไม่มีสิทธิ์หมุนแล้ว'));S.spinning=true;S.wheelMsg='';const b=$('#spinbtn');if(b)b.classList.add('dis');send({t:'spin'});setTimeout(()=>{if(S.spinning){S.spinning=false;if(modOpen('wheel'))renderWheel()}},9000)};
 H.spin_r=m=>{const cur=((S.wheelRot||0)%360+360)%360,want=((-(m.idx*45+22.5))%360+360)%360,delta=((want-cur)%360+360)%360,from=S.wheelRot||0,to=from+360*5+delta,t0=performance.now(),dur=4200;S.spinning=true;
  const step=()=>{const k=Math.min(1,(performance.now()-t0)/dur),e=1-Math.pow(1-k,3);S.wheelRot=from+(to-from)*e;drawWheel(S.wheelRot);if(k<1&&$('#wheelc')){if(Math.floor((S.wheelRot)/45)!=Math.floor((S.wheelRot-8)/45))sfx('step');requestAnimationFrame(step)}else{S.wheelRot=to%360;S.spinning=false;
-   const r=m.r||{},txt=(r.c?r.c+'🪙 ':'')+(r.g?r.g+'💎 ':'')+(r.tk?r.tk+'🎟 ':'')+(r.inv?Object.entries(r.inv).map(([k,n])=>((S.cat.food[k]||{}).e||'🎁')+'×'+n).join(' '):'');S.wheelMsg='🎉 '+txt;sfx('level');if(modOpen('wheel'))renderWheel();for(let i=0;i<4;i++)setTimeout(()=>burst(rnd(200,600),rnd(250,420),pick(['⭐','🎉','✨']),3),i*120)}};requestAnimationFrame(step)};
+   const r=m.r||{},txt=(r.c?r.c+'💰 ':'')+(r.g?r.g+'💎 ':'')+(r.tk?r.tk+'🎟 ':'')+(r.inv?Object.entries(r.inv).map(([k,n])=>((S.cat.food[k]||{}).e||'🎁')+'×'+n).join(' '):'');S.wheelMsg='🎉 '+txt;sfx('level');if(modOpen('wheel'))renderWheel();for(let i=0;i<4;i++)setTimeout(()=>burst(rnd(200,600),rnd(250,420),pick(['⭐','🎉','✨']),3),i*120)}};requestAnimationFrame(step)};
 // ================= starter missions + tutorial =================
 H.starter=m=>{S.starter=m;UI.starterpill();if(modOpen('starter'))renderStarter()};
 UI.starterpill=function(){const el=$('#starterpill');if(!el)return;const st=S.starter,done=S.me.stDone;if(!st||done||S.scr!='game'){el.classList.add('hidden');return}el.classList.remove('hidden');const n=st.list.filter(x=>x.claimed).length,rd=S.me.stReady||0;
@@ -2814,7 +2900,7 @@ const TUT=[{e:'🐶',tx:['Welcome to Cozy Dogs! This is your home — your dogs 
  {e:'💭',tx:['Dogs sometimes make a wish 💭 — grant it for bonus coins! The 🎾 button lets you throw a ball for fetch.','บางครั้งน้องหมาจะขอของ 💭 ทำตามเพื่อรับเหรียญโบนัส! ปุ่ม 🎾 ใช้โยนบอลให้คาบกลับมา'],hl:'#fetchbtn'},
  {e:'🧭',tx:['The dock has everything: Shop, Capsules, Friends, the Dog Park 🌳, online Games 🎮 and your House 🏡.','แถบด้านล่างมีทุกอย่าง: ร้านค้า กาชา เพื่อน สวนหมา 🌳 เกมออนไลน์ 🎮 และบ้าน 🏡'],hl:'#dock'},
  {e:'🌱',tx:['Finish the Starter missions for easy rewards. Have fun!','ทำภารกิจมือใหม่เพื่อรับรางวัลง่าย ๆ สนุกนะ!'],hl:'#starterpill'}];
-function tutStart(){if(S.me.tut||S.tutOn||S.scr!='game')return;if(S.owner!=S.name||Park.on||MP.g){setTimeout(tutStart,2000);return}if(modOpen('daily')||modOpen('help')||$('#mods .ov')){setTimeout(tutStart,1500);return}S.tutOn=true;S.tutI=0;tutShow()}
+function tutStart(){if(S.me.tut||S.tutOn||S.scr!='game')return;if(S.owner!=S.name||Park.on||MP.g||S.edit){setTimeout(tutStart,2000);return}if(modOpen('daily')||modOpen('help')||$('#mods .ov')){setTimeout(tutStart,1500);return}S.tutOn=true;S.tutI=0;tutShow()}
 function tutShow(){const el=$('#coach'),s=TUT[S.tutI];$$('.hl').forEach(e=>e.classList.remove('hl'));if(!s){return tutEnd()}
  el.classList.remove('hidden');el.innerHTML=`<div class="ce">${s.e}</div><div class="ct">${TT(s.tx[0],s.tx[1])}<div class="cn">${S.tutI+1}/${TUT.length}</div></div><div class="cb"><button class="btn sm ghost" data-do="tutskip">${TT('Skip','ข้าม')}</button><button class="btn sm mint" data-do="tutnext">${S.tutI==TUT.length-1?TT('Got it!','เข้าใจแล้ว!'):TT('Next','ต่อไป')} ▶</button></div>`;
  const h=s.hl&&$(s.hl);if(h&&!h.classList.contains('hidden'))h.classList.add('hl')}
@@ -2836,7 +2922,7 @@ function renderHouse(){const hi=S.hinfo,tab=S.houseTab||'h',th=S.set.lang=='th';
    <div class="stats4"><div><b>${hi.cozy.score}</b><small>🛋️ ${TT('Cozy score','คะแนนความอบอุ่น')}</small></div><div><b>${hi.likes}</b><small>❤️ ${TT('Likes','ถูกใจ')}</small></div><div><b>${hi.cozy.sets.length}/${W?W.sets.length:7}</b><small>🧩 ${TT('Sets','ชุดเฟอร์')}</small></div></div>
    ${nx?`<div class="list" style="margin-top:10px"><div class="li"><div class="g"><b>⬆️ ${TT('Upgrade to level','อัปเกรดเป็นระดับ')} ${hi.hl+2}</b><small>${TT('Furniture','เฟอร์')} ${hi.maxItems}→<b>${nx.items}</b> · ${TT('Dogs','หมา')} ${hi.maxDogs}→<b>${nx.dogs}</b></small><small>${TT('Needs player level','ต้องเลเวล')} ${nx.lvl}${S.me.lvl>=nx.lvl?' ✔':' ✖'}</small></div><span class="rw">${nx.c} ${ic('coin','sm')}${nx.g?'<br>'+nx.g+' '+ic('gem','sm'):''}</span><button class="btn sm ${canUp?'mint':'dis'}" data-do="houseup">${TT('Upgrade','อัปเกรด')}</button></div></div>`:`<div class="list" style="margin-top:10px"><div class="li" style="background:#fff3c4"><div class="g"><b>🏆 ${TT('Max level reached!','อัปเกรดสูงสุดแล้ว!')}</b></div></div></div>`}
    ${perks.length?`<h4 style="margin:12px 0 6px">✨ ${TT('Active perks','โบนัสที่ใช้งานอยู่')}</h4><div class="sel-row">${perks.map(p=>`<span class="opt on">${esc(t(W.perks[p]))}</span>`).join('')}</div>`:`<div class="muted" style="margin-top:10px">🧩 ${TT('Complete furniture sets to unlock perks!','จัดเฟอร์ให้ครบชุดเพื่อรับโบนัสพิเศษ!')}</div>`}
-   <h4 style="margin:12px 0 6px">🎉 ${TT('Party','ปาร์ตี้')}</h4><div class="list"><div class="li"><div class="g"><b>${pty>0?TT('Party in progress!','ปาร์ตี้กำลังสนุก!')+' ⏳ '+mmss(pty):TT('Throw a party','จัดปาร์ตี้')}</b><small>${TT('5 minutes · friends are invited · guests earn coins · dogs go wild','5 นาที · เชิญเพื่อนอัตโนมัติ · แขกได้เหรียญ · น้องหมาเต้นกันสนุก')}</small></div><button class="btn sm ${pty>0||S.owner!=S.name?'dis':'pink'}" data-do="partygo">🎉 40🪙</button></div></div>
+   <h4 style="margin:12px 0 6px">🎉 ${TT('Party','ปาร์ตี้')}</h4><div class="list"><div class="li"><div class="g"><b>${pty>0?TT('Party in progress!','ปาร์ตี้กำลังสนุก!')+' ⏳ '+mmss(pty):TT('Throw a party','จัดปาร์ตี้')}</b><small>${TT('5 minutes · friends are invited · guests earn coins · dogs go wild','5 นาที · เชิญเพื่อนอัตโนมัติ · แขกได้เหรียญ · น้องหมาเต้นกันสนุก')}</small></div><button class="btn sm ${pty>0||S.owner!=S.name?'dis':'pink'}" data-do="partygo">🎉 40💰</button></div></div>
    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn sky" data-do="gbopen" data-n="${esc(S.name)}">📖 ${TT('Guestbook','สมุดเยี่ยม')}</button><button class="btn lav" data-do="mail">✉️ ${TT('Mailbox','กล่องจดหมาย')}</button></div>`}
  else if(tab=='s'){const W=S.welcome,placed=new Set(S.owner==S.name?S.items.map(i=>i.type):[]);
   body=`<div class="muted" style="margin-bottom:8px">${TT('Place every piece of a set in your house to unlock its perk and bonus cozy points.','วางเฟอร์ให้ครบทุกชิ้นของชุดเพื่อรับโบนัสพิเศษและคะแนนความอบอุ่น')}</div>`+(W?W.sets.map(s=>{const info=hi.sets.find(x=>x.id==s.id)||{have:0,total:s.need.length,done:false};
@@ -2899,7 +2985,7 @@ DO.games=()=>{send({t:'mp_get'});send({t:'spin_get'});renderHub()};
 H.mp_info=m=>{S.mpInfo=m;if(modOpen('games'))renderHub()};
 function renderHub(){const th=S.set.lang=='th',inf=S.mpInfo||{cap:600,used:0,wait:{}},sp=S.spin;
  const og=OG.map(g=>`<div class="gmcard og" data-do="${g[6]||'mpfind'}" data-g="${g[0]}"><span class="e">${g[1]}</span><div style="flex:1"><b style="font-size:16px">${t(g[2])}</b> <span class="pill">👥 ${g[5]}</span>${inf.wait&&inf.wait[g[0]]?` <span class="pill on">⏳ ${inf.wait[g[0]]} ${TT('waiting','รออยู่')}</span>`:''}<div class="muted">${th?g[3]:g[4]}</div></div></div>`).join('');
- modal('games','🎮 '+t('Games'),`<h4 class="hubh">🌐 ${TT('Online games','เกมออนไลน์')}</h4><div class="muted" style="margin-bottom:8px">${TT('Real players join your room · if nobody is around, friendly bots fill in (half rewards).','ผู้เล่นจริงจะเข้าห้องเดียวกับคุณ · ถ้าไม่มีใครอยู่ จะมีบอทมาเล่นด้วย (รางวัลครึ่งเดียว)')}<br>🪙 ${TT('Arcade coins today','เหรียญเกมออนไลน์วันนี้')}: <b>${inf.used}/${inf.cap}</b></div>${og}
+ modal('games','🎮 '+t('Games'),`<h4 class="hubh">🌐 ${TT('Online games','เกมออนไลน์')}</h4><div class="muted" style="margin-bottom:8px">${TT('Real players join your room · if nobody is around, friendly bots fill in (half rewards).','ผู้เล่นจริงจะเข้าห้องเดียวกับคุณ · ถ้าไม่มีใครอยู่ จะมีบอทมาเล่นด้วย (รางวัลครึ่งเดียว)')}<br>💰 ${TT('Arcade coins today','เหรียญเกมออนไลน์วันนี้')}: <b>${inf.used}/${inf.cap}</b></div>${og}
  <div class="gmcard" data-do="wheel" style="margin-top:6px"><span class="e">🎰</span><div style="flex:1"><b style="font-size:16px">${TT('Lucky Wheel','วงล้อนำโชค')}</b>${sp&&sp.free||S.me.spinFree?` <span class="pill on">🎁 ${TT('FREE spin!','หมุนฟรี!')}</span>`:''}<div class="muted">${TT('One free spin every day — coins, gems, tickets and more.','หมุนฟรีวันละครั้ง ได้เหรียญ เพชร ตั๋ว และของรางวัลอื่น ๆ')}</div></div></div>
  <h4 class="hubh">🎮 ${TT('Solo mini-games','มินิเกมเล่นคนเดียว')}</h4><div class="muted" style="margin-bottom:8px">${th?'รางวัลเหรียญจากมินิเกมจำกัดวันละ 500 เหรียญ':'Mini game coin rewards are capped at 500 per day.'}</div>`+
   GAMES.filter(g=>g[0]!='rps').map(g=>`<div class="gmcard" data-do="gstart" data-g="${g[0]}"><span class="e">${g[1]}</span><div><b style="font-size:16px">${t(g[2])}</b><div class="muted">${th?g[3]:g[4]}</div></div></div>`).join(''),'sm')}
@@ -3280,11 +3366,11 @@ function html(av,size,o){o=o||{};return`<canvas class="avc ${o.cls||''}" width="
 function paint(root){(root||document).querySelectorAll('canvas[data-av]').forEach(c=>{if(c.dataset.done)return;c.dataset.done=1;let av,o;try{av=JSON.parse(c.dataset.av);o=JSON.parse(c.dataset.ao||'{}')}catch{return}
  const src=thumb(av,Object.assign({size:c.width/2},o));c.getContext('2d').drawImage(src,0,0,c.width,c.height)})}
 // ---------- speech bubble (shared by home + park) ----------
-const FONT=()=>'bold 12px '+getComputedStyle(document.body).fontFamily;
-function bubble(c,x,by,text,a){const tx=text.length>26?text.slice(0,25)+'…':text;c.save();c.font=FONT();c.textAlign='center';const tw=c.measureText(tx).width+18;c.globalAlpha=a==null?1:a;
+const FONT=()=>'bold 12px '+UIF();
+function bubble(c,x,by,text,a){const cs=Array.from(String(text)),tx=cs.length>26?cs.slice(0,25).join('')+'…':cs.join('');c.save();c.font=FONT();c.textAlign='center';const tw=c.measureText(tx).width+18;c.globalAlpha=a==null?1:a;
  c.fillStyle='#fff';c.strokeStyle='#5a3d33';c.lineWidth=2;c.lineJoin='round';c.beginPath();c.roundRect(x-tw/2,by-24,tw,22,9);c.fill();c.stroke();
  c.beginPath();c.moveTo(x-5,by-3);c.lineTo(x,by+4);c.lineTo(x+5,by-3);c.fill();c.stroke();c.fillStyle='#fff';c.fillRect(x-4,by-4,8,3);c.fillStyle='#5a3d33';c.fillText(tx,x,by-9);c.restore()}
-function pill(c,x,y,text,o){o=o||{};c.save();c.font='bold 11px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';const w=c.measureText(text).width+16;
+function pill(c,x,y,text,o){o=o||{};c.save();c.font='bold 11px '+UIF();c.textAlign='center';const w=c.measureText(text).width+16;
  c.fillStyle=o.fill||'rgba(255,250,241,.94)';c.strokeStyle=o.stroke||'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y,w,17,8);c.fill();c.stroke();c.fillStyle=o.ink||'#5a3d33';c.fillText(text,x,y+12);c.restore()}
 // ---------- the owner at home (stands in a corner of the room) ----------
 const AV_S=.9,HOME={hit:null};
@@ -3297,7 +3383,7 @@ function homeTop(a){return a.y-(a.top||90)}
 function drawHomeTag(c,a,t,now){const top=homeTop(a);
  if(S.set.names&&a.name)pill(c,a.x,a.y+9,a.name,{stroke:'#6fb8ff'});
  const b=S.avBub;if(b&&now-b.at<4500)bubble(c,a.x,top-10,b.m,Math.min(1,(4500-(now-b.at))/600));
- else if(a.own&&!LS.get('cd_avhint',false)&&!S.edit){const y=top-14+Math.sin(t*3)*3;c.save();c.font='bold 12px '+getComputedStyle(document.body).fontFamily;c.textAlign='center';const tx='👕 '+TT('Tap to change outfit','แตะเพื่อเปลี่ยนชุด'),w=c.measureText(tx).width+18;
+ else if(a.own&&!LS.get('cd_avhint',false)&&!S.edit){const y=top-14+Math.sin(t*3)*3;c.save();c.font='bold 12px '+UIF();c.textAlign='center';const tx='👕 '+TT('Tap to change outfit','แตะเพื่อเปลี่ยนชุด'),w=c.measureText(tx).width+18;
   c.fillStyle='#fff3c4';c.strokeStyle='#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(a.x-w/2,y-22,w,22,10);c.fill();c.stroke();c.fillStyle='#5a3d33';c.fillText(tx,a.x,y-7);c.restore()}}
 function pickHome(x,y){const h=HOME.hit;if(!h||!S.ownerAv)return false;const dx=(x-h[0])/h[2],dy=(y-h[1])/h[3];return dx*dx+dy*dy<=1}
 // ---------- the person walking the dog (park) ----------
@@ -3439,13 +3525,13 @@ const Wardrobe=(()=>{
   renderSave()}
  function saved(m){const n=(m.bought||[]).length;
   if(m.same&&!n){W.saving=false;toast('👕 '+TT('You are already wearing this look','ใส่ลุคนี้อยู่แล้ว'));return}
-  sfx(n?'coin':'level');toast('✨ '+TT('Look saved!','บันทึกลุคแล้ว!')+(n?'  🛍️ −'+m.cost+'🪙':''),3000);
+  sfx(n?'coin':'level');toast('✨ '+TT('Look saved!','บันทึกลุคแล้ว!')+(n?'  🛍️ −'+m.cost+'💰':''),3000);
   W.base=clone(m.av);if(W.saving){W.saving=false;W.draft=clone(m.av);closeMod('wardrobe');
    if(Park.on){const q=Park.m[Park.me];if(q){q.av=m.av;q.emote={e:'👋',at:performance.now()}}}
    else{S.avTap=performance.now()+2600;const a=AVA.homeAvatar(performance.now());if(a){sparkle(a.x,a.y-48,16);burst(a.x,a.y-(a.top||90)-12,'✨',4)}}}
   else refresh()}
  function failed(m){W.saving=false;sfx('err');
-  if(m&&m.code=='coins')toast('🪙 '+TT('Not enough coins','เหรียญไม่พอ')+' ('+(m.cost|0)+')');else toast(TT('Could not save this look','บันทึกลุคนี้ไม่ได้'));refresh()}
+  if(m&&m.code=='coins')toast('💰 '+TT('Not enough coins','เหรียญไม่พอ')+' ('+(m.cost|0)+')');else toast(TT('Could not save this look','บันทึกลุคนี้ไม่ได้'));refresh()}
  // ---------- actions ----------
  const touch=(keepScroll=true)=>{renderPane(keepScroll);renderSave()};
  DO.wardrobe=()=>open();
@@ -3479,7 +3565,7 @@ const TIPS={th:['ลูบหัวน้องหมาทุกวันเพ
  en:['Pet your dogs daily to grow Bond 💕','Every dog has its own personality.','Buy furniture, then drag it into your room 🛋️','Train to unlock tricks — spin, jump, roll!','Send friends a gift once a day 🎁','Play at night — the fireplace is so cozy 🔥','Visit the Dog Park 🌳 grab treats, kick the ball, trade with friends.','A new community goal starts every Monday 🌍']};
 function applyLang(){$$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));const fb=$('#fetchbtn');if(fb)fb.title=t('Fetch');$('#tip').textContent=pick(TIPS[S.set.lang]||TIPS.th);document.documentElement.lang=S.set.lang}
 DO.lang=(d,el,e)=>{e.preventDefault();S.set.lang=S.set.lang=='th'?'en':'th';saveSet();applyLang()};
-DO.ltab=d=>{$('#fLogin').classList.toggle('hidden',d.v!='login');$('#fReg').classList.toggle('hidden',d.v!='reg');$('#tLogin').classList.toggle('on',d.v=='login');$('#tReg').classList.toggle('on',d.v=='reg')};
+DO.ltab=d=>{$('#fForgot').classList.add('hidden');$('#fLogin').classList.toggle('hidden',d.v!='login');$('#fReg').classList.toggle('hidden',d.v!='reg');$('#tLogin').classList.toggle('on',d.v=='login');$('#tReg').classList.toggle('on',d.v=='reg')};
 UI.all=function(){UI.starterpill();UI.fetchbtn();UI.cur();UI.pcard();UI.loc();UI.dock();UI.online();UI.chat();UI.bars();UI.care();UI.goalpill();UI.parkbar();UI.parkinfo()};
 // ---------- login scene ----------
 const Login={dogs:[],items:[],deco:{wall:'cream',floor:'wood',light:'sunset'},ready:false};
@@ -3498,19 +3584,35 @@ function loginFrame(ms,dt){if(!Login.ready)return;const w=innerWidth,h=innerHeig
  renderWorld(bgx,{deco:Login.deco,items:Login.items,dogs:Login.dogs,avatar:Login.avatar,env:{hour:18.7,weather:'sunny',season:S.cat.season}},t,now,dt);World.scale=sc0}
 // ---------- auth ----------
 function setErr(id,m){$(id).textContent=m||''}
-async function ensureConn(){if(S.ws&&S.ws.readyState==1)return;await connect()}
-async function doAuth(msg,errId){setErr(errId,'');try{await ensureConn();send(msg)}catch{setErr(errId,S.set.lang=='th'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ (รัน node server.js แล้วหรือยัง?)':'Cannot reach server. Is it running?')}}
+async function ensureConn(){if(S.ws&&S.ws.readyState==1)return;await connect(false,40000)}      // 40 s: a free host that was asleep needs a while to wake up
+const loginBusy=on=>{$$('#login button[type=submit],#login [data-do=guest]').forEach(b=>b.disabled=!!on);clearTimeout(loginBusy.t);if(on)loginBusy.t=setTimeout(()=>loginBusy(false),15000)};
+async function doAuth(msg,errId){setErr(errId,'');loginBusy(true);try{await ensureConn();if(!send(msg))throw 0}catch{loginBusy(false);setErr(errId,S.set.lang=='th'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ (ถ้าเปิดบน Render รอสักครู่แล้วลองใหม่ / ถ้ารันเอง ตรวจว่า node server.js ทำงานอยู่)':'Cannot reach the server. Try again in a moment.')}}
 $('#fLogin').onsubmit=e=>{e.preventDefault();doAuth({t:'login',user:$('#lUser').value,pass:$('#lPass').value},'#lErr')};
 $('#fReg').onsubmit=e=>{e.preventDefault();doAuth({t:'register',user:$('#rUser').value,email:$('#rMail').value,pass:$('#rPass').value},'#rErr')};
 DO.guest=()=>doAuth({t:'guest'},'#lErr');
-H.auth=m=>{if(!m.ok){setErr($('#fReg').classList.contains('hidden')?'#lErr':'#rErr',m.err);if(S.pendingResume||S.autoResume){S.token=null;LS.set('cd_token',null);S.autoResume=false;S.pendingResume=false;show('login')}sfx('err');return}
- if(Park.on)Park.leaveLocal();S.name=m.name;S.guest=m.guest;if(m.token){S.token=m.token;LS.set('cd_token',m.token)}S.loaded=true;S.autoResume=false;S.pendingResume=false;hideBanner()};
+// forgot password: user name + the recovery code saved at sign-up + a new password
+DO.forgot=()=>{$('#fLogin').classList.add('hidden');$('#fReg').classList.add('hidden');$('#fForgot').classList.remove('hidden');$('#fUser').value=$('#lUser').value;setErr('#fErr','');setTimeout(()=>{try{($('#fUser').value?$('#fCode'):$('#fUser')).focus()}catch{}},30)};
+$('#fForgot').onsubmit=e=>{e.preventDefault();doAuth({t:'reset',user:$('#fUser').value,code:$('#fCode').value,pass:$('#fPass').value},'#fErr')};
+H.auth=m=>{loginBusy(false);if(!m.ok){setErr(!$('#fForgot').classList.contains('hidden')?'#fErr':$('#fReg').classList.contains('hidden')?'#lErr':'#rErr',m.err);
+  if(S.pendingResume||S.autoResume){const again=S.pendingResume&&S.loaded;S.autoResume=false;S.pendingResume=false;
+   if(m.exp){S.token=null;LS.set('cd_token',null);show('login')}              // only when the server says the login is really over do we forget it
+   else if(again)setTimeout(dropAndReconnect,4000);                             // busy / hiccup while reconnecting: keep the login and try again in a moment
+   else show('login')}                                                           // at start-up: keep it too, a reload tries again
+  sfx('err');return}
+ reconnecting=false;if(Park.on)Park.leaveLocal();S.name=m.name;S.guest=m.guest;if(m.token){S.token=m.token;LS.set('cd_token',m.token)}S.loaded=true;S.autoResume=false;S.pendingResume=false;hideBanner()};
 function show(id){S.scr=id;$$('.scr').forEach(s=>s.classList.toggle('on',s.id==id));if(id=='game')layout()}
-H.kick=()=>{wantConn=false;toast(S.set.lang=='th'?'มีการเข้าสู่ระบบจากที่อื่น':'Logged in elsewhere');setTimeout(()=>location.reload(),1200)};
+H.kick=m=>{if(m&&m.idle)return;      // the server dropped a quiet connection: the normal reconnect (resume) follows by itself
+ wantConn=false;clearTimeout(reconnectTimer);      // opened on another device: do NOT reload by ourselves (two devices used to kick each other in an endless loop)
+ modal('kicked','📱 '+TT('Opened on another device','เปิดเล่นจากอีกเครื่อง'),`<div class="center"><p style="font-weight:800">${TT('This account was opened on another device, so this one was disconnected.','บัญชีนี้ถูกเปิดเล่นจากอีกเครื่อง เครื่องนี้เลยถูกตัดการเชื่อมต่อ')}</p><button class="btn pink" data-do="relogin" style="margin-top:10px;font-size:18px;padding:10px 24px">${TT('Play here again','กลับมาเล่นที่เครื่องนี้')}</button><p class="muted" style="margin-top:8px;font-size:12px">${TT('(the other device will be disconnected)','(อีกเครื่องจะถูกตัดออกแทน)')}</p></div>`,'sm',{lock:1})};
+DO.relogin=()=>location.reload();
+{const _cm=DO.closemod;DO.closemod=d=>{if(d.id=='kicked')return location.reload();_cm(d)}}
 // ---------- game messages ----------
 H.welcome=m=>{S.welcome=m;DOGS.setBreeds(m.breeds);S.cat=localizeCat({items:m.cat.items,food:m.cat.food,acc:m.cat.acc,walls:m.cat.walls,floors:m.cat.floors,lights:m.cat.lights,tricks:m.cat.tricks,season:m.cat.season})};
 let firstMe=true;
-H.me=m=>{const prevInv=JSON.stringify(S.me.inv),prevSt=(S.me.stReady||0)+'/'+(S.me.stDone?1:0);Object.assign(S.me,m);UI.cur();UI.pcard();UI.dock();UI.starterpill();UI.fetchbtn();if(S.loaded&&(S.me.stReady||0)+'/'+(S.me.stDone?1:0)!=prevSt&&!S.me.stDone)send({t:'starter'});if(modOpen('house'))send({t:'house_info'});
+H.me=m=>{const prevInv=JSON.stringify(S.me.inv),prevSt=(S.me.stReady||0)+'/'+(S.me.stDone?1:0),prevRec=S.me.rec;Object.assign(S.me,m);
+ if(prevRec!==S.me.rec&&modOpen('settings'))renderSettings();
+ if(m.rec===false&&!S.recAsked){S.recAsked=true;let n=0;const iv=setInterval(()=>{if(S.me.rec!==false||S.guest||++n>60)return clearInterval(iv);if(!MP.g&&!Park.on&&!$('#mods .ov')){clearInterval(iv);recPwModal(true)}},2000)}      // an old account without a recovery code is offered one once per visit, as soon as no other window (daily reward, game...) is open
+UI.cur();UI.pcard();UI.dock();UI.starterpill();UI.fetchbtn();if(S.loaded&&(S.me.stReady||0)+'/'+(S.me.stDone?1:0)!=prevSt&&!S.me.stDone)send({t:'starter'});if(modOpen('house'))send({t:'house_info'});
  if(prevInv!=JSON.stringify(S.me.inv)){if(S.feedOpen||S.sel)UI.care();if(S.edit)UI.edit()}
  for(const id of['shop','capsule','profile'])if(modOpen(id))({shop:renderShop,capsule:()=>0,profile:()=>DO.profile()})[id]();
  if(modOpen('prof'))renderProfile();if(modOpen('daily'))DO.daily();if(modOpen('wardrobe'))Wardrobe.refresh();
@@ -3528,10 +3630,10 @@ H.deco=m=>{S.deco=m.deco;ROOM.setDeco(S.deco);if(modOpen('shop'))renderShop();sf
 H.fx=m=>{const d=m.dog&&S.dogs[m.dog];if(d&&d._pos){const[x,y,L]=d._pos;if(m.pet){burst(x,y-L-d._top*.8,'❤️',4);sfx('pet')}else if(m.e=='✨'){sparkle(x,y-30,14)}else burst(x,y-L-d._top*.8,m.e,3)}else burst(m.x||400,m.y||300,m.e,3)};
 H.players=m=>{S.players=m.list;UI.online()};
 H.chat=m=>{Park.onChat(m);if(!Park.on&&m.from==S.owner)S.avBub={m:m.m,at:performance.now()};S.chat.push(m);if(S.chat.length>60)S.chat.shift();const el=$('#chat');UI.chat();if(el.classList.contains('min')){const hd=$('.hd span',el);if(hd)hd.textContent='💬 '+t('Chat')+' •'}};
-H.event=m=>ticker(m.text);
-H.notify=m=>{toast(locMsg(m.m));sfx('notify')};
+H.event=m=>ticker(locEvent(m.text));
+H.notify=m=>{toast(S.set.lang=='th'?locMsg(m.m):locEvent(m.m));sfx('notify')};
 H.toast=m=>{if(S.capBusy)capUnlock();toast(locMsg(m.m));if(/ไม่พอ|ไม่มี|ไม่ได้|เต็ม|Not enough|แล้ว$/.test(m.m)&&!/learned|ปลด|เป็นเพื่อน|ส่ง/.test(m.m))sfx('err')};
-H.levelup=m=>{sfx('level');toast('⭐ '+TT('Level Up!','เลเวลอัป!')+' Lv.'+m.lvl+'  +50🪙 +1💎',4200);const r=cv.getBoundingClientRect();for(let i=0;i<5;i++)setTimeout(()=>burst(rnd(150,650),rnd(250,450),pick(['⭐','🎉','✨']),4),i*150)};
+H.levelup=m=>{sfx('level');toast('⭐ '+TT('Level Up!','เลเวลอัป!')+' Lv.'+m.lvl+'  +50💰 +1💎',4200);const r=cv.getBoundingClientRect();for(let i=0;i<5;i++)setTimeout(()=>burst(rnd(150,650),rnd(250,450),pick(['⭐','🎉','✨']),4),i*150)};
 H.buy_ok=m=>{sfx('coin');const it=S.cat.items[m.id]||S.cat.food[m.id]||S.cat.acc[m.id];toast('🛍️ '+(it?it.n:m.id)+' ×'+m.n)};
 H.equip_ok=m=>{sfx('ok');const d=(S.allDogs||[]).find(x=>x.id==m.dog);if(d)d.acc=m.acc;const s=S.dogs[m.dog];if(s)s.acc=m.acc;if(modOpen('prof'))renderProfile();UI.care()};
 H.quests=m=>{S.quests=m;if(modOpen('quests'))renderQuests()};
@@ -3547,11 +3649,11 @@ H.park_av=m=>{const q=Park.m[m.n];if(q)q.av=m.av;if(m.n==S.name)S.me.av=m.av};
 (function boot(){buildIcons();DOGS.setBreeds(EMBED.breeds);S.cat=localizeCat(Object.assign({},EMBED.cat,{season:(()=>{const m=new Date().getMonth()+1;return m==10?'halloween':m==12?'christmas':''})()}));
  applyLang();initLogin();ROOM.setDeco(Login.deco);UI.cur();
  const lu=LS.get('cd_user','');$('#lUser').value=lu;
- if(S.token){S.autoResume=true;connect().then(()=>send({t:'resume',token:S.token})).catch(()=>{S.autoResume=false})}
+ if(S.token){S.autoResume=true;connect(false,40000).then(()=>send({t:'resume',token:S.token})).catch(()=>{S.autoResume=false;setErr('#lErr',S.set.lang=='th'?'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองรีเฟรชอีกครั้ง':'Cannot reach the server. Reload to try again.')})}
  // keep the clock / weather label fresh
  setInterval(()=>{if(S.scr=='game')UI.loc()},20000);
- setInterval(()=>{if(S.ws&&S.ws.readyState==1&&S.loaded)send({t:'hb'})},20000);   // heartbeat: lets the server drop dead connections
- addEventListener('beforeunload',()=>{});
+ setInterval(()=>{if(!S.loaded||!wantConn||reconnecting)return;if(S.ws&&S.ws.readyState==1){send({t:'hb'});if(Date.now()-lastRx>30000)dropAndReconnect()}else onDisconnect()},10000);   // heartbeat both ways: the server answers, so a dead connection is noticed within ~30 s (and the server can drop dead ones)
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){probeConn();if(AU.ctx&&AU.ctx.state!='running')actx()}});addEventListener('pageshow',probeConn);addEventListener('online',probeConn);   // back from the background / network changed: check at once
 })();
 </script>
 </body></html>

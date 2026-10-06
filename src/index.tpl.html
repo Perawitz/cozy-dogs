@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Cozy Dogs</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B6%3C/text%3E%3C/svg%3E">
 <style>/*@CSS*/</style></head>
@@ -11,17 +11,26 @@
   <div class="panel logincard">
    <div class="tabs"><button class="on" data-do="ltab" data-v="login" id="tLogin" data-t="Login">Login</button><button data-do="ltab" data-v="reg" id="tReg" data-t="Register">Register</button></div>
    <form id="fLogin" autocomplete="on">
-    <label class="fld"><span data-t="Username">Username</span><input id="lUser" autocomplete="username" maxlength="16"></label>
+    <label class="fld"><span data-t="Username">Username</span><input id="lUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16"></label>
     <label class="fld"><span data-t="Password">Password</span><input id="lPass" type="password" autocomplete="current-password" maxlength="64"></label>
     <div class="err" id="lErr"></div>
     <div class="row"><button class="btn pink" type="submit" data-t="Login">Login</button><button class="btn ghost" type="button" data-do="guest" data-t="Play as Guest">Play as Guest</button></div>
+    <a href="#" class="flink" data-do="forgot" id="aForgot" data-t="Forgot password?">Forgot password?</a>
    </form>
    <form id="fReg" class="hidden" autocomplete="on">
-    <label class="fld"><span data-t="Username">Username</span><input id="rUser" autocomplete="username" maxlength="16" placeholder="3-16"></label>
+    <label class="fld"><span data-t="Username">Username</span><input id="rUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16" placeholder="3-16"></label>
     <label class="fld"><span data-t="Email">Email</span><input id="rMail" type="email" autocomplete="email" maxlength="60"></label>
     <label class="fld"><span data-t="Password">Password</span><input id="rPass" type="password" autocomplete="new-password" maxlength="64" placeholder="6+"></label>
     <div class="err" id="rErr"></div>
     <div class="row"><button class="btn mint" type="submit" data-t="Create account">Create account</button></div>
+   </form>
+   <form id="fForgot" class="hidden" autocomplete="off">
+    <p class="fhelp" data-t="Enter your username, the recovery code you saved when you signed up, and a new password.">Enter your username, the recovery code you saved when you signed up, and a new password.</p>
+    <label class="fld"><span data-t="Username">Username</span><input id="fUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16"></label>
+    <label class="fld"><span data-t="Recovery code">Recovery code</span><input id="fCode" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="32" placeholder="XXXX-XXXX-XXXX-XXXX"></label>
+    <label class="fld"><span data-t="New password">New password</span><input id="fPass" type="password" autocomplete="new-password" maxlength="64" placeholder="6+"></label>
+    <div class="err" id="fErr"></div>
+    <div class="row"><button class="btn mint" type="submit" data-t="Set new password">Set new password</button><button class="btn ghost" type="button" data-do="ltab" data-v="login" data-t="Back to login">Back to login</button></div>
    </form>
   </div>
   <div class="tip" id="tip"></div>

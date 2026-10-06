@@ -10,7 +10,7 @@ const TYPES=['visit','chat','emoji','deco','rename','daily','act','feed','equip'
  'park_join','park_leave','park_move','park_pose','park_emote','park_trick','park_dog','goal','goal_claim','trade_req','trade_ans','trade_set','trade_ok','trade_cancel','ping','hb',
  'mp_find','mp_cancel','mp_leave','mp_get','mp_tap','mp_act','mp_ans','mp_hit','mp_pick','mp_bp','mp_bp','mp_bp','mp_pr','wish_get','wish_skip','spin','spin_get','starter','starter_claim','house_up','house_info','party','party_end','gb_get','gb_post','gb_del','like','contest_get','contest_enter','contest_vote','mail_get','mail_claim','park_throw','park_dig','lb2','tutorial'];
 const FIELDS=['r','id','dog','food','acc','k','v','n','m','e','a','x','y','f','uid','name','ids','i','score','g','from','ok','ver','inv','coins','dogs','p','c','ticket','on','token','game','pick','choice','to','msg','text','d','who','owner','slot','kind','idx','tap','side'];
-TYPES.push('av_save','av_get','av_save','av_save','av_save');FIELDS.push('av','h','hc','ht','sk','hm','t','b','s','g','x','e','bl','fr','ls','tc','bc','sc','hk','xk','pt','ec');   // wardrobe messages are fuzzed too
+TYPES.push('rec_new','rec_new');TYPES.push('av_save','av_get','av_save','av_save','av_save');FIELDS.push('av','h','hc','ht','sk','hm','t','b','s','g','x','e','bl','fr','ls','tc','bc','sc','hk','xk','pt','ec');   // wardrobe messages are fuzzed too
 const AVD=require('./avatar_data');
 const lookOK=av=>{if(!av||typeof av!='object')return false;for(const k in AVD.KINDS)if(!AVD.find(k,av[k]))return false;for(const k in AVD.NCOL)if(!(Number.isInteger(av[k])&&av[k]>=0&&av[k]<AVD.NCOL[k]))return false;return(av.bl===0||av.bl===1)&&(av.fr===0||av.fr===1)&&AVD.HOME.some(h=>h.id===av.hm)};
 (async()=>{
@@ -21,7 +21,7 @@ const lookOK=av=>{if(!av||typeof av!='object')return false;for(const k in AVD.KI
  for(const g of ['','{','null','[]','"str"','123','{"t":1}','{"t":{}}','{"t":["x"]}','{"t":"'+'a'.repeat(3000)+'"}','\u0000\u0001','{"t":"visit","id":{"__proto__":1}}','{"__proto__":{"t":"chat"}}'])a.send(g);
  // 2) hostile logins before auth
  const x=await cli();for(const u of ['constructor','__proto__','toString','hasOwnProperty','CONSTRUCTOR'])x.send({t:'login',user:u,pass:'abcdefg'});
- x.send({t:'login',user:{a:1},pass:[1]});x.send({t:'register',user:'__proto__',email:'a@b.co',pass:'abcdefg'});x.send({t:'resume',token:{}});x.send({t:'register',user:'admin',email:'a@b.co',pass:'abcdefg'});
+ x.send({t:'login',user:{a:1},pass:[1]});x.send({t:'register',user:'__proto__',email:'a@b.co',pass:'abcdefg'});x.send({t:'resume',token:{}});for(const code of [null,{x:1},[1],'x'.repeat(300),'AAAA-BBBB-CCCC-DDDD','__proto__'])for(const user of ['fuzzer','constructor',{a:1},null])x.send({t:'reset',user,code,pass:'abcdefg'});x.send({t:'register',user:'admin',email:'a@b.co',pass:'abcdefg'});
  await sleep(500);ok(true,'hostile auth messages did not crash');
  // 3) random fuzz of every type, with and without a real dog id
  let n=0;const b=await cli();

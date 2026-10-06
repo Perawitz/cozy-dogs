@@ -47,7 +47,7 @@ const ACH=[
  {id:'lucky',n:'Lucky!',d:'Own a Legendary or Mythic dog',goal:1,v:p=>p.dogs.some(d=>'LM'.includes(BR[d.breed][2]))?1:0,r:{c:300}},
  {id:'deco15',n:'Interior Designer',d:'Place 15 items in your house',goal:15,v:p=>p.items.length,r:{c:200}},
  {id:'fr3',n:'Social Butterfly',d:'Have 3 friends',goal:3,v:p=>p.friends.length,r:{c:150,tk:1}},
- {id:'streak7',n:'Loyal Owner',d:'Reach a 7-day login streak',goal:7,v:p=>p.daily.streak,r:{g:5}},
+ {id:'streak7',n:'Loyal Owner',d:'Reach a 7-day login streak',goal:7,v:p=>Math.max(p.daily.best|0,p.daily.streak|0),r:{g:5}},
  {id:'kick50',n:'Ball Lover',d:'Kick the ball 50 times in the park',goal:50,v:p=>st(p,'kick'),r:{c:150}},
  {id:'park100',n:'Treat Hunter',d:'Collect 100 park treats',goal:100,v:p=>st(p,'park'),r:{g:5}},
  {id:'trade5',n:'Trader',d:'Complete 5 trades',goal:5,v:p=>st(p,'trade'),r:{c:200,tk:1}},
@@ -69,13 +69,16 @@ const ACH=[
  {id:'angel',n:'Little Angel',d:'Own the halo and the angel wings',goal:1,v:p=>(p.avOwn||[]).includes('ht:halo')&&(p.avOwn||[]).includes('x:wings')?1:0,r:{g:5}}];
 const COLL=[[5,{c:200}],[10,{tk:2}],[15,{c:500}],[20,{g:10}],[25,{tk:5}],[30,{c:1000}],[35,{g:20}],[40,{tk:8}],[45,{g:30}],[50,{g:100,tk:10,c:2000}]];
 const rnd=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)];
-const rid=()=>crypto.randomBytes(5).toString('hex'), today=()=>new Date().toISOString().slice(0,10);
+const rid=()=>crypto.randomBytes(5).toString('hex');
+const TZH=process.env.CD_TZ!=null&&process.env.CD_TZ!==''&&Number.isFinite(+process.env.CD_TZ)?+process.env.CD_TZ:7;     // the game day starts at midnight in Thailand (UTC+7); set CD_TZ=0 for UTC
+const ymd=t=>new Date(t+TZH*36e5).toISOString().slice(0,10), today=()=>ymd(Date.now());
 const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
 
 // own-property lookups: a client-supplied id like "__proto__" or "constructor" must never reach an object's prototype chain
 const own=(o,k)=>typeof k=='string'&&Object.prototype.hasOwnProperty.call(o,k), cat=(T,k)=>own(T,k)?T[k]:undefined;
 const nul=o=>Object.assign(Object.create(null),o);
-const RESERVED=['__proto__','constructor','prototype','hasownproperty','tostring','valueof','admin','administrator','system','server','moderator','staff','cozydogs','null','undefined'];
+const RESERVED=[...Object.getOwnPropertyNames(Object.prototype).map(k=>k.toLowerCase()),'prototype','admin','administrator','system','server','moderator','staff','cozydogs','null','undefined'];   // every name an object already has (toString, __defineGetter__ ...) can never be a player name
+const THMARK=/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/g, baseName=s=>String(s).replace(THMARK,'').toLowerCase();    // Thai vowel / tone marks do not make a different name: 'Adminั' is still 'admin'
 let db={players:nul(),accounts:nul(),sessions:nul()};
 for(const f of [DBF,DBF+'.bak']){try{Object.assign(db,JSON.parse(fs.readFileSync(f,'utf8')));break}catch(e){if(e.code!='ENOENT')console.error('could not read',f,e.message)}}
 db.players=nul(db.players);db.accounts=nul(db.accounts);db.sessions=nul(db.sessions);
@@ -84,6 +87,7 @@ db.players=nul(db.players);db.accounts=nul(db.accounts);db.sessions=nul(db.sessi
 const SB_URL=(process.env.SUPABASE_URL||'').trim().replace(/\/+$/,''), SB_KEY=(process.env.SUPABASE_KEY||'').trim(), REMOTE=!!(SB_URL&&SB_KEY);
 const SB_H={apikey:SB_KEY,'Content-Type':'application/json'}; if(SB_KEY.startsWith('eyJ'))SB_H.Authorization='Bearer '+SB_KEY;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let loaded=!REMOTE;      // false until the Supabase read worked: a SIGTERM during start-up must not upsert an EMPTY database over the real save
 async function remoteLoad(){                 // returns normally only if the read worked: we never start with empty data and overwrite the real save
   for(let i=1;;i++){
     try{const r=await fetch(SB_URL+'/rest/v1/game_data?id=eq.main&select=data',{headers:SB_H,signal:AbortSignal.timeout(15000)});
@@ -96,6 +100,7 @@ async function remoteLoad(){                 // returns normally only if the rea
   }}
 let rSaving=false,rPending=false;
 async function remoteSave(){
+  if(!loaded)return;
   if(rSaving){rPending=true;return}
   rSaving=true;
   try{const r=await fetch(SB_URL+'/rest/v1/game_data?on_conflict=id',{method:'POST',headers:{...SB_H,Prefer:'resolution=merge-duplicates,return=minimal'},
@@ -105,13 +110,14 @@ async function remoteSave(){
   finally{rSaving=false;if(rPending){rPending=false;remoteSave()}}}
 let dirty=false,lastBak=0;
 function save(){                       // atomic: write a temp file, then rename (a crash mid-write can never leave a half-written data.json)
+  if(!loaded)return;
   try{const tmp=DBF+'.tmp';fs.writeFileSync(tmp,JSON.stringify(db));
     if(Date.now()-lastBak>6e5){try{fs.copyFileSync(DBF,DBF+'.bak')}catch{}lastBak=Date.now()}
     fs.renameSync(tmp,DBF);dirty=false}catch(e){console.error('save failed:',e.message)}
   if(REMOTE)remoteSave()}
 const safe=(name,f)=>(...a)=>{try{return f(...a)}catch(e){console.error('['+name+']',e&&e.stack||e)}};
 setInterval(safe('save',()=>{if(dirty)save()}),5000);
-for(const sg of ['SIGINT','SIGTERM'])process.on(sg,async()=>{save();if(REMOTE){await sleep(100);for(let i=0;i<40&&rSaving;i++)await sleep(100)}process.exit(0)});
+for(const sg of ['SIGINT','SIGTERM'])process.on(sg,async()=>{save();if(REMOTE&&loaded){await sleep(100);for(let i=0;i<40&&rSaving;i++)await sleep(100)}process.exit(0)});
 process.on('uncaughtException',e=>console.error('uncaught:',e&&e.stack||e));
 process.on('unhandledRejection',e=>console.error('unhandled:',e));
 
@@ -119,13 +125,21 @@ process.on('unhandledRejection',e=>console.error('unhandled:',e));
 const hashPw=(pw,salt)=>crypto.scryptSync(pw,salt,64).toString('hex');
 const checkPw=(a,pw)=>{const h=Buffer.from(hashPw(pw,a.salt),'hex'),e=Buffer.from(a.hash,'hex');return h.length==e.length&&crypto.timingSafeEqual(h,e)};
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
+// ---- recovery code: shown to the player once, kept only as a salted scrypt hash (like the password). A player who forgot the password sets a new one with it.
+//      16 random characters from a 32-letter alphabet without 0/O/1/I = 80 bits, printed as XXXX-XXXX-XXXX-XXXX. Single use: a successful reset issues a new code.
+const RECA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const newRecCode=()=>{let s='';for(let i=0;i<16;i++)s+=RECA[crypto.randomInt(RECA.length)];return s.replace(/(.{4})(?=.)/g,'$1-')};
+const normRec=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,32);
+function setRec(a){const code=newRecCode(),salt=crypto.randomBytes(16).toString('hex');a.rec={salt,hash:hashPw(normRec(code),salt)};dirty=true;return code}
+function checkRec(a,code){const n=normRec(code);if(!a||!a.rec||n.length!=16)return false;const h=Buffer.from(hashPw(n,a.rec.salt),'hex'),e=Buffer.from(a.rec.hash,'hex');return h.length==e.length&&crypto.timingSafeEqual(h,e)}
+const recFail=new Map();      // lower-case account name -> {n, t}: wrong-code attempts in the current hour (memory only; 5 per hour, then the reset is locked for that account)
 function newSession(name){const t=crypto.randomBytes(24).toString('hex');
   const mine=Object.entries(db.sessions).filter(([,s])=>s.name==name).sort((a,b)=>a[1].exp-b[1].exp);while(mine.length>=5)delete db.sessions[mine.shift()[0]];   // max 5 live sessions per account
   db.sessions[sha(t)]={name,exp:Date.now()+30*864e5};dirty=true;return t}
 function purge(){const now=Date.now();let n=0;for(const k of Object.keys(db.sessions))if(db.sessions[k].exp<now){delete db.sessions[k];n++}
   const viewed=new Set([...conns.values()].flatMap(c=>[c.name,c.view]));            // guests nobody uses any more (>1 day) are removed with every reference to them
   for(const name of Object.keys(db.players)){if(!isGuestName(name)||viewed.has(name))continue;const p=db.players[name];if(now-(p.seen||0)<864e5)continue;
-    delete db.players[name];n++;for(const o of Object.values(db.players)){o.friends=o.friends.filter(x=>x!=name);o.reqIn=o.reqIn.filter(x=>x!=name);o.reqOut=o.reqOut.filter(x=>x!=name);delete o.gifted[name]}}
+    delete db.players[name];n++;for(const k of Object.keys(db.sessions))if(db.sessions[k].name==name)delete db.sessions[k];for(const o of Object.values(db.players)){o.friends=o.friends.filter(x=>x!=name);o.reqIn=o.reqIn.filter(x=>x!=name);o.reqOut=o.reqOut.filter(x=>x!=name);delete o.gifted[name]}}
   if(n)dirty=true}
 const isGuestName=n=>/^Guest\d{4}$/.test(n)&&!own(db.accounts,n.toLowerCase());
 setInterval(safe('purge',()=>purge()),36e5);
@@ -145,10 +159,13 @@ function player(name){
   if(p.dogs.length&&!p.dogs.some(d=>!d.away))p.dogs[0].away=false;
   return p;
 }
+function migrateAll(){for(const n of Object.keys(db.players)){try{player(n)}catch(e){console.error('[migrate]',n,e&&e.message)}}}      // every old save gets every newer field now, not only when its owner logs in (leaderboard / purge scan them all)
 const lvl=p=>1+Math.floor(p.xp/100);
+const CARE_XP=500;      // care actions (pet, play, brush ...) give at most this much XP per day: they cost nothing, so without a cap a script could level up for the +50 coins / +1 gem every level pays
+function careXp(p,n,ws){const t=today();if(!p.cx||p.cx.d!=t)p.cx={d:t,n:0};n=Math.min(n,Math.max(0,CARE_XP-p.cx.n));if(n>0){p.cx.n+=n;addXp(p,n,ws)}}
 function addXp(p,n,ws){const b=lvl(p);if(n>0&&F.perks(p).has('xp'))n=Math.ceil(n*1.15);p.xp+=n;dirty=true;if(lvl(p)>b){p.coins+=50;p.gems+=1;if(ws)send(ws,{t:'levelup',lvl:lvl(p)})}}
 const give=(p,r)=>{p.coins+=r.c||0;p.gems+=r.g||0;p.tickets+=r.tk||0;dirty=true};
-const rtxt=r=>[r.c&&r.c+'🪙',r.g&&r.g+'💎',r.tk&&r.tk+'🎟'].filter(Boolean).join(' ');
+const rtxt=r=>[r.c&&r.c+'💰',r.g&&r.g+'💎',r.tk&&r.tk+'🎟'].filter(Boolean).join(' ');
 function rollDog(p){
   p.pity++; let r,x=Math.random()*100,acc=0;
   if(p.pity>=PITY) r=Math.random()<.2?'M':'L'; else for(const k in RATES){acc+=RATES[k]; if(x<acc){r=k;break}}
@@ -156,7 +173,7 @@ function rollDog(p){
   return mkDog(pick(BREEDS.filter(b=>b[2]==r))[0], Math.random()<.5?'Normal':pick(VARIANTS));
 }
 // ---- quests
-function ensureQ(p,name){const t=today();if(p.q.date==t)return;let s=0;for(const ch of name+t)s=(s*31+ch.charCodeAt(0))>>>0;const r=()=>(s=(s*1664525+1013904223)>>>0)/4294967296,pool=QPOOL.map((_,i)=>i),list=[];
+function ensureQ(p,name){const t=today();if(p.q.date==t)return;let s=0;for(const ch of name+t)s=(s*31+ch.charCodeAt(0))>>>0;const gst=isGuestName(name),r=()=>(s=(s*1664525+1013904223)>>>0)/4294967296,pool=QPOOL.map((_,i)=>i).filter(i=>!(gst&&QPOOL[i].t=='like')),list=[];      // guests cannot like houses, so they never get that quest
   while(list.length<4){list.push({k:pool.splice(Math.floor(r()*pool.length),1)[0],claimed:false})}p.q={date:t,cnt:{},list,bonus:false};dirty=true}
 function bump(name,type,n=1,ws){const p=player(name);ensureQ(p,name);p.stats[type]=(p.stats[type]||0)+n;p.q.cnt[type]=(p.q.cnt[type]||0)+n;dirty=true;S.goalAdd(name,type,n);
   if(ws)for(const e of p.q.list){const q=QPOOL[e.k];if(q.t==type&&p.q.cnt[type]-n<q.goal&&p.q.cnt[type]>=q.goal)send(ws,{t:'notify',m:'✅ Quest complete: '+q.n})}}
@@ -188,7 +205,7 @@ const STAY={IDLE:3000,WALK:500,RUN:300,SLEEP:14000,EAT:6000,DRINK:4000,PLAY:8000
 function decide(p,d,dogs,now,forced){
   const [x,y]=posOf(d,now); d.fx=x;d.fy=y; let stt=forced; d.trick=null;
   if(!stt){
-    const h=new Date().getHours(), night=h>=21||h<6, tv=p.items.some(i=>C.ITEMS[i.type].role=='tv');
+    const h=new Date().getHours(), night=h>=21||h<6, tv=p.items.some(i=>C.ITEMS[i.type]?.role=='tv');
     const w={IDLE:1,WALK:1.5,RUN:.5,SLEEP:.6,EAT:.5,DRINK:.4,PLAY:1,SNIFF:1,SIT:.7,BARK:.3,STRETCH:.4,WINDOW:.3,SEEK_OWNER:.4,EXPLORE:.8,CORNER:.2,SOCIAL:dogs.length>1?.8:0,WATCH:tv?.6:0};
     for(const k in PERS[d.pers]) w[k]*=PERS[d.pers][k];
     if(p.party&&p.party.until>now){w.PLAY*=3;w.RUN*=3;w.SOCIAL*=4;w.BARK*=3;w.SLEEP*=.1;w.CORNER*=.2}
@@ -218,7 +235,7 @@ const toView=(o,m)=>viewers(o).forEach(w=>send(w,m));
 const sendAll=m=>conns.forEach((_,w)=>send(w,m));
 const wsOf=name=>[...conns].find(([,c])=>c.name==name)?.[0];
 const sendMe=ws=>{const c=conns.get(ws),p=player(c.name);send(ws,{t:'me',name:c.name,guest:c.guest,coins:p.coins,gems:p.gems,tickets:p.tickets,xp:p.xp,lvl:lvl(p),pity:p.pity,wins:p.wins,
-  owned:[...new Set(p.dogs.map(d=>d.breed))],total:p.dogs.length,canClaim:p.daily.last!=today(),streak:p.daily.streak,inv:p.inv,unlock:p.unlock,ready:readyCount(p,c.name),stats:p.stats,av:p.av,avOwn:p.avOwn||[],...F.meExtra(p,c.name)})};
+  owned:[...new Set(p.dogs.map(d=>d.breed))],total:p.dogs.length,canClaim:p.daily.last!=today(),streak:p.daily.streak,dayNext:p.daily.last==ymd(Date.now()-864e5)?(p.daily.streak%7)+1:1,inv:p.inv,unlock:p.unlock,ready:readyCount(p,c.name),stats:p.stats,av:p.av,avOwn:p.avOwn||[],rec:c.guest?null:!!(own(db.accounts,c.name.toLowerCase())&&db.accounts[c.name.toLowerCase()].rec),...F.meExtra(p,c.name)})};
 const sendPlayers=()=>sendAll({t:'players',list:[...conns.values()].map(c=>({name:c.name,lvl:lvl(player(c.name)),view:c.view,park:!!c.park,dog:player(c.name).dogs[0]?.breed}))});
 function sendHouse(ws,owner){const p=player(owner),now=Date.now();send(ws,{t:'house',owner,av:p.av,deco:p.deco,items:p.items,dogs:houseDogs(p).map(d=>pub(d,now)),party:p.party&&p.party.until>now?p.party.until-now:0,likes:p.likes|0})}
 const pushHouse=o=>viewers(o).forEach(w=>sendHouse(w,o));
@@ -227,9 +244,14 @@ const realName=n=>Object.keys(db.players).find(k=>k.toLowerCase()==String(n).tri
 const avOf=n=>{const o=db.players[n];if(!o)return null;if(V)V.ensure(o,n);return o.av||null};   // a player's look (validated), for friend lists / leaderboards
 function sendFriends(ws,c){const p=player(c.name);const row=n=>{const w=wsOf(n),o=db.players[n];return{name:n,lvl:o?lvl(o):1,online:!!w,view:w?conns.get(w).view:null,dog:o?.dogs[0]?.breed,av:avOf(n)}};
   send(ws,{t:'friends',friends:p.friends.map(row),inReq:p.reqIn.map(row),outReq:p.reqOut,gifted:p.gifted,today:today()})}
-function leaderboard(me){const ps=Object.entries(db.players).filter(([n])=>!isGuestName(n)).map(([n,p])=>({n,lvl:lvl(p),xp:p.xp,breeds:uniq(p),dogs:p.dogs.length,wins:p.wins,items:p.items?.length||0,likes:p.likes|0,cozy:F.cozy(p).score,arcade:p.stats.mpwin|0,wishes:p.stats.wish|0}));
-  const top=(k)=>[...ps].sort((a,b)=>b[k]-a[k]||b.xp-a.xp).slice(0,10).map(x=>({n:x.n,v:x[k],lvl:x.lvl}));
-  const rank=k=>[...ps].sort((a,b)=>b[k]-a[k]||b.xp-a.xp).findIndex(x=>x.n==me)+1;
+const LBK=['xp','breeds','wins','likes','cozy','arcade','wishes'],LBZERO=new Set(['wins','likes','arcade','wishes']);     // boards where 0 means "none yet": nobody gets a medal for 0
+let lbC=null;
+function lbBuild(){const ps=Object.entries(db.players).filter(([n])=>!isGuestName(n)).map(([n,p])=>({n,lvl:lvl(p),xp:p.xp,breeds:uniq(p),dogs:p.dogs.length,wins:p.wins,items:p.items?.length||0,likes:p.likes|0,cozy:F.cozy(p).score,arcade:p.stats.mpwin|0,wishes:p.stats.wish|0}));
+  const sorted={};for(const k of LBK)sorted[k]=[...ps].sort((a,b)=>b[k]-a[k]||b.xp-a.xp);lbC={t:Date.now(),n:ps.length,sorted}}
+function leaderboard(me){if(!lbC||lbC.n<=150||Date.now()-lbC.t>3000)lbBuild();      // a big server reuses the sorted lists for 3 s (they are O(players) to build)
+  const ps=lbC.sorted;
+  const top=(k)=>ps[k].filter(x=>!LBZERO.has(k)||x[k]>0).slice(0,10).map(x=>({n:x.n,v:x[k],lvl:x.lvl}));
+  const rank=k=>{const i=ps[k].findIndex(x=>x.n==me);return i<0||(LBZERO.has(k)&&!(ps[k][i][k]>0))?0:i+1};
   const out={level:top('xp'),breeds:top('breeds'),wins:top('wins'),likes:top('likes'),cozy:top('cozy'),arcade:top('arcade'),wishes:top('wishes'),
     rank:{level:rank('xp'),breeds:rank('breeds'),wins:rank('wins'),likes:rank('likes'),cozy:rank('cozy'),arcade:rank('arcade'),wishes:rank('wishes')}};
   const avs=Object.create(null);for(const k of ['level','breeds','wins','likes','cozy','arcade','wishes'])for(const x of out[k])if(!(x.n in avs))avs[x.n]=avOf(x.n);   // one look per distinct player, shared by every board
@@ -253,8 +275,15 @@ function scrub(o,d){for(const k of BADK)if(Object.prototype.hasOwnProperty.call(
   for(const k of Object.keys(o)){const v=o[k];if(v&&typeof v=='object'){if(d>=3)o[k]=null;else scrub(v,d+1)}}}
 function drop(ws){const qi=queue.indexOf(ws);if(qi>=0)queue.splice(qi,1);const c=conns.get(ws);if(c)clearTimeout(c.rpsBot);if(c&&c.game)endRps(c.game,c.name);S.onClose(ws);A.onClose(ws);F.onClose(ws);conns.delete(ws)}
 const ipOf=ws=>ws.ip||'?', isLocal=ip=>/^(::1|127\.|::ffff:127\.)/.test(ip), lim=new Map();
+// Behind a reverse proxy (Render ...) every socket comes from the proxy, so all players would share ONE rate-limit bucket. Render appends the address it saw to X-Forwarded-For,
+// so with HOPS=2 the client is the 2nd entry from the right (anything a client sends in front of that is ignored). TRUST_PROXY_HOPS=0 turns this off; on Render it is on by default.
+const HOPS=process.env.TRUST_PROXY_HOPS!=null&&process.env.TRUST_PROXY_HOPS!==''?Math.max(0,+process.env.TRUST_PROXY_HOPS|0):(process.env.RENDER?2:0);
+function clientIp(req){const a=String(req&&req.socket&&req.socket.remoteAddress||'?');if(!HOPS)return a;
+  const x=String(req.headers&&req.headers['x-forwarded-for']||'').split(',').map(s=>s.trim()).filter(Boolean);if(!x.length)return a;
+  const ip=x[Math.max(0,x.length-HOPS)].slice(0,64);return isLocal(ip)?'p:'+ip:ip}
+const over=(ip,kind,max,win)=>{if(isLocal(ip))return false;const e=lim.get(kind+ip);return !!e&&Date.now()-e.t<=win&&e.n>=max};     // look only, do not count
 function hit(ip,kind,max,win){if(isLocal(ip))return true;const k=kind+ip,n=Date.now(),e=lim.get(k);if(!e||n-e.t>win){lim.set(k,{t:n,n:1});return true}return ++e.n<=max}
-setInterval(safe('lim',()=>{const n=Date.now();for(const [k,e] of lim)if(n-e.t>36e5)lim.delete(k)}),6e5);
+setInterval(safe('lim',()=>{const n=Date.now();for(const [k,e] of lim)if(n-e.t>36e5)lim.delete(k);for(const [k,e] of recFail)if(n-e.t>36e5)recFail.delete(k)}),6e5);
 function enter(ws,name,guest,token){
   for(const [w,o] of conns) if(o.name==name&&w!==ws){send(w,{t:'kick'});drop(w);w.close()}
   conns.set(ws,{name,view:name,guest,last:Date.now()}); const p=player(name);ensureQ(p,name);
@@ -262,10 +291,10 @@ function enter(ws,name,guest,token){
   send(ws,{t:'welcome',breeds:BREEDS,rates:RATES,cost:COST,pity:PITY,cat:{items:C.ITEMS,food:C.FOOD,acc:C.ACC,walls:C.WALLS,floors:C.FLOORS,lights:C.LIGHTS,tricks:C.TRICKS,season:C.season()},max:{house:maxDogs(p),items:maxItems(p)},house:C.HOUSE,sets:C.SETS,perks:C.PERKS,events:C.EVENTS});
   S.touch(name); sendMe(ws); sendHouse(ws,name); sendPlayers(); send(ws,S.goalMsg(name)); F.onEnter(ws,conns.get(ws),p);
   if(p.daily.last!=today()) send(ws,{t:'notify',m:'🎁 รางวัลล็อกอินรายวันพร้อมรับแล้ว!'});
-  for(const n of p.reqIn) send(ws,{t:'notify',m:'👥 '+n+' ส่งคำขอเป็นเพื่อน'});
+  for(const n of p.reqIn.slice(0,3)) send(ws,{t:'notify',m:'👥 '+n+' ส่งคำขอเป็นเพื่อน'});
 }
 wss.on('connection',(ws,req)=>{
-  let last=0,count=0,fails=0,tries=0,flood=0;ws.ip=String(req&&req.socket&&req.socket.remoteAddress||'?');ws.born=Date.now();
+  let last=0,count=0,fails=0,tries=0,flood=0;ws.ip=clientIp(req);ws.born=Date.now();
   ws.on('error',()=>{});
   ws.on('message',raw=>{ try{ onMessage(raw) }catch(e){ console.error('[msg]',e&&e.stack||e) } });
   function onMessage(raw){
@@ -276,35 +305,52 @@ wss.on('connection',(ws,req)=>{
     scrub(m,0);
     let c=conns.get(ws); if(c)c.last=now;
     if(!c){                                   // ---- authentication (server-side only)
-      const bad=e=>{fails++;send(ws,{t:'auth',ok:false,err:e})};
-      if(fails>=8||++tries>30||!hit(ipOf(ws),'f',25,3e5)) return send(ws,{t:'auth',ok:false,err:'ลองมากเกินไป รอสักครู่แล้วรีเฟรช'});
+      const bad=(e,x)=>{fails++;hit(ipOf(ws),'f',25,3e5);send(ws,{t:'auth',ok:false,err:e,...x})};            // only FAILED attempts count against the per-address limit
+      if(fails>=8||++tries>30||over(ipOf(ws),'f',25,3e5)) return send(ws,{t:'auth',ok:false,err:'ลองมากเกินไป รอสักครู่แล้วรีเฟรช',busy:1});
       if(typeof m.t!='string') return;
       const user=String(m.user||'').trim(), pw=String(m.pass||'');
       if(m.t=='register'){
         if(!hit(ipOf(ws),'r',10,36e5)) return bad('สมัครบ่อยเกินไป ลองใหม่ภายหลัง');
-        if(!/^[A-Za-z0-9_฀-๿]{3,16}$/.test(user)||/^guest/i.test(user)||RESERVED.includes(user.toLowerCase())) return bad('ชื่อผู้ใช้ 3-16 ตัว (ห้ามขึ้นต้น Guest)');
+        const bn=baseName(user);
+        if(!/^[A-Za-z0-9_\u0E01-\u0E3A\u0E40-\u0E4E\u0E50-\u0E59]{3,16}$/.test(user)||bn.length<3||/^guest/i.test(bn)||RESERVED.includes(user.toLowerCase())||RESERVED.includes(bn)) return bad('ชื่อผู้ใช้ 3-16 ตัว (ห้ามขึ้นต้น Guest)');
         if(!/^\S+@\S+\.\S+$/.test(String(m.email||''))) return bad('อีเมลไม่ถูกต้อง');
         if(pw.length<6||pw.length>64) return bad('รหัสผ่านอย่างน้อย 6 ตัว');
-        if(own(db.accounts,user.toLowerCase())||Object.keys(db.players).some(k=>k.toLowerCase()==user.toLowerCase())) return bad('ชื่อนี้ถูกใช้แล้ว');
+        if(own(db.accounts,user.toLowerCase())||Object.keys(db.players).some(k=>baseName(k)==bn)||Object.keys(db.accounts).some(k=>baseName(k)==bn)) return bad('ชื่อนี้ถูกใช้แล้ว');
         const salt=crypto.randomBytes(16).toString('hex');
         db.accounts[user.toLowerCase()]={name:user,email:String(m.email).slice(0,60),salt,hash:hashPw(pw,salt)}; dirty=true;
-        enter(ws,user,false,newSession(user));
+        const rc=setRec(db.accounts[user.toLowerCase()]);enter(ws,user,false,newSession(user));
+        send(ws,{t:'rec',code:rc,fresh:1});      // the recovery code is shown once, right after signing up
       } else if(m.t=='login'){
         const a=own(db.accounts,user.toLowerCase())?db.accounts[user.toLowerCase()]:null;
+        if(!a)hashPw('x','00');                     // an unknown name costs the same time as a real one (no way to tell which names exist)
         if(!a||!a.salt||pw.length>64||!checkPw(a,pw)) return bad('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
         enter(ws,a.name,false,newSession(a.name));
+      } else if(m.t=='reset'){                  // forgot the password: user name + recovery code + new password
+        if(!hit(ipOf(ws),'rs',10,36e5)) return bad('ลองมากเกินไป รอสักครู่แล้วลองใหม่');
+        const key=user.toLowerCase(),a=own(db.accounts,key)?db.accounts[key]:null,now2=Date.now();
+        let rf=recFail.get(key);if(!rf||now2-rf.t>36e5){rf={n:0,t:now2};recFail.set(key,rf)}
+        if(rf.n>=5) return bad('ลองผิดหลายครั้งเกินไป ลองใหม่ภายใน 1 ชั่วโมง');
+        if(pw.length<6||pw.length>64) return bad('รหัสผ่านใหม่อย่างน้อย 6 ตัว');
+        if(!a)hashPw('x','00');                  // unknown names cost the same time as real ones
+        if(!a||!checkRec(a,m.code)){rf.n++;return bad('ชื่อผู้ใช้หรือรหัสกู้คืนไม่ถูกต้อง')}
+        recFail.delete(key);
+        a.salt=crypto.randomBytes(16).toString('hex');a.hash=hashPw(pw,a.salt);
+        for(const k of Object.keys(db.sessions))if(db.sessions[k].name==a.name)delete db.sessions[k];     // every old login on other devices stops working
+        const rc=setRec(a);enter(ws,a.name,false,newSession(a.name));
+        send(ws,{t:'rec',code:rc,reset:1});                                                  // the used code is gone: here is the next one
       } else if(m.t=='resume'){
         const s=db.sessions[sha(String(m.token||'').slice(0,100))];
-        if(!s||s.exp<Date.now()||!own(db.players,s.name)&&!own(db.accounts,s.name.toLowerCase())) return bad('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
-        enter(ws,s.name,false,m.token);
+        if(!s||s.exp<Date.now()||!own(db.players,s.name)&&!own(db.accounts,s.name.toLowerCase())) return bad('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่',{exp:1});
+        enter(ws,s.name,isGuestName(s.name),m.token);
       } else if(m.t=='guest'){
         if(!hit(ipOf(ws),'g',40,36e5)) return bad('เข้าเป็น Guest บ่อยเกินไป');
         let g,k=0;do g='Guest'+(1000+Math.floor(Math.random()*9000));while(k++<50&&(own(db.players,g)||[...conns.values()].some(o=>o.name==g)));
-        enter(ws,g,true,null)}
+        enter(ws,g,true,newSession(g))}       // a guest gets a session too: after a dropped connection (phone in the pocket) the SAME guest comes back
       return;
     }
     if(typeof m.t!='string'||m.t.length>24) return;
     if(m.t=='ping'){send(ws,{t:'pong',c:+m.c||0});return}
+    if(m.t=='hb'){send(ws,{t:'hb'});return}      // heartbeat: the page checks that something comes back
     if(S.handle(ws,c,m)||A.handle(ws,c,m)||F.handle(ws,c,m)||V.handle(ws,c,m)) return;
     const p=player(c.name), mine=c.view==c.name, toast=s=>send(ws,{t:'toast',m:s});
     switch(m.t){
@@ -321,37 +367,42 @@ wss.on('connection',(ws,req)=>{
         const all=[];for(const k in AVD.KINDS)for(const it of AVD.KINDS[k])if(it.p)all.push(k+':'+it.id);p.avOwn=all;
         dirty=true;sendMe(ws);toast('🛠️ แอดมิน: เหรียญ '+p.coins.toLocaleString()+' + ของครบทุกชิ้น');
         console.log('[admin] cheat granted to',c.name);break }
+      case 'rec_new':{                       // (re)create the recovery code - needs the password again
+        const a=!c.guest&&own(db.accounts,c.name.toLowerCase())?db.accounts[c.name.toLowerCase()]:null;if(!a)break;
+        if(!hit(ipOf(ws),'rn',10,36e5)||(c.recFails|0)>=5){send(ws,{t:'rec_err',err:'ลองมากเกินไป รอสักครู่'});break}
+        if(typeof m.pass!='string'||m.pass.length>64||!checkPw(a,m.pass)){c.recFails=(c.recFails|0)+1;send(ws,{t:'rec_err',err:'รหัสผ่านไม่ถูกต้อง'});break}
+        c.recFails=0;send(ws,{t:'rec',code:setRec(a)});sendMe(ws);break }
       case 'logout':{ if(m.token) delete db.sessions[sha(String(m.token).slice(0,100))]; dirty=true; drop(ws); sendPlayers(); break }
       case 'visit':{ if(own(db.players,m.id)){ S.leavePark(ws); if(c.view!=m.id&&m.id!=c.name) bump(c.name,'visit',1,ws); c.view=m.id;sendHouse(ws,m.id);sendMe(ws);sendPlayers();F.onVisit(ws,c,m.id)} break }
-      case 'chat':{ const s=String(m.m||'').replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e]/g,'').replace(/\s+/g,' ').trim().slice(0,120);
+      case 'chat':{ let s=String(m.m||'').replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e]/g,'').replace(/\s+/g,' ').trim();s=Array.from(s).slice(0,120).join('').trim();   // cut by characters, never in the middle of an emoji
         if(!s||now-(c.lastChat||0)<900||(s==c.lastTxt&&now-c.lastChat<8000)) { if(s&&now-(c.lastChat||0)<900)toast('💬 พิมพ์ช้าลงหน่อยนะ'); break } c.lastChat=now;c.lastTxt=s; sendAll({t:'chat',from:c.name,m:s}); break }
       case 'emoji':{ if(['❤️','😂','👍','🐶','⭐','😮'].includes(m.e)) toView(c.view,{t:'fx',e:m.e,x:rnd(100,700),y:rnd(250,400)}); break }
       case 'deco':{
         const DK={wall:C.WALLS,floor:C.FLOORS,light:C.LIGHTS},T=own(DK,m.k)?DK[m.k]:null; if(!mine||!T||!own(T,m.v)) break;
         if(T[m.v]>0&&!p.unlock[m.k].includes(m.v)){ if(p.coins<T[m.v]) return toast('Coins ไม่พอ'); p.coins-=T[m.v]; p.unlock[m.k].push(m.v); toast('🎨 ปลดล็อก '+m.v+'!') }
         p.deco[m.k]=m.v;dirty=true;toView(c.name,{t:'deco',deco:p.deco});sendMe(ws);break }
-      case 'rename':{ const d=p.dogs.find(d=>d.id===m.dog),s=String(m.name||'').replace(/[<>&"'\u0000-\u001f\u200b-\u200f\u2028-\u202e]/g,'').trim().slice(0,12); if(d&&s){d.name=s;dirty=true;pushDogs(c.name,p)} break }
+      case 'rename':{ const d=p.dogs.find(d=>d.id===m.dog);let s=String(m.name||'').replace(/[<>&"'\u0000-\u001f\u200b-\u200f\u2028-\u202e]/g,'').trim();s=Array.from(s).slice(0,12).join('').trim(); if(d&&s){d.name=s;dirty=true;pushDogs(c.name,p)} break }
       case 'daily':{
         if(p.daily.last==today()) return toast('รับรางวัลวันนี้ไปแล้ว');
-        const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
-        p.daily.streak=p.daily.last==y?(p.daily.streak%7)+1:1; p.daily.last=today();
+        const y=ymd(Date.now()-864e5);
+        p.daily.streak=p.daily.last==y?(p.daily.streak%7)+1:1; p.daily.best=Math.max(p.daily.best|0,p.daily.streak); p.daily.last=today();
         const r=DAILY[p.daily.streak-1]; give(p,r);
         send(ws,{t:'daily_ok',day:p.daily.streak,r}); sendMe(ws); break }
       case 'act':{
         if(!['pet','play','toy','brush','bath','train'].includes(m.a)) break;
         if(!own(db.players,c.view)) break; const dogs=houseDogs(db.players[c.view]), d=dogs.find(d=>d.id===m.dog); if(!d) break;
-        if(m.a=='pet'){ toView(c.view,{t:'fx',e:'❤️',dog:d.id,pet:1}); if(mine){d.happy=clamp(d.happy+8);d.bond=clamp(d.bond+1+(F.perks(p).has('bond')?1:0));addXp(p,1,ws);bump(c.name,'pet',1,ws);F.wish(p,d,'pet',null,ws,c.name)} }
+        if(m.a=='pet'){ toView(c.view,{t:'fx',e:'❤️',dog:d.id,pet:1}); if(mine){d.happy=clamp(d.happy+8);d.bond=clamp(d.bond+1+(F.perks(p).has('bond')?1:0));careXp(p,1,ws);bump(c.name,'pet',1,ws);F.wish(p,d,'pet',null,ws,c.name)} }
         else if(mine){
-          if(m.a=='play'||m.a=='toy'){ d.bond=clamp(d.bond+2); addXp(p,3,ws); bump(c.name,'play',1,ws); decide(p,d,dogs,now,'PLAY'); F.wish(p,d,'play',null,ws,c.name) }
-          else if(m.a=='brush'){ d.happy=clamp(d.happy+6);d.clean=clamp(d.clean+8);d.bond=clamp(d.bond+1); bump(c.name,'brush',1,ws);addXp(p,2,ws); toView(c.view,{t:'fx',e:'✨',dog:d.id}); F.wish(p,d,'brush',null,ws,c.name) }
-          else if(m.a=='bath'){ if(p.coins<5) return toast('Coins ไม่พอ'); p.coins-=5; d.clean=100; d.happy=clamp(d.happy+4); d.bond=clamp(d.bond+1); bump(c.name,'bath',1,ws);addXp(p,2,ws); toView(c.view,{t:'fx',e:'🛁',dog:d.id}); F.wish(p,d,'bath',null,ws,c.name) }
+          if(m.a=='play'||m.a=='toy'){ d.bond=clamp(d.bond+2); careXp(p,3,ws); bump(c.name,'play',1,ws); decide(p,d,dogs,now,'PLAY'); F.wish(p,d,'play',null,ws,c.name) }
+          else if(m.a=='brush'){ d.happy=clamp(d.happy+6);d.clean=clamp(d.clean+8);d.bond=clamp(d.bond+1); bump(c.name,'brush',1,ws);careXp(p,2,ws); toView(c.view,{t:'fx',e:'✨',dog:d.id}); F.wish(p,d,'brush',null,ws,c.name) }
+          else if(m.a=='bath'){ if(p.coins<5) return toast('Coins ไม่พอ'); p.coins-=5; d.clean=100; d.happy=clamp(d.happy+4); d.bond=clamp(d.bond+1); bump(c.name,'bath',1,ws);careXp(p,2,ws); toView(c.view,{t:'fx',e:'🛁',dog:d.id}); F.wish(p,d,'bath',null,ws,c.name) }
           else if(m.a=='train'){
             if(d.energy<15) return toast(d.name+' หมดแรงแล้ว ให้พักก่อนนะ 💤');
             const nx=C.TRICKS.find(([n,b])=>!d.tricks.includes(n)&&d.bond>=b); let tr,isNew=false;
             if(nx&&(!d.tricks.length||Math.random()<.6)){tr=nx[0];d.tricks.push(tr);isNew=true}else if(d.tricks.length)tr=pick(d.tricks);else return toast('Bond ยังไม่พอสำหรับเทรน');
-            d.energy=clamp(d.energy-10);d.bond=clamp(d.bond+1);d.happy=clamp(d.happy+5);addXp(p,isNew?8:3,ws);bump(c.name,'train',1,ws);
+            d.energy=clamp(d.energy-10);d.bond=clamp(d.bond+1);d.happy=clamp(d.happy+5);careXp(p,isNew?8:3,ws);bump(c.name,'train',1,ws);
             decide(p,d,dogs,now,'TRICK');d.trick=tr;F.wish(p,d,'train',null,ws,c.name);
-            if(isNew){p.coins+=10;toast('🎓 '+d.name+' learned “'+tr+'”! +10🪙')}else toast('👏 '+d.name+' did “'+tr+'”')
+            if(isNew){p.coins+=10;toast('🎓 '+d.name+' learned “'+tr+'”! +10💰')}else toast('👏 '+d.name+' did “'+tr+'”')
           }
         } else break;
         dirty=true; toView(c.view,{t:'dogs',dogs:[pub(d,now)]}); sendMe(ws); break;
@@ -361,11 +412,11 @@ wss.on('connection',(ws,req)=>{
         if((p.inv[m.food]||0)>0) p.inv[m.food]--; else if(m.food=='kibble'&&p.coins>=FD.p) p.coins-=FD.p; else return toast('ไม่มี '+FD.n+' ในกระเป๋า — ซื้อที่ Shop');
         const fav=String(d.favFood).toLowerCase()==m.food;
         d.hunger=clamp(d.hunger+FD.h);d.happy=clamp(d.happy+FD.hp*(fav?2.5:1));if(FD.c)d.clean=clamp(d.clean+FD.c);d.bond=clamp(d.bond+1+(FD.b||0)+(fav?1:0));
-        addXp(p,3,ws);bump(c.name,'feed',1,ws);decide(p,d,dogs,now,'EAT');F.wish(p,d,'feed',m.food,ws,c.name);
+        careXp(p,3,ws);bump(c.name,'feed',1,ws);decide(p,d,dogs,now,'EAT');F.wish(p,d,'feed',m.food,ws,c.name);
         toView(c.view,{t:'fx',e:fav?'😋':'🍖',dog:d.id}); if(fav)toast('😋 '+d.name+' loves '+FD.n+'!');
         dirty=true;toView(c.view,{t:'dogs',dogs:[pub(d,now)]});sendMe(ws);break }
       case 'equip':{
-        if(!mine) break; const d=p.dogs.find(d=>d.id===m.dog); if(!d) break;
+        if(!mine) return toast('ทำได้เฉพาะกับหมาในบ้านของตัวเองนะ'); const d=p.dogs.find(d=>d.id===m.dog); if(!d) break;
         if(m.acc===null||m.acc==='') d.acc=null;
         else{ if(!cat(C.ACC,m.acc)) break; const worn=p.dogs.filter(x=>x.acc==m.acc&&x!==d).length; if((p.inv[m.acc]||0)<=worn) return toast('ไม่มีไอเทมนี้ในคลัง (หรือถูกใส่อยู่)'); d.acc=m.acc }
         dirty=true;pushDogs(c.name,p);send(ws,{t:'equip_ok',dog:d.id,acc:d.acc});break }
@@ -397,17 +448,17 @@ wss.on('connection',(ws,req)=>{
         if(mine) pushDogs(c.name,p); break;
       }
       case 'dog_fav':{ const d=p.dogs.find(d=>d.id===m.dog); if(d){d.fav=!d.fav;dirty=true;if(!d.away)pushDogs(c.name,p);send(ws,{t:'dogs_all',dogs:p.dogs.map(x=>pub(rt(x),Date.now()))})} break }
-      case 'dog_home':{ if(!mine) break; const d=p.dogs.find(d=>d.id===m.dog); if(!d) break;
+      case 'dog_home':{ if(!mine) return toast('ทำได้เฉพาะกับหมาในบ้านของตัวเองนะ'); const d=p.dogs.find(d=>d.id===m.dog); if(!d) break;
         if(m.on){ if(p.dogs.filter(x=>!x.away).length>=maxDogs(p)) return toast('บ้านเต็ม (สูงสุด '+maxDogs(p)+' ตัว) — อัปเกรดบ้านเพื่อเลี้ยงเพิ่ม'); d.away=false;rt(d);decide(p,d,houseDogs(p),Date.now()) }
         else{ if(p.dogs.filter(x=>!x.away).length<=1) return toast('ต้องมีหมาอยู่บ้านอย่างน้อย 1 ตัว'); d.away=true }
         dirty=true;pushDogs(c.name,p);send(ws,{t:'dogs_all',dogs:p.dogs.map(x=>pub(rt(x),Date.now()))});break }
       case 'dogs_get':{ send(ws,{t:'dogs_all',dogs:p.dogs.map(x=>pub(rt(x),Date.now()))}); break }
       case 'release':{
-        if(!mine) break; const ids=(Array.isArray(m.ids)?m.ids:[]).slice(0,60).map(String); let gain=0,cnt=0;
+        if(!mine) return toast('ทำได้เฉพาะกับหมาในบ้านของตัวเองนะ'); const ids=(Array.isArray(m.ids)?m.ids:[]).slice(0,60).map(String); let gain=0,cnt=0;
         for(const id of ids){ if(p.dogs.length<=1) break; const i=p.dogs.findIndex(d=>d.id==id); if(i<0||p.dogs[i].fav) continue;
           if(!p.dogs[i].away&&p.dogs.filter(d=>!d.away).length<=1) continue;
           gain+=C.RELEASE[BR[p.dogs[i].breed][2]]; p.dogs.splice(i,1); cnt++ }
-        p.coins+=gain;dirty=true; toast(cnt?`👋 ปล่อยหมา ${cnt} ตัว +${gain}🪙`:'ไม่มีหมาที่ปล่อยได้ (ตัวโปรดปล่อยไม่ได้)');
+        p.coins+=gain;dirty=true; toast(cnt?`👋 ปล่อยหมา ${cnt} ตัว +${gain}💰`:'ไม่มีหมาที่ปล่อยได้ (ตัวโปรดปล่อยไม่ได้)');
         pushHouse(c.name);send(ws,{t:'dogs_all',dogs:p.dogs.map(x=>pub(rt(x),Date.now()))});sendMe(ws);break }
       case 'quests':{ send(ws,{t:'quests',list:questList(p,c.name),bonus:{ready:p.q.list.every(e=>e.claimed),claimed:p.q.bonus},date:p.q.date}); break }
       case 'quest_claim':{ const ql=questList(p,c.name),q=ql[m.i|0]; if(!q||q.claimed||q.prog<q.goal) break; p.q.list[q.i].claimed=true; give(p,q.r); toast('🎁 +'+rtxt(q.r));
@@ -425,7 +476,7 @@ wss.on('connection',(ws,req)=>{
         if(p.friends.includes(n)) return toast('เป็นเพื่อนกันอยู่แล้ว'); const o=player(n);
         if(p.reqIn.includes(n)){ p.reqIn=p.reqIn.filter(x=>x!=n);o.reqOut=o.reqOut.filter(x=>x!=c.name);p.friends.push(n);o.friends.push(c.name);toast('🤝 เป็นเพื่อนกับ '+n+' แล้ว!'); const ow=wsOf(n); if(ow){send(ow,{t:'notify',m:'🤝 '+c.name+' ตอบรับเป็นเพื่อน'});sendFriends(ow,conns.get(ow))} }
         else if(p.reqOut.includes(n)) return toast('ส่งคำขอไปแล้ว');
-        else{ p.reqOut.push(n);o.reqIn.push(c.name);toast('📨 ส่งคำขอถึง '+n+' แล้ว'); const ow=wsOf(n); if(ow){send(ow,{t:'notify',m:'👥 '+c.name+' ส่งคำขอเป็นเพื่อน'});sendFriends(ow,conns.get(ow));sendMe(ow)} }
+        else{ if(o.reqIn.length>=40) return toast('ผู้เล่นคนนั้นมีคำขอเป็นเพื่อนค้างเยอะแล้ว ลองใหม่ภายหลังนะ'); p.reqOut.push(n);o.reqIn.push(c.name);toast('📨 ส่งคำขอถึง '+n+' แล้ว'); const ow=wsOf(n); if(ow){send(ow,{t:'notify',m:'👥 '+c.name+' ส่งคำขอเป็นเพื่อน'});sendFriends(ow,conns.get(ow));sendMe(ow)} }
         dirty=true;sendFriends(ws,c);break }
       case 'friend_ok':{ const n=realName(m.name); if(!n||!p.reqIn.includes(n)) break; const o=player(n); p.reqIn=p.reqIn.filter(x=>x!=n);o.reqOut=o.reqOut.filter(x=>x!=c.name);
         p.friends.push(n);o.friends.push(c.name);dirty=true;toast('🤝 เป็นเพื่อนกับ '+n+' แล้ว!'); const ow=wsOf(n); if(ow){send(ow,{t:'notify',m:'🤝 '+c.name+' ตอบรับเป็นเพื่อน'});sendFriends(ow,conns.get(ow))} sendFriends(ws,c);sendMe(ws);break }
@@ -433,7 +484,7 @@ wss.on('connection',(ws,req)=>{
       case 'friend_del':{ const n=realName(m.name); if(!n) break; const o=player(n); p.friends=p.friends.filter(x=>x!=n);o.friends=o.friends.filter(x=>x!=c.name);dirty=true;sendFriends(ws,c);break }
       case 'friend_gift':{ const n=realName(m.name); if(!n||!p.friends.includes(n)) break; if(p.gifted[n]==today()) return toast('วันนี้ส่งของขวัญให้คนนี้แล้ว');
         const o=player(n); p.gifted[n]=today(); o.inv.treat=Math.min(99,(o.inv.treat||0)+1); o.coins+=5; p.coins+=8; dirty=true; bump(c.name,'gift',1,ws);F.mailTo(n,{k:'gift',from:c.name});
-        toast('🎁 ส่งของขวัญให้ '+n+' แล้ว +8🪙'); const ow=wsOf(n); if(ow){send(ow,{t:'notify',m:'🎁 '+c.name+' ส่งขนมให้คุณ (+5🪙)'});sendMe(ow)} sendFriends(ws,c);sendMe(ws);break }
+        toast('🎁 ส่งของขวัญให้ '+n+' แล้ว +8💰'); const ow=wsOf(n); if(ow){send(ow,{t:'notify',m:'🎁 '+c.name+' ส่งขนมให้คุณ (+5💰)'});sendMe(ow)} sendFriends(ws,c);sendMe(ws);break }
       case 'lb':{ send(ws,{t:'lb',...leaderboard(c.name)}); break }
       case 'mg_start':{ if(!['memory','catch','guess'].includes(m.g)) break; c.mg={g:m.g,t:now}; break }
       case 'mg_end':{
@@ -452,7 +503,7 @@ wss.on('connection',(ws,req)=>{
           g.timer=setTimeout(()=>endRps(g),25000);}
         else{queue.push(ws);send(ws,{t:'rps_wait'});clearTimeout(c.rpsBot);c.rpsBot=setTimeout(()=>rpsBot(ws),RPS_WAIT)} break;      // nobody came: a friendly bot plays (like the other online games)
       }
-      case 'rps_cancel':{ const qi=queue.indexOf(ws); if(qi>=0) queue.splice(qi,1); clearTimeout(c.rpsBot); break }
+      case 'rps_cancel':{ const qi=queue.indexOf(ws); if(qi>=0) queue.splice(qi,1); clearTimeout(c.rpsBot); if(c.game) endRps(c.game,c.name); break }     // closing the window in the middle of a match = giving up (no more half-dead match that blocks the next search)
       case 'rps_pick':{ const g=c.game; if(!g||typeof m.v!='string'||!['R','P','S'].includes(m.v)||g.pick[c.name]) break; g.pick[c.name]=m.v; if(Object.keys(g.pick).length==2) endRps(g); break }
     }
   }
@@ -473,16 +524,17 @@ function endRps(g,quitter){            // server decides winner & pays out
   const beats={R:'S',S:'P',P:'R'}, pa=A&&g.pick[A.name], pb=g.bot?g.pick.$bot:B&&g.pick[B.name]; let ra=0;
   if(quitter) ra=quitter==(A&&A.name)?-1:1; else if(pa&&!pb) ra=1; else if(pb&&!pa) ra=-1; else if(pa&&pb&&pa!=pb) ra=beats[pa]==pb?1:-1;
   for(const [w,c,my,op,r] of [[g.a,A,pa,pb,ra],[g.b,B,pb,pa,-ra]]){
-    if(!c) continue; c.game=null; const p=player(c.name); let gain=r>0?30:r==0?5:0;
-    if(g.bot){if(!p.mp||p.mp.date!=today())p.mp={date:today(),coins:0};gain=clamp(Math.round(gain/2),0,Math.max(0,600-p.mp.coins));p.mp.coins+=gain}
-    p.coins+=gain; if(r>0){if(!g.bot)p.wins++;addXp(p,g.bot?10:20,w);bump(c.name,'win',1,w)} dirty=true;
+    if(!c) continue; c.game=null; const p=player(c.name); let gain=r>0?30:r==0&&(my||op)?5:0;      // nobody picked anything = a timeout, not a draw: no reward
+    if(!p.mp||p.mp.date!=today())p.mp={date:today(),coins:0};     // matches against people count in the same daily arcade cap as bot matches (600 coins)
+    if(g.bot)gain=Math.round(gain/2);gain=clamp(gain,0,Math.max(0,600-p.mp.coins));p.mp.coins+=gain;
+    p.coins+=gain; if(r>0){if(!g.bot)p.wins++;if(gain>0)addXp(p,g.bot?10:20,w);bump(c.name,'win',1,w)} if(my||op||quitter)bump(c.name,'mp',1,w); dirty=true;
     send(w,{t:'rps_result',my,op,r,gain,bot:g.bot?1:0}); sendMe(w);
   }
 }
 // ---- simulation (1 Hz, only watched houses) + random cute events
-setInterval(()=>{
+setInterval(safe('sim',()=>{
   const now=Date.now();
-  for(const o of new Set([...conns.values()].map(c=>c.view))){
+  for(const o of new Set([...conns.values()].map(c=>c.view))){ try{
     const p=db.players[o]; if(!p) continue; const dogs=houseDogs(p), changed=[], pk=F.perks(p);
     for(const d of dogs){if(d.fetch){if(now-d.fetch.t0>30000)d.fetch=null;else continue}
       d.hunger=clamp(d.hunger-.25*(pk.has('hunger')?.65:1),5); d.energy=clamp(d.energy-.12*(pk.has('energy')?.6:1),5); d.happy=clamp(d.happy-.05,pk.has('happy')?45:20); d.clean=clamp(d.clean-.03,10);
@@ -490,23 +542,23 @@ setInterval(()=>{
       if(d.hunger<25&&(!d.nt||now-d.nt>3e5)){d.nt=now;const ow=wsOf(o);ow&&send(ow,{t:'notify',m:`🐶 ${d.name} หิวแล้ว!`})}
     }
     if(changed.length) toView(o,{t:'dogs',dogs:changed});
-  }
-},1000);
+  }catch(e){console.error('[sim]',o,e&&e.stack||e)} }
+}),1000);
 const EVT=[['found a ball!','PLAY'],['fell asleep on the sofa.','SLEEP'],['wants to play!','PLAY'],['discovered a new place!','EXPLORE'],
   ['brought you a toy!','SEEK_OWNER'],['is looking out the window.','WINDOW'],['is chasing a butterfly 🦋','RUN'],['is rolling around happily!','STRETCH']];
-setInterval(()=>{
+setInterval(safe('events',()=>{
   const now=Date.now();
-  for(const o of new Set([...conns.values()].map(c=>c.view))){
+  for(const o of new Set([...conns.values()].map(c=>c.view))){ try{
     const p=db.players[o]; if(!p) continue; const dogs=houseDogs(p).filter(d=>!d.fetch); if(!dogs.length) continue; const ow=wsOf(o), here=ow&&conns.get(ow).view==o;
     if(dogs.length>1&&Math.random()<.2){const [a,b]=dogs.sort(()=>Math.random()-.5);decide(p,a,dogs,now,'SLEEP');decide(p,b,dogs,now,'SLEEP');
-      toView(o,{t:'dogs',dogs:[pub(a,now),pub(b,now)]});toView(o,{t:'event',text:`💤 ${a.name} และ ${b.name} นอนด้วยกัน (+5🪙)`});
+      toView(o,{t:'dogs',dogs:[pub(a,now),pub(b,now)]});toView(o,{t:'event',text:`💤 ${a.name} และ ${b.name} นอนด้วยกัน (+5💰)`});
       if(here){p.coins+=5;dirty=true;sendMe(ow)} continue}
     const d=pick(dogs);
     if(Math.random()<.18){ const big=Math.random()<.04, r=big?{g:1}:{c:Math.floor(rnd(3,9))}; decide(p,d,dogs,now,'SNIFF'); toView(o,{t:'dogs',dogs:[pub(d,now)]});
-      toView(o,{t:'event',text:`⛏️ ${d.name} dug up ${big?'a shiny gem 💎':'a buried coin 🪙'}${here?' (+'+rtxt(r)+')':''}`}); if(here){give(p,r);sendMe(ow)} continue }
+      toView(o,{t:'event',text:`⛏️ ${d.name} dug up ${big?'a shiny gem 💎':'a buried coin 💰'}${here?' (+'+rtxt(r)+')':''}`}); if(here){give(p,r);sendMe(ow)} continue }
     const [txt,stt]=pick(EVT); decide(p,d,dogs,now,stt);
     toView(o,{t:'dogs',dogs:[pub(d,now)]}); toView(o,{t:'event',text:`🐶 ${d.name} ${txt}`});
-  }
-},40000);
+  }catch(e){console.error('[events]',o,e&&e.stack||e)} }
+}),40000);
 server.on('error',e=>{if(e&&e.code=='EADDRINUSE'){console.error('\n[!] พอร์ต '+PORT+' ถูกใช้อยู่แล้ว — น่าจะมีเซิร์ฟเวอร์ Cozy Dogs ตัวเก่าเปิดค้างอยู่ (ปิดหน้าต่างเทอร์มินัลเก่า หรือกด Ctrl+C)\n    หรือรันพอร์ตอื่น:  Windows: set PORT=3001 && node server.js   |   Mac/Linux: PORT=3001 node server.js\n');process.exit(1)}console.error('server error:',e);process.exit(1)});
-(async()=>{if(REMOTE)await remoteLoad();server.listen(PORT,()=>console.log('Cozy Dogs on http://localhost:'+PORT+(REMOTE?'  (data: Supabase)':'  (data: local file)')))})();
+(async()=>{if(REMOTE){await remoteLoad();loaded=true}migrateAll();server.listen(PORT,()=>console.log('Cozy Dogs on http://localhost:'+PORT+(REMOTE?'  (data: Supabase)':'  (data: local file)')))})();

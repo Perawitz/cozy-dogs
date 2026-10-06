@@ -1,5 +1,17 @@
 // Cozy Dogs - core: state, i18n, helpers, pixel icons, audio, network
 'use strict';
+// iPhone fix (v6.2.1): Safari / the in-app browsers of Instagram, LINE, Facebook ... can IGNORE textAlign='center' for Thai
+// (stacked vowels and tone marks), so a chat bubble's text started in the middle of the bubble and ran out of it.
+// We do the centring ourselves: measure the text, switch to left alignment, and move x. Same picture everywhere else.
+(()=>{const P=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;if(!P||P.__thFix)return;P.__thFix=1;
+ if(!P.roundRect)P.roundRect=function(x,y,w,h,r){r=typeof r=='number'?r:Array.isArray(r)?(r[0]||0):(r&&r.x)||0;r=Math.max(0,Math.min(r,Math.abs(w)/2,Math.abs(h)/2));   // older iPhones / in-app browsers have no roundRect
+  this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
+ for(const fn of ['fillText','strokeText']){const o=P[fn];
+  P[fn]=function(s,x,y,mw){const al=this.textAlign;
+   if((al=='center'||al=='right'||al=='end')&&/[฀-๿]/.test(s)){const w=this.measureText(s).width;this.textAlign='left';
+    try{return mw==null?o.call(this,s,al=='center'?x-w/2:x-w,y):o.call(this,s,al=='center'?x-w/2:x-w,y,mw)}finally{this.textAlign=al}}
+   return o.apply(this,arguments)}}})();
+const UIF=()=>{const l=document.documentElement.lang;if(UIF.l!==l||!UIF.v){UIF.l=l;UIF.v=getComputedStyle(document.body).fontFamily}return UIF.v};      // the page font, looked up once (was looked up for every label in every frame)
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -16,7 +28,7 @@ const PERS_EM={PLAYFUL:'🎾',LAZY:'😴',ENERGETIC:'⚡',SHY:'🙈',FRIENDLY:'�
 // ---------------- i18n (English keys -> Thai) ----------------
 const TH={'Shop':'ร้านค้า','Dogs':'น้องหมา','Capsule':'กาชา','Collection':'สะสม','Quests':'ภารกิจ','Ranks':'อันดับ','Friends':'เพื่อน','Games':'เกม','Decorate':'ตกแต่ง','Photo':'ถ่ายรูป','Settings':'ตั้งค่า','Chat':'แชท',
  'Pet':'ลูบหัว','Feed':'ให้อาหาร','Play':'เล่น','Brush':'หวีขน','Bath':'อาบน้ำ','Train':'เทรน','Info':'ข้อมูล','Wear':'แต่งตัว','Hunger':'หิว','Energy':'พลัง','Happy':'สุข','Clean':'สะอาด','Bond':'ความผูกพัน',
- 'Login':'เข้าสู่ระบบ','Register':'สมัครสมาชิก','Guest':'เล่นแบบ Guest','Username':'ชื่อผู้ใช้','Password':'รหัสผ่าน','Email':'อีเมล','Play as Guest':'เล่นแบบ Guest','Create account':'สร้างบัญชี',
+ 'Login':'เข้าสู่ระบบ','Register':'สมัครสมาชิก','Guest':'เล่นแบบ Guest','Username':'ชื่อผู้ใช้','Password':'รหัสผ่าน','Email':'อีเมล','Play as Guest':'เล่นแบบ Guest','Create account':'สร้างบัญชี','Forgot password?':'ลืมรหัสผ่าน?','Recovery code':'รหัสกู้คืน','New password':'รหัสผ่านใหม่','Set new password':'ตั้งรหัสผ่านใหม่','Back to login':'กลับไปหน้าเข้าสู่ระบบ','Enter your username, the recovery code you saved when you signed up, and a new password.':'ใส่ชื่อผู้ใช้ รหัสกู้คืนที่จดไว้ตอนสมัคร และรหัสผ่านใหม่ที่ต้องการ',
  'Buy':'ซื้อ','Owned':'มีอยู่','Close':'ปิด','Done':'เสร็จ','Cancel':'ยกเลิก','Confirm':'ยืนยัน','Claim':'รับ','Claimed':'รับแล้ว','Locked':'ล็อก','Visit':'เยี่ยมบ้าน','Go Home':'กลับบ้าน','Gift':'ส่งของขวัญ','Remove':'ลบ','Add':'เพิ่ม','Accept':'ตอบรับ','Decline':'ปฏิเสธ',
  'Food':'อาหาร','Toys':'ของเล่น','Furniture':'เฟอร์นิเจอร์','Rugs':'พรม','Wall':'ผนัง','Accessories':'เครื่องแต่งตัว','Styles':'ธีมห้อง','Season':'เทศกาล','Wallpaper':'วอลเปเปอร์','Floor':'พื้น','Lighting':'แสงไฟ',
  'All':'ทั้งหมด','At home':'อยู่บ้าน','Away':'ไม่อยู่บ้าน','Favorites':'ตัวโปรด','Release':'ปล่อยกลับธรรมชาติ','Rename':'เปลี่ยนชื่อ','Tricks':'ลูกเล่น','Personality':'นิสัย','Favorite food':'อาหารโปรด','Favorite toy':'ของเล่นโปรด',
@@ -51,7 +63,7 @@ const ic=(n,cls='')=>`<img class="ic ${cls}" src="${ICON[n]}" alt="">`;
 
 // ---------------- audio ----------------
 const AU={ctx:null,master:null,music:null,mg:null,started:false,timer:null,step:0,next:0};
-function actx(){if(!AU.ctx){try{AU.ctx=new(window.AudioContext||window.webkitAudioContext)();AU.master=AU.ctx.createGain();AU.master.connect(AU.ctx.destination);AU.sfx=AU.ctx.createGain();AU.sfx.connect(AU.master);AU.mus=AU.ctx.createGain();AU.mus.connect(AU.master);applyVol()}catch{}}if(AU.ctx&&AU.ctx.state=='suspended')AU.ctx.resume();return AU.ctx}
+function actx(){if(!AU.ctx){try{AU.ctx=new(window.AudioContext||window.webkitAudioContext)();AU.master=AU.ctx.createGain();AU.master.connect(AU.ctx.destination);AU.sfx=AU.ctx.createGain();AU.sfx.connect(AU.master);AU.mus=AU.ctx.createGain();AU.mus.connect(AU.master);applyVol()}catch{}}if(AU.ctx&&AU.ctx.state!='running'){try{const r=AU.ctx.resume();r&&r.catch&&r.catch(()=>{})}catch{}}return AU.ctx}      // iOS also uses 'interrupted' (phone call, silent switch, app switch), not only 'suspended'
 function applyVol(){if(!AU.ctx)return;AU.master.gain.value=S.set.vol;AU.sfx.gain.value=S.set.sound?1:0;AU.mus.gain.value=S.set.music?.55:0}
 function tone(f,d=.1,type='sine',v=.12,when=0,slide=0,dest){const a=actx();if(!a||!S.set.sound&&!dest)return;const o=a.createOscillator(),g=a.createGain(),t0=a.currentTime+when;o.type=type;o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide),t0+d);
  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.008);g.gain.exponentialRampToValueAtTime(.0008,t0+d);o.connect(g);g.connect(dest||AU.sfx);o.start(t0);o.stop(t0+d+.05)}
@@ -75,18 +87,30 @@ function musicStep(tm,bar,beat){const a=AU.ctx,ch=CH[bar%4],dst=AU.mus;
  if(beat==6)key(ch[0]-12+7,.9,.1);
  if([2,3,5,7].includes(beat)&&Math.random()<.7){const m=ch[1+Math.floor(Math.random()*4)]+12+(Math.random()<.3?12:0);key(m,.7,.05)}
  if(Math.random()<.35){tick(.03,3500)}}
-function musicTick(){const a=AU.ctx;if(!a||!S.set.music)return;const spb=60/78/2;while(AU.next<a.currentTime+.4){const sw=AU.step%2?spb*.16:0;musicStep(AU.next+sw,Math.floor(AU.step/8),AU.step%8);AU.next+=spb;AU.step++}}
+function musicTick(){const a=AU.ctx;if(!a||!S.set.music)return;const spb=60/78/2;if(AU.next<a.currentTime)AU.next=a.currentTime+.1;while(AU.next<a.currentTime+.4){      // after the page was in the background: do not play all the missed notes at once
+  const sw=AU.step%2?spb*.16:0;musicStep(AU.next+sw,Math.floor(AU.step/8),AU.step%8);AU.next+=spb;AU.step++}}
 function startMusic(){const a=actx();if(!a||AU.timer)return;AU.next=a.currentTime+.1;AU.timer=setInterval(musicTick,120);AU.started=true}
 function stopMusic(){clearInterval(AU.timer);AU.timer=null}
-const firstTouch=()=>{actx();if(S.set.music)startMusic();removeEventListener('pointerdown',firstTouch)};addEventListener('pointerdown',firstTouch);
+// iOS only unlocks sound from touchend / click (not pointerdown) and may suspend it again later: keep trying on every tap until the audio is really running
+const UNLOCK=['pointerdown','touchend','click','keydown'];
+const firstTouch=()=>{const a=actx();if(!a)return;if(S.set.music&&!AU.timer)startMusic();if(a.state=='running')for(const ev of UNLOCK)removeEventListener(ev,firstTouch,true)};
+for(const ev of UNLOCK)addEventListener(ev,firstTouch,true);
 
 // ---------------- network ----------------
 const H={};   // message handlers: H.type=fn(msg)
-let reconnectTimer=null,wantConn=false;
+let reconnectTimer=null,wantConn=false,reconnecting=false,lastRx=Date.now();
 function wsURL(){return location.protocol=='file:'?'ws://localhost:3000':(location.protocol=='https:'?'wss://':'ws://')+location.host}
-function send(o){if(S.ws&&S.ws.readyState==1)S.ws.send(JSON.stringify(o))}
-function connect(first){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket(wsURL())}catch(e){return rej(e)}S.ws=ws;
- ws.onopen=()=>{wantConn=true;res(ws)};ws.onerror=()=>rej(new Error('ws'));
- ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}const f=H[m.t];if(f)f(m);else if(window.DEBUG)console.log('unhandled',m.t)};
- ws.onclose=()=>{if(S.ws!==ws)return;if(S.loaded&&wantConn)onDisconnect()}})}
-function onDisconnect(){try{MP.abort()}catch{}showBanner(t('Reconnecting')+'…',true);clearTimeout(reconnectTimer);let n=0;const tryIt=async()=>{try{await connect();S.pendingResume=true;if(S.token)send({t:'resume',token:S.token});else send({t:'guest'});hideBanner()}catch{reconnectTimer=setTimeout(tryIt,Math.min(8000,1500+n++*700))}};reconnectTimer=setTimeout(tryIt,1200)}
+function send(o){if(S.ws&&S.ws.readyState==1){S.ws.send(JSON.stringify(o));return true}return false}
+function connect(first,wait){return new Promise((res,rej)=>{let ws,done=false;try{ws=new WebSocket(wsURL())}catch(e){return rej(e)}S.ws=ws;
+ const to=setTimeout(()=>{if(done)return;done=true;try{ws.close()}catch{}rej(new Error('timeout'))},wait||9000);      // a connection attempt that hangs (bad network) must end, so the next try can start
+ ws.onopen=()=>{if(done)return;done=true;clearTimeout(to);wantConn=true;lastRx=Date.now();res(ws)};ws.onerror=()=>{if(done)return;done=true;clearTimeout(to);rej(new Error('ws'))};
+ ws.onmessage=e=>{lastRx=Date.now();let m;try{m=JSON.parse(e.data)}catch{return}const f=H[m.t];if(f)f(m);else if(window.DEBUG)console.log('unhandled',m.t)};
+ ws.onclose=()=>{clearTimeout(to);if(!done){done=true;rej(new Error('closed'))}if(S.ws!==ws)return;if(S.loaded&&wantConn&&!reconnecting)onDisconnect()}})}
+H.hb=()=>{};
+// reconnect: ONE loop with a growing delay (a failed attempt's onclose used to start a second loop and reset the delay)
+function onDisconnect(){if(reconnecting)return;reconnecting=true;try{MP.abort()}catch{}showBanner(t('Reconnecting')+'…',true);clearTimeout(reconnectTimer);let n=0;
+ const tryIt=async()=>{try{await connect();reconnecting=false;S.pendingResume=true;if(S.token)send({t:'resume',token:S.token});else send({t:'guest'})}catch{reconnectTimer=setTimeout(tryIt,Math.min(8000,1500+n++*700))}};reconnectTimer=setTimeout(tryIt,1200)}
+// a connection can look open but be dead (phone slept, Wi-Fi -> 4G): drop it and reconnect
+function dropAndReconnect(){if(!S.loaded||!wantConn||reconnecting)return;const o=S.ws;if(o){o.onclose=null;o.onmessage=null;o.onerror=null;try{o.close()}catch{}}onDisconnect()}
+function probeConn(){if(!S.loaded||!wantConn||reconnecting)return;if(!S.ws||S.ws.readyState!=1){onDisconnect();return}const t0=Date.now();send({t:'hb'});setTimeout(()=>{if(lastRx<t0)dropAndReconnect()},4000)}
+

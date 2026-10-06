@@ -4,7 +4,8 @@ const GUID='258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
 class Sock extends EventEmitter{
   constructor(socket,max,head){super();this.s=socket;this.readyState=1;this.max=max;this.buf=head&&head.length?Buffer.from(head):Buffer.alloc(0);this.frag=null;
     socket.on('data',d=>{this.buf=Buffer.concat([this.buf,d]);try{this._parse()}catch{this._close()}});
-    socket.on('close',()=>this._gone());socket.on('error',()=>this._gone());if(this.buf.length)this._parse()}
+    socket.on('close',()=>this._gone());socket.on('error',()=>this._gone());socket.on('end',()=>{this._gone();try{socket.destroy()}catch{}});   // a peer that just disappears (proxy, phone) must not stay in the game as a ghost for minutes
+    if(this.buf.length)this._parse()}
   _gone(){if(this.readyState==3)return;this.readyState=3;this.emit('close')}
   _frame(op,p){if(this.s.destroyed)return;const n=p.length,h=n<126?Buffer.from([128|op,n]):n<65536?Buffer.from([128|op,126,n>>8,n&255]):(()=>{const b=Buffer.alloc(10);b[0]=128|op;b[1]=127;b.writeBigUInt64BE(BigInt(n),2);return b})();this.s.write(Buffer.concat([h,p]))}
   send(d){if(this.readyState!=1)return;this._frame(1,Buffer.from(String(d)))}

@@ -10,7 +10,8 @@ function showBanner(m){const b=$('#banner');b.textContent=m;b.style.display='blo
 // ---- modals
 function modal(id,title,body,cls='',opts={}){let ov=$(`#mods .ov[data-mod="${id}"]`);const had=!!ov;
  if(!ov){ov=document.createElement('div');ov.className='ov';ov.dataset.mod=id;if(opts.lock)ov.dataset.lock=1;ov.innerHTML=`<div class="panel mod ${cls}"><div class="mh"><span class="mt"></span><span class="sp"></span><button class="x" data-do="closemod" data-id="${id}">✕</button></div><div class="mb"></div></div>`;
-  ov.addEventListener('pointerdown',e=>{if(e.target===ov&&!ov.dataset.lock){ov.remove();ov.dispatchEvent(new Event('close'))}});$('#mods').append(ov);sfx('open')}
+  let down=false;ov.addEventListener('pointerdown',e=>{down=e.target===ov});      // close on the CLICK that follows a press on the dark background: closing on pointerdown let the same tap fall through onto the button underneath
+  ov.addEventListener('click',e=>{const was=down;down=false;if(was&&e.target===ov&&!ov.dataset.lock){ov.remove();ov.dispatchEvent(new Event('close'))}});$('#mods').append(ov);sfx('open')}
  $('.mt',ov).innerHTML=title;const mb=$('.mb',ov),sc=mb.scrollTop;mb.innerHTML=body;if(typeof AVA!='undefined')AVA.paint(mb);if(had)mb.scrollTop=sc;return ov}
 const modOpen=id=>$(`#mods .ov[data-mod="${id}"]`);
 function closeMod(id){const o=modOpen(id);if(o){o.remove();o.dispatchEvent(new Event('close'))}}
@@ -51,19 +52,19 @@ UI.online=function(){const l=S.players.filter(p=>p.name!=S.name);$('#online').in
 UI.chat=function(){const el=$('#chat'),min=el.classList.contains('min');const log=S.chat.slice(-30).map(c=>`<div><b>${esc(c.from)}</b> ${esc(c.m)}</div>`).join('');
  let lg=$('.log',el);
  if(!lg||!$('#chatf',el)){   // build the panel once
-  el.innerHTML=`<div class="hd" data-do="togchat"><span>💬 ${t('Chat')}</span><span>${min?'▲':'▼'}</span></div><div class="log">${log}</div><div class="em">${['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button data-do="emoji" data-e="${e}">${e}</button>`).join('')}</div><form id="chatf"><input maxlength="120" placeholder="…" autocomplete="off" enterkeyhint="send"><button class="btn sm pink">➤</button></form>`;
-  lg=$('.log',el);$('#chatf').onsubmit=e=>{e.preventDefault();const i=$('input',el);if(i.value.trim()){send({t:'chat',m:i.value});i.value=''}}}
+  el.innerHTML=`<div class="hd" data-do="togchat"><span>💬 ${t('Chat')}</span><span>${min?'▲':'▼'}</span></div><div class="log">${log}</div><div class="em">${['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button data-do="emoji" data-e="${e}">${e}</button>`).join('')}</div><form id="chatf"><input maxlength="120" placeholder="${TT('Type a message…','พิมพ์ข้อความ…')}" autocomplete="off" enterkeyhint="send"><button class="btn sm pink">➤</button></form>`;
+  lg=$('.log',el);$('#chatf').onsubmit=e=>{e.preventDefault();const i=$('input',el);if(i.value.trim()){if(send({t:'chat',m:i.value}))i.value='';else toast(TT('Not connected yet — your message is kept, try again in a moment','ยังไม่ได้เชื่อมต่อ — ข้อความยังอยู่ ลองส่งใหม่อีกครั้งนะ'))}}}
  else{   // later calls only refresh the log + header: rebuilding the <input> on every incoming message dropped focus and the typed text (and closed the phone keyboard)
-  lg.innerHTML=log;const sp=$$('.hd span',el);if(sp[0])sp[0].textContent='💬 '+t('Chat');if(sp[1])sp[1].textContent=min?'▲':'▼'}
+  lg.innerHTML=log;const ci=$('#chatf input',el);if(ci)ci.placeholder=TT('Type a message…','พิมพ์ข้อความ…');const sp=$$('.hd span',el);if(sp[0])sp[0].textContent='💬 '+t('Chat');if(sp[1])sp[1].textContent=min?'▲':'▼'}
  lg.scrollTop=lg.scrollHeight}
 DO.togchat=()=>{const el=$('#chat');el.classList.toggle('min');UI.chat();if(!el.classList.contains('min')&&matchMedia('(pointer:coarse)').matches){const i=$('input',el);if(i)i.focus()}};
 DO.togonline=()=>{$('#online').classList.toggle('hidden')};
 DO.emoji=d=>send({t:'emoji',e:d.e});
-DO.visit=d=>{if(S.edit)return toast('Finish decorating first');if(Park.on)Park.leaveLocal();send({t:'visit',id:d.n});closeMod('friends')};
+DO.visit=d=>{if(S.edit)return toast(TT('Finish decorating first','ตกแต่งให้เสร็จก่อนนะ'));if(Park.on)Park.leaveLocal();send({t:'visit',id:d.n});closeMod('friends')};
 DO.home=()=>{if(Park.on)Park.leaveLocal();send({t:'visit',id:S.name})};
 UI.bars=function(){const own=S.owner==S.name,v=$('#visitbar');if(typeof UI.fetchbtn=='function')UI.fetchbtn();
  v.classList.toggle('hidden',own);if(!own)v.innerHTML=`🏡 ${esc(S.owner)} <button class="btn sm sky" data-do="home">🏠 ${t('Go Home')}</button><button class="btn sm pink" data-do="gblike" title="Like">❤️</button><button class="btn sm lav" data-do="gbopen" data-n="${esc(S.owner)}" title="Guestbook">📖</button>`+['❤️','😂','👍','🐶','⭐','😮'].map(e=>`<button class="btn sm ghost" data-do="emoji" data-e="${e}">${e}</button>`).join('');
- if(S.edit&&S.sel){S.sel=null;UI.care()}const eb=$('#editbar');eb.style.display=S.edit?'flex':'none';eb.classList.toggle('hidden',!S.edit);if(S.edit)UI.edit()}
+ document.body.classList.toggle('editing',!!S.edit);if(S.edit&&S.sel){S.sel=null;UI.care()}const eb=$('#editbar');eb.style.display=S.edit?'flex':'none';eb.classList.toggle('hidden',!S.edit);if(S.edit)UI.edit()}
 // ---- decorate bar
 const ECATS=[['all','All'],['toy','Toys'],['furn','Furniture'],['rug','Rugs'],['wall','Wall'],['season','Season']];
 UI.edit=function(){const cat=S.editCat||'all',C=S.cat.items,inv=S.me.inv,placed={};for(const i of S.items)placed[i.type]=(placed[i.type]||0)+1;
@@ -83,9 +84,9 @@ UI.care=function(){const el=$('#care'),d=S.dogs[S.sel];if(!d){el.classList.add('
  const bar=(k,l,v,col)=>`<div class="bar"><b>${t(l)}</b><i><u data-bar="${k}" style="width:${v}%;background:${v<30?'#ff6b6b':col}"></u></i></div>`;
  el.innerHTML=`<button class="xbtn" data-do="desel">✕</button><div class="top"><div class="th">${thumbHTML(d.breed,d.variant,31,d.acc)}</div><div style="flex:1;min-width:0"><h4>${esc(d.name)} ${rarTag(b.r)}</h4><div class="sub">${esc(b.name)}${d.variant!='Normal'?' · '+t(d.variant):''}</div><div class="sub">${PERS_EM[d.pers]||''} ${nice(d.pers)}</div><div class="hearts" data-bondh>${hearts}</div></div></div>
  <div class="bars">${bar('hunger','Hunger',d.hunger,'#ffb36b')}${bar('energy','Energy',d.energy,'#6fb8ff')}${bar('happy','Happy',d.happy,'#ff8fb0')}${bar('clean','Clean',d.clean,'#6fd1a5')}</div>
- <div class="acts"><button class="btn pink" data-do="act" data-a="pet"><span>🤚</span>${t('Pet')}</button><button class="btn ${own?'':'dis'}" data-do="feedtog"><span>🍖</span>${t('Feed')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="play"><span>🎾</span>${t('Play')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="brush"><span>🪮</span>${t('Brush')}</button>
- <button class="btn sky ${own?'':'dis'}" data-do="act" data-a="bath"><span>🛁</span>${t('Bath')} <small>5🪙</small></button><button class="btn mint ${own?'':'dis'}" data-do="act" data-a="train"><span>🎓</span>${t('Train')}</button><button class="btn lav ${own?'':'dis'}" data-do="dogprof" data-id="${d.id}"><span>🎀</span>${t('Wear')}</button><button class="btn ghost" data-do="dogprof" data-id="${d.id}"><span>ℹ️</span>${t('Info')}</button></div>
- <div class="foodpick ${S.feedOpen?'on':''}">${FOODS.map(k=>{const f=F[k],n=S.me.inv[k]||0,fav=String(d.favFood).toLowerCase()==k,can=n>0||(k=='kibble'&&S.me.coins>=f.p);return`<div class="fp ${can?'':'dis'} ${fav?'fav':''}" data-do="feed" data-f="${k}" title="${f.n}"><span class="e">${f.e}</span>${f.n}<br><small>${n>0?'':f.p+'🪙'}</small>${n>0?`<em>${n}</em>`:''}</div>`}).join('')}</div>`;
+ <div class="acts"><button class="btn pink" data-do="act" data-a="pet"><span>🤚</span>${t('Pet')}</button><button class="btn ${own?'':'dis'}" data-do="feedtog"><span>🍖</span>${t('Feed')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="play"><span>🎾</span>${t('Play')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="brush"><span>🧹</span>${t('Brush')}</button>
+ <button class="btn sky ${own?'':'dis'}" data-do="act" data-a="bath"><span>🛁</span>${t('Bath')} <small>5💰</small></button><button class="btn mint ${own?'':'dis'}" data-do="act" data-a="train"><span>🎓</span>${t('Train')}</button><button class="btn lav ${own?'':'dis'}" data-do="dogprof" data-id="${d.id}"><span>🎀</span>${t('Wear')}</button><button class="btn ghost" data-do="dogprof" data-id="${d.id}"><span>ℹ️</span>${t('Info')}</button></div>
+ <div class="foodpick ${S.feedOpen?'on':''}">${FOODS.map(k=>{const f=F[k],n=S.me.inv[k]||0,fav=String(d.favFood).toLowerCase()==k,can=n>0||(k=='kibble'&&S.me.coins>=f.p);return`<div class="fp ${can?'':'dis'} ${fav?'fav':''}" data-do="feed" data-f="${k}" title="${f.n}"><span class="e">${f.e}</span>${f.n}<br><small>${n>0?'':f.p+'💰'}</small>${n>0?`<em>${n}</em>`:''}</div>`}).join('')}</div>`;
  paintThumbs(el)}
 UI.careBars=function(){const d=S.dogs[S.sel];if(!d||$('#care').classList.contains('hidden'))return;for(const k of['hunger','energy','happy','clean']){const u=$(`#care [data-bar="${k}"]`);if(u){u.style.width=d[k]+'%';u.style.background=d[k]<30?'#ff6b6b':{hunger:'#ffb36b',energy:'#6fb8ff',happy:'#ff8fb0',clean:'#6fd1a5'}[k]}}
  const h=$('#care [data-bondh]');if(h){const n=Math.floor(d.bond/10);if(h.dataset.n!=n){h.dataset.n=n;h.innerHTML=Array.from({length:10},(_,i)=>ic(i<n?'heart':'hearte','sm')).join('')}}}

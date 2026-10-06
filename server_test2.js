@@ -32,13 +32,14 @@ const U='x'+Math.random().toString(36).slice(2,6);
  for(let i=0;i<30&&!kicked;i++){await sleep(100);kicked=b.log.some(x=>x.t=='park_s'&&x.b&&(Math.abs(x.b[2])+Math.abs(x.b[3])>50))}
  ok(kicked,'walking into the ball kicks it (shared physics)');
  // treats
+ a.clear('park_item');await sleep(150);const pk0=(a.me||{stats:{}}).stats.park||0;      // forget treats that were already spawned (and maybe collected) earlier in this test; read the count BEFORE waiting: a new treat can spawn right under the dog
  const add=await a.wait('park_item',9000,x=>x.add);ok(add.add.k&&add.add.x>0,'treat spawned');
- const before=a.me?.coins??0,pk0=(a.me||{stats:{}}).stats.park||0;
+ const before=a.me?.coins??0;
  a.send({t:'park_move',x:add.add.x,y:add.add.y,run:1});
  let del=null;try{del=await a.wait('park_item',7000,x=>x.del==add.add.id)}catch{}
  // another treat could be taken by the other dog (bob walks elsewhere) - if so just verify protocol
  ok(del&&del.by,'treat collected by a dog (server decides) ');
- if(del&&del.by==A){await sleep(200);const m2=a.me;ok(m2&&(m2.stats.park||0)==pk0+1,'collector stat updated: '+JSON.stringify(m2&&m2.stats.park))}else ok(true,'(other collected)');
+ if(del&&del.by==A){await sleep(200);const m2=a.me;ok(m2&&(m2.stats.park||0)>=pk0+1,'collector stat updated: '+JSON.stringify(m2&&m2.stats.park)+' pk0='+pk0)}else ok(true,'(other collected)');
  // goal progress via pets
  a.send({t:'park_leave'});const out=await b.wait('park_out');ok(out.n==A,'park_out broadcast');
  a.send({t:'visit',id:A});const hs=await a.wait('house');const dogs=hs.dogs;

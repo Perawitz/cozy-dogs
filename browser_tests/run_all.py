@@ -15,6 +15,10 @@ TESTS=[  # (name, script, extra args after <repo> <tag> <port>)
  ('brawl','brawl.py',['4','desk,portrait,land']),
  ('brawl_syn','brawl_syn.py',['desk,portrait,land']),
  ('brawl_leave','brawl_leave.py',['desk,portrait']),
+ ('recovery','recovery.py',['desk,portrait,land,tiny']),
+ ('thai_canvas','thai_canvas.py',[]),
+ ('reconnect','reconnect.py',[]),
+ ('mobile_layout','mobile_layout.py',[]),
 ]
 want=set(sys.argv[1:]);out=[];t00=time.time()
 for i,(name,script,extra) in enumerate(TESTS):
