@@ -58,19 +58,24 @@ function bubble(c,x,by,text,a){const cs=Array.from(String(text)),tx=cs.length>26
  c.beginPath();c.moveTo(x-5,by-3);c.lineTo(x,by+4);c.lineTo(x+5,by-3);c.fill();c.stroke();c.fillStyle='#fff';c.fillRect(x-4,by-4,8,3);c.fillStyle='#5a3d33';c.fillText(tx,x,by-9);c.restore()}
 function pill(c,x,y,text,o){o=o||{};c.save();c.font='bold 11px '+UIF();c.textAlign='center';const w=c.measureText(text).width+16;
  c.fillStyle=o.fill||'rgba(255,250,241,.94)';c.strokeStyle=o.stroke||'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y,w,17,8);c.fill();c.stroke();c.fillStyle=o.ink||'#5a3d33';c.fillText(text,x,y+12);c.restore()}
+// v6.3: the achievement a player chose to show above their head (a small gold tag; hidden while a speech bubble is up)
+function titlePill(c,x,y,ti){if(!ti||!ti.n)return;pill(c,x,y,'🏆 '+t(ti.n),{fill:'#fff3c4',stroke:'#d99a1e'})}
 // ---------- the owner at home (stands in a corner of the room) ----------
 const AV_S=.9,HOME={hit:null};
 function homePose(now,P){if(S.avTap&&now<S.avTap)return'wave';for(const d of Object.values(S.dogs)){if(d.state=='SEEK_OWNER'){const q=posOf(d,now);if(Math.hypot(q[0]-P[0],q[1]-P[1])<150)return'happy'}}return'idle'}
-function homeAvatar(now){const av=S.ownerAv;if(!av||!D)return null;const P=D.HOMEPOS[av.hm]||D.HOMEPOS.bl;return{av,x:P[0],y:P[1],name:S.owner,pose:homePose(now,P),own:S.owner==S.name}}
+function homeAvatar(now){const av=S.ownerAv;if(!av||!D)return null;const P=D.HOMEPOS[av.hm]||D.HOMEPOS.bl;return{av,ti:S.ownerTi||null,x:P[0],y:P[1],name:S.owner,pose:homePose(now,P),own:S.owner==S.name}}
 function drawHome(c,a,t,now){c.save();c.translate(a.x,a.y);
  c.fillStyle='rgba(60,32,22,.24)';c.beginPath();c.ellipse(0,0,20*AV_S,6*AV_S,0,0,7);c.fill();
  const r=draw(c,a.av,t,{pose:a.pose,s:AV_S,seed:3});c.restore();a.top=r.top;HOME.hit=[a.x,a.y-r.top*.5,Math.max(24,r.w*.55),Math.max(30,r.top*.55)]}
 function homeTop(a){return a.y-(a.top||90)}
 function drawHomeTag(c,a,t,now){const top=homeTop(a);
  if(S.set.names&&a.name)pill(c,a.x,a.y+9,a.name,{stroke:'#6fb8ff'});
- const b=S.avBub;if(b&&now-b.at<4500)bubble(c,a.x,top-10,b.m,Math.min(1,(4500-(now-b.at))/600));
- else if(a.own&&!LS.get('cd_avhint',false)&&!S.edit){const y=top-14+Math.sin(t*3)*3;c.save();c.font='bold 12px '+UIF();c.textAlign='center';const tx='👕 '+TT('Tap to change outfit','แตะเพื่อเปลี่ยนชุด'),w=c.measureText(tx).width+18;
-  c.fillStyle='#fff3c4';c.strokeStyle='#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(a.x-w/2,y-22,w,22,10);c.fill();c.stroke();c.fillStyle='#5a3d33';c.fillText(tx,a.x,y-7);c.restore()}}
+ const b=S.avBub;
+ if(b&&now-b.at<4500)bubble(c,a.x,top-10,b.m,Math.min(1,(4500-(now-b.at))/600));
+ else{const hint=a.own&&!LS.get('cd_avhint',false)&&!S.edit;
+  if(hint){const y=top-14+Math.sin(t*3)*3;c.save();c.font='bold 12px '+UIF();c.textAlign='center';const tx='👕 '+TT('Tap to change outfit','แตะเพื่อเปลี่ยนชุด'),w=c.measureText(tx).width+18;
+   c.fillStyle='#fff3c4';c.strokeStyle='#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(a.x-w/2,y-22,w,22,10);c.fill();c.stroke();c.fillStyle='#5a3d33';c.fillText(tx,a.x,y-7);c.restore()}
+  if(a.ti&&!S.edit)titlePill(c,a.x,top-(hint?62:27),a.ti)}}      // the title sits above the first-time hint, so choosing one is never "invisible"
 function pickHome(x,y){const h=HOME.hit;if(!h||!S.ownerAv)return false;const dx=(x-h[0])/h[2],dy=(y-h[1])/h[3];return dx*dx+dy*dy<=1}
 // ---------- the person walking the dog (park) ----------
 const PAV_S=.84,LEASH_D=64;
@@ -93,7 +98,7 @@ function drawHuman(c,m,t,now){if(!m.av||m.hx==null)return;const pose=humanPose(m
  const r=draw(c,m.av,t,{pose,s:PAV_S,flip:front?dogRight:!dogRight,hold:front?'L':null,seed:m.seed||0});c.restore();
  if(wade){c.save();c.translate(m.hx,m.hy+1);c.fillStyle='rgba(90,175,225,.5)';c.beginPath();c.ellipse(0,0,17*PAV_S,6*PAV_S,0,0,7);c.fill();c.strokeStyle='rgba(255,255,255,'+(.55+.3*Math.sin(t*6+1))+')';c.lineWidth=2;c.beginPath();c.ellipse(0,1,(15+Math.sin(t*4+1)*3)*PAV_S,(4.6+Math.sin(t*4+1))*PAV_S,0,0,7);c.stroke();c.restore()}
  m._hand=[m.hx+r.hand[0],m.hy+r.hand[1]+sink];m._htop=r.top+sink*-1;m._hhit=[m.hx,m.hy-r.top*.5,Math.max(22,r.w*.6),Math.max(28,r.top*.55)]}
-function drawLeash(c,m,t){if(!m._hand||m._top==null||!m.av)return;const b=DOGS.BR[m.breed];if(!b)return;const sc=b.size*.9,cl=collar({w:m._w||90,top:m._top/sc},sc,m.face||1);
+function drawLeash(c,m,t){if(!m._hand||m._top==null||!m.av)return;const b=DOGS.b(m);if(!b)return;const sc=b.size*.9,cl=collar({w:m._w||90,top:m._top/sc},sc,m.face||1);
  leash(c,m._hand[0],m._hand[1],m.rx+cl[0],m.ry+cl[1]+(m.wade?5:0),m.av.ls,t,{moving:m.hmv,len:LEASH_D*1.15})}
 // ---------- animated preview: the person walking their dog (wardrobe + profile) ----------
 // get() -> {av,pose:'walk'|'idle'|'wave'|'happy',dog:{breed,variant,acc}|null}
@@ -124,5 +129,5 @@ function stage(cv,get){
   const r=draw(g,st.av,t,{pose:st.pose,s:S2,flip:front,hold:front?'L':null,seed:1});g.restore();
   if(info){const cl=collar(info,sc,1);leash(g,hx+r.hand[0],fy+r.hand[1],dogP[0]+cl[0],dogP[1]+cl[1],st.av.ls,t,{moving:walk,len:(dx-hx)*1.05})}
  };loop()}
-g.AVA={frame,draw,thumb,bust,leash,key,RATE,CROP,nfr,isFront,cache,html,paint,bubble,pill,homeAvatar,drawHome,drawHomeTag,pickHome,stepHuman,drawHuman,drawLeash,collar,PAV_S,LEASH_D,stage};
+g.AVA={frame,draw,thumb,bust,leash,key,RATE,CROP,nfr,isFront,cache,html,paint,bubble,pill,titlePill,homeAvatar,drawHome,drawHomeTag,pickHome,stepHuman,drawHuman,drawLeash,collar,PAV_S,LEASH_D,stage};
 })(window);

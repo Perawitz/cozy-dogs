@@ -1,5 +1,5 @@
-# Runs every browser test in this folder one after another (each starts its own throw-away server) and prints a summary.
-#   python3 browser_tests/run_all.py            (from the project root; takes about 10-12 minutes)
+# Runs every browser test in this folder one after another (each starts its own throw-away server) and prints a summary.  
+#   python3 browser_tests/run_all.py            (from the project root; takes about 35-40 minutes since v7)
 #   python3 browser_tests/run_all.py chat rps   (only the ones you name)
 # Needs: pip install playwright && playwright install chromium
 import os,subprocess,sys,time
@@ -19,6 +19,14 @@ TESTS=[  # (name, script, extra args after <repo> <tag> <port>)
  ('thai_canvas','thai_canvas.py',[]),
  ('reconnect','reconnect.py',[]),
  ('mobile_layout','mobile_layout.py',[]),
+ ('google','google.py',['desk,portrait,land,tiny']),
+ ('dm','dm.py',['desk,portrait,land']),            # v7: private chat
+ ('voice','voice.py',['desk,portrait,land']),     # v7: park voice chat (fake microphone)
+ ('nursery','nursery.py',['desk,portrait,land']),   # v7: eggs + breeding
+ ('petshop','petshop.py',['desk,portrait,land']),   # v7: pet shop + player market
+ ('show','show.py',['desk,portrait,land']),         # v7: hourly dog show
+ ('announce','announce.py',['desk,portrait,land']), # v7.1: paid server-wide announcements
+ ('menu','menu.py',['desk,portrait,land,tiny']),     # v7.2: slim dock + Menu window + what's new tour + dog barks
 ]
 want=set(sys.argv[1:]);out=[];t00=time.time()
 for i,(name,script,extra) in enumerate(TESTS):

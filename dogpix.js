@@ -68,7 +68,39 @@ const PR={
  moonshiba:Object.assign({},SHIBA,{moon:1,cheek:'a',brow:null}),
  flamepuppy:{L:7,BL:11,BH:6.2,MZ:3,ear:'p',es:1.1,tail:'plume',fluff:1,tipc:'a'},
 };
-const prof=id=>Object.assign({},BASE,PR[id]||{});
+// ---- v7 premium breeds (extra flourishes are drawn by drawFx below: petal leaf eyep stripe horn horn2 mane spikes wings halo bee grad)
+Object.assign(PR,{
+ mochipup:{L:3,BL:8,BH:7.5,HS:1.3,MZ:.5,ear:'r',es:.8,tail:'fluff',fluff:1,belly:'b',muz:'b',cheek:'a',smile:1},
+ teddypom:{L:4,BL:8,BH:6.5,HS:1.25,MZ:1.1,ear:'r',es:.9,tail:'fluff',fluff:2,muz:'a',belly:'b',cheek:'b'},
+ bunnycorgi:{L:4,BL:12,BH:6,HS:1.05,MZ:2.4,ear:'b',es:.85,eh:2.5,tail:'stub',cheek:'a',sock:'a',blaze:'a'},
+ pandapup:{L:5,BL:9,BH:7,HS:1.25,MZ:1.3,ear:'r',es:.85,earc:'a',tail:'stub',sock:'a',chest:'a',eyep:1,muz:'b',belly:'b'},
+ sakurashiba:Object.assign({},SHIBA,{petal:1,cheek:'a',brow:null,muz:'b'}),
+ cottonpoodle:{L:7,BL:9,BH:5.5,HS:.98,MZ:3.6,ear:'d',es:1.1,tail:'pom',fluff:3,belly:'b',muz:'b',lw:2,grad:1},
+ berrydal:{L:8,BL:11,BH:6,MZ:3.2,ear:'d',earc:'a',tail:'sabre',spots:'a',belly:'b',muz:'b',leaf:1},
+ honeybeepup:{L:5,BL:9,BH:6.5,HS:1.2,MZ:1.5,ear:'p',es:.8,tail:'whip',fluff:1,belly:'b',muz:'b',stripe:1,bee:1,wings:1,wingc:'e4f7ff'},
+ angelretriever:{L:7,BL:12,BH:6.5,MZ:3.2,ear:'d',earc:'b',tail:'plume',fluff:1,belly:'b',halo:1,wings:1},
+ unicornpup:{L:6,BL:10,BH:6.3,HS:1.05,MZ:2.4,ear:'p',es:.9,earc:'b',tail:'plume',fluff:1,horn:1,mane:1,sock:'a'},
+ dragonpup:{L:6,BL:11,BH:6.5,HS:1.05,MZ:2.6,ear:'p',es:.7,earc:'a',tail:'sabre',belly:'a',chest:'a',horn2:1,spikes:1,wings:1,wingc:'ffb25a',tipc:'a'},
+});
+const BASEP=id=>Object.assign({},BASE,PR[id]||{});
+// A dog "key" says how to draw it:  base [+ other breed ~ seed] [. stage b/p/t] [# trait-trait]   (see traits.js)  e.g. corgi+husky~3.p#blush-star
+const KEYRE=/^([a-z0-9]+)(?:\+([a-z0-9]+)~(\d))?(?:\.([bpt]))?(?:#([a-z0-9-]+))?$/;
+function parseKey(id){const m=KEYRE.exec(String(id));return m?{base:m[1],mix:m[2]||null,ms:+m[3]||0,st:m[4]?'bpt'.indexOf(m[4]):3,tr:m[5]?m[5].split('-'):[]}:{base:String(id),mix:null,ms:0,st:3,tr:[]}}
+// mixed breed (พันทาง): body shape = a blend of both parents (the dominant one counts a little more), markings / ears / tail come from either one, chosen by the look seed
+const NUMK=['L','BL','BH','HS','MZ','es'],CATK=['ear','earc','tail','fluff','flat','smile','tipc'],MARK=['sock','blaze','cheek','brow','belly','chest','saddle','muz','spots','merle','star','moon'];
+function blend(a,b,ms){
+ const A=BASEP(a),B=BASEP(b),rA=PR[a]||{},rB=PR[b]||{},w=.46+.07*(ms&3),P=Object.assign({},A);
+ for(const k of NUMK)P[k]=+((A[k]*w+B[k]*(1-w))).toFixed(2);
+ CATK.forEach((k,i)=>{if(((ms>>(i%3))&1)&&rB[k]!==undefined)P[k]=B[k]});
+ for(const k of MARK)if(rA[k]===undefined&&rB[k]!==undefined)P[k]=rB[k];
+ if(rB.eh&&(ms&1))P.eh=rB.eh;
+ return P}
+// growth stages: the same pixel size, but a smaller body, shorter legs and a short nose - so a baby is a big-headed little ball
+const STG=[{BL:.56,BH:.68,L:.5,HS:.88,MZ:.7},{BL:.72,BH:.8,L:.7,HS:.94,MZ:.85},{BL:.88,BH:.92,L:.88,HS:.98,MZ:.95}];
+function prof(id){
+ const k=parseKey(id);let P=k.mix&&PR[k.mix]?blend(k.base,k.mix,k.ms):BASEP(k.base);
+ if(k.st<3){const f=STG[k.st];P.BL=+(P.BL*f.BL).toFixed(2);P.BH=+Math.max(3.2,P.BH*f.BH).toFixed(2);P.L=Math.max(2,Math.round(P.L*f.L));P.HS=+(P.HS*f.HS).toFixed(2);P.MZ=+(P.MZ*f.MZ).toFixed(2);P.lw=P.lw?Math.max(2,P.lw-1):0}
+ P.st=k.st;P.trl=k.tr;return P}
 
 // ---------- palette per variant ----------
 function pal(b,v,P){
@@ -81,6 +113,7 @@ function pal(b,v,P){
  const bodyAt=(x,y)=>{
   if(v=='Galaxy'){const t=cl((x*.55+y*.9-12)/62);return t<.5?mx([34,20,100],[122,74,208],t*2):mx([122,74,208],[224,106,208],t*2-1)}
   if(v=='Rainbow')return hsl((x*6+y*4)%360,.8,.74);
+  if(P.grad&&v=='Normal'){const t=cl((x*.5+y*.85-18)/36);return mx(body,acc,t)}      // cotton-candy poodle: pink -> sky
   return body};
  return{a:acc,d:dk,w:[255,255,255],n:[28,20,18],t:P.tongue?hexc(P.tongue):[255,124,147],r:[255,179,193],o:[42,28,24],e:P.eyec?hexc(P.eyec):(body[0]*.3+body[1]*.59+body[2]*.11<75&&v!='Galaxy'?[160,108,56]:[28,20,18]),y:[255,210,63],bodyAt};
 }
@@ -142,7 +175,7 @@ function gen(b,v,pose,fr,acc){
  function ear(far,hx,hy,ry){
   const k=P.ear,es=P.es,em=P.earc,m=far?(FM[em]||em):em;
   if(k=='p'||k=='b'||k=='t'){
-   const xc=far?hx+3.5:hx-3,yb=hy-ry+2+(far?1:0),h=Math.max(2,Math.round(7*es*(earB==3?.5:earB==2?.8:1))),w=Math.round((k=='b'?5.5:5)*es),tilt=earB>=2?-2.5:(k=='b'?-.3:-1.2);
+   const xc=far?hx+3.5:hx-3,yb=hy-ry+2+(far?1:0),h=Math.max(2,Math.round(7*es*(P.eh||1)*(earB==3?.5:earB==2?.8:1))),w=Math.round((k=='b'?5.5:5)*es),tilt=earB>=2?-2.5:(k=='b'?-.3:-1.2);
    for(let j=0;j<h;j++){const f=k=='b'?1-.35*j/h:1-j/h,ww=Math.max(1,Math.round(w*f)),c0=xc+tilt*(j/h);for(let i=0;i<ww;i++)set(c0-ww/2+i+.5,yb-j,m)}
    if(!far&&k!='t')for(let j=1;j<h*.7;j++){const iw=Math.max(0,Math.round(w*.45*(1-j/(h*.75)))),c0=xc+tilt*(j/h);for(let i=0;i<iw;i++)set(c0-iw/2+i+.5,yb-j,'r')}
    if(k=='t')ell(xc+tilt+2.2,yb-h+1,2,1.6,m);
@@ -190,14 +223,14 @@ function gen(b,v,pose,fr,acc){
   }
  }
  const scallop=by=>{for(let k=0;k<16;k++){const a=k/16*Math.PI*2;if(S(a)>.75)continue;ell(cx+C(a)*(BL+.8),by+S(a)*(BH+.6),1.8,1.8,'b')}};
- let hx,hy,by,after=()=>{};
+ let hx,hy,by,after=()=>{},BA=[cx,GY-14],FL=[cx,GY-12];      // BA = top of the back, FL = middle of the flank (for marks, wings, rainbow...)
  // ----- body by mode -----
  if(mode=='lie'){
   const hh=BH*.78+(fr?.6:0);by=GY-hh+.5;
   tail(cx-BL,GY-3,'ground');
   ell(cx,by,BL,hh,'b');ell(cx-BL+4,by+.5,BH*.9,hh,'b');
   if(P.fluff>=2)scallop(by);
-  hx=cx+BL+3;hy=GY-5-(HS-1)*2;pitch=1;
+  hx=cx+BL+3;hy=GY-5-(HS-1)*2;pitch=1;BA=[cx-1,by-hh+1];FL=[cx,by];
   path([[cx+BL-4,by-1],[hx-2,hy+2]],3.2,'b');
   decor(by);
   after=()=>{ell(hx+3,GY-1.2,3.6,1.7,'b');ell(hx-2,GY-1,3,1.4,'f');if(P.sock)tint(hx+3,GY-1.2,3.6,1.7,P.sock=='a'?'a':'w')};
@@ -209,7 +242,7 @@ function gen(b,v,pose,fr,acc){
   ell(cx-BL*.45+1,GY-4.5,6,5,'b');ell(cx-BL*.45+7,GY-1,4,1.6,'b');
   if(P.fluff>=1)ell(bx+1,GY-13,4.5,6,'b');
   leg(bx+1,{dx:0,l:0},GY-12,'b','a');
-  hx=bx+3;hy=GY-13-BH*.95-4-(look?1:0);if(look)pitch=-2;
+  hx=bx+3;hy=GY-13-BH*.95-4-(look?1:0);if(look)pitch=-2;BA=[bx-3,GY-15-BH*.5];FL=[bx-2,GY-10];
   path([[bx,GY-14],[hx-2,hy+3]],Math.max(3,BH*.55),'b');
   if(belM)tint(bx+2,GY-12,3,7,belM);if(chM)tint(bx+2,GY-12,3,6,chM);
   if(P.saddle)tint(cx-1,GY-9,BL*.5,4,P.saddle);
@@ -223,7 +256,7 @@ function gen(b,v,pose,fr,acc){
   if(P.fluff>=1)ell(cx+BL-1,b0+3,4.5,BH,'b');
   if(P.fluff>=2)scallop(b0+1);
   leg(cx-BL+3,{dx:0,l:0},yh,'b','a');leg(cx+BL-3,{dx:3,l:0},yf,'b','a');
-  hx=cx+BL+3;hy=b0+4-BH*.6+1;pitch=.5;
+  hx=cx+BL+3;hy=b0+4-BH*.6+1;pitch=.5;BA=[cx-BL*.4-1,b0-2-BH];FL=[cx-1,b0];
   path([[cx+BL-3,b0+2],[hx-2,hy+2]],Math.max(3,BH*.55),'b');
   decor(b0+1);
  }else{
@@ -235,12 +268,48 @@ function gen(b,v,pose,fr,acc){
   if(P.fluff>=2)scallop(by);
   leg(cx+BL-3,legs[0],yt,'b','a');leg(cx-BL+3,legs[1],yt,'b','a');
   if(P.fluff>=3)for(const lx of[cx+BL-3,cx+BL-7,cx-BL+3,cx-BL+7])ell(lx,GY-5,3,2.4,'b');
-  hx=cx+BL+2+hdx;hy=by-BH-1+hdy;
+  hx=cx+BL+2+hdx;hy=by-BH-1+hdy;BA=[cx-2,by-BH];FL=[cx+1,by];
   if(headLow==1){hx=cx+BL+4;hy=GY-5-(HS-1)*3}else if(headLow==2){hx=cx+BL+5;hy=GY-11-(HS-1)*3}
   path([[cx+BL-3,by-BH*.3],[hx-2,hy+3]],Math.max(3,BH*.55),'b');
   decor(by);
  }
  head(hx,hy);after();
+ // ----- v7: cute traits & premium flourishes (anchored to the head / back / flank; drawn before the accessories so a hat still sits on top) -----
+ const MM=(x0,y0,rows,pal,only)=>rows.forEach((row,j)=>[...row].forEach((ch,i)=>{if(pal[ch])cs(x0+i,y0+j,pal[ch],only)}));
+ const cb=(x,y,hx)=>{const m=get(Math.round(x),Math.round(y));if(m&&'bfagdw'.includes(m))cs(x,y,hx)};          // paint only over body-coloured pixels (never the eyes / nose / mouth)
+ function drawFx(list){
+  if(!EP)return;const{hx,hy,rx,ry,ex1,ex2,ey,tipX,sy}=EP,X=Math.round(hx),Y=Math.round(hy),top=Y-Math.round(ry),fl=(dx,dy)=>[FL[0]+dx,FL[1]+dy];
+  for(const f of list)switch(f){
+   case'blush':for(const x of[ex1-1,ex1,ex2+1,ex2+2])cb(x,ey+3,'ff8fa8');break;
+   case'babyblush':for(const x of[ex1-1,ex2+2])cb(x,ey+3,'ffb0c0');break;
+   case'freckle':for(const[x,y]of[[ex2+3,ey+2],[ex2+5,ey+3],[ex2+4,ey+4],[ex1+1,ey+3],[ex1-1,ey+2]])cb(x,y,'b5703c');break;
+   case'moon':MM(X,top+1,['.YY','YY.','YY.','.YY'],{Y:'f5c242'},true);break;
+   case'cloud':MM(BA[0]-3,BA[1]-3,['.WW.W.','WWWWWW','LLLLLL'],{W:'ffffff',L:'d4e8ff'});break;
+   case'bandit':for(let y=ey-1;y<=ey+2;y++)for(let x=ex1-1;x<=ex2+3;x++)cb(x,y,'5a4d6c');break;
+   case'blep':if(!mouth){MM(Math.round(tipX)-4,Math.round(sy+2.8),['PP','PD'],{P:'ff7c93',D:'e8607c'})}break;
+   case'heart':MM(fl(-2,-2)[0],fl(-2,-2)[1],['.R.R.','RHRRR','.RRR.','..R..'],{R:'ff4f7e',H:'ffa0bb'},true);break;
+   case'star':MM(fl(-2,-2)[0],fl(-2,-2)[1],['..Y..','.YYY.','YYWYY','.YYY.','.Y.Y.'],{Y:'ffd23a',W:'fff6b0'},true);break;
+   case'sprout':MM(X,top-3,['G.G','GGG','.D.','.D.'],{G:'5ccb5c',D:'3a8f3a'});break;
+   case'flower':MM(X-6,top-1,['.P.','PYP','.P.'],{P:'ff9ec8',Y:'ffd23a'});break;
+   case'bubble':MM(X-7,top-5,['.W.','WLW','.W.'],{W:'bfe3ff',L:'eaf7ff'});MM(X-10,top-1,['.W','WL'],{W:'bfe3ff',L:'eaf7ff'});break;
+   case'bee':case'bee2':for(const ax of[X-1,X+3]){cs(ax,top-1,'3a3342');cs(ax,top-2,'3a3342');cs(ax,top-3,'ffd23a');cs(ax+1,top-3,'ffd23a');cs(ax,top-4,'ffd23a');cs(ax+1,top-4,'ffd23a')}break;
+   case'halo':MM(X-2,top-7,['.fFFFf.','fYYYYYf','.fYYYf.'],{f:'ffe27a',F:'fff6b0',Y:'ffd23a'});break;
+   case'wings':{const wc=P.wingc||'ffffff';MM(BA[0]-3,BA[1]-5,['..WWW.','.WWWWW','WWWWW.','.WEE..','..E...'],{W:wc,E:'c8d8f0'});break}
+   case'sparkle':{MM(X+7,top-4,['.Y.','YWY','.Y.'],{Y:'ffe27a',W:'ffffff'});MM(X-9,top+2,['.Y.','YWY','.Y.'],{Y:'ffe27a',W:'ffffff'});for(let i=0;i<12;i++)cb(FL[0]-BL+(i*7)%(BL*2),FL[1]-BH+(i*5)%(BH*2),'ffffff');break}
+   case'rainbow':for(let i=0;i<=10;i++){const y0=Math.round(BA[1]-1-3.5*S(Math.PI*i/10)),x=BA[0]-5+i;cs(x,y0,'ff6b6b');cs(x,y0+1,'ffd93a');cs(x,y0+2,'5aa8ff')}break;
+   case'frosty':MM(X,top+1,['.W.','WIW','.W.'],{W:'b7e6ff',I:'eaf8ff'},true);for(const x of[ex1-1,ex2+2])cb(x,ey+3,'a8dcff');break;
+   case'petal':for(const[x,y]of[[X+1,top-2],[X+2,top-3],[X-3,top-1],[BA[0]+1,BA[1]-1]]){cs(x,y,'ffb3c7');cs(x+1,y,'ff8fb0')}break;
+   case'leaf':MM(X-2,top-3,['G.G.G','GGGGG','.GGG.'],{G:'4fbf5a'});break;
+   case'eyep':tint(ex1+.5,ey+.5,2.6,3,'a','b');tint(ex2+.5,ey+.5,2.6,3,'a','b');break;
+   case'stripe':for(let x=FL[0]-BL+1;x<=FL[0]+BL-2;x++)if((x-FL[0]+BL)%6<2)for(let y=FL[1]-BH-1;y<=FL[1]+BH+1;y++){const m=get(Math.round(x),Math.round(y));if(m=='b'||m=='f')cs(x,y,'2a2a30')}break;
+   case'horn':MM(X+1,top-6,['Y','W','Y','YW','YY','YY'].map((r,i)=>i<3?r.padEnd(2,'.'):r),{Y:'ffd24a',W:'fff6c0'});break;
+   case'horn2':for(const hx0 of[X-2,X+3]){cs(hx0,top-1,'fff1d0');cs(hx0,top-2,'fff1d0');cs(hx0-(hx0<X?1:-1),top-3,'e8a060');cs(hx0,top-3,'fff1d0')}break;
+   case'mane':for(let i=0;i<8;i++){const t=i/7,x=(X-4)*(1-t)+BA[0]*t,y=(top+1)*(1-t)+(BA[1]-1)*t,c=['ff9ec8','b79bff','8ec5ff','8ee6c0'][i%4];cs(x,y,c);cs(x+1,y,c);cs(x,y-1,c)}break;
+   case'spikes':for(let i=0;i<5;i++){const x=BA[0]+2-i*3,y=BA[1]-1+(i>2?1:0);cs(x,y-2,'ffe08a');cs(x-1,y-1,'ffe08a');cs(x,y-1,'ffe08a');cs(x+1,y-1,'ffe08a')}break;
+  }}
+ {const L=[];if(P.st<2)L.push('babyblush');if(P.stripe)L.push('stripe');if(P.eyep)L.push('eyep');  if(P.wings||P.trl.includes('wings'))L.push('wings');if(P.mane)L.push('mane');if(P.spikes)L.push('spikes');
+  for(const f of['petal','leaf','horn','horn2','halo','bee'])if(P[f])L.push(f);
+  for(const t of P.trl)if(t!='wings'&&!L.includes(t))L.push(t);drawFx(L)}
  // ----- accessories (drawn over the head / neck, then outlined with the dog) -----
  function drawAcc(a){if(!a||!EP)return;const{hx,hy,rx,ry,ex1,ex2,ey}=EP,X=Math.round(hx),Y=Math.round(hy),top=Y-Math.round(ry),nx=X-1,ny=Y+Math.round(ry)-1;
   const M=(x0,y0,rows,pal,only)=>rows.forEach((row,j)=>[...row].forEach((ch,i)=>{if(pal[ch])cs(x0+i,y0+j,pal[ch],only)}));

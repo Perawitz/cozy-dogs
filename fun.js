@@ -27,7 +27,7 @@ function mkWish(d,now){const [k,need,f]=Math.random()<.7?pick(WPERS[d.pers]||WAL
  return{k,f:food,need,got:0,exp:now+15*60e3}}
 function wish(p,d,kind,food,ws,name){const w=d.wish;if(!w||w.k!=kind)return;if(kind=='feed'&&w.f&&food!==w.f)return;
  if(++w.got<w.need)return;                                              // progress travels with the caller's next 'dogs' push
- const pk=perks(p),r={c:Math.round((12+w.need*5)*(pk.has('coin')?1.1:1)*(pk.has('wish')?1.25:1)*evMul())};if(Math.random()<.1)r.g=1;
+ const pk=perks(p),r={c:Math.round((12+w.need*5)*(pk.has('coin')?1.1:1)*(pk.has('wish')?1.25:1)*(1+X.TRD.buff(d,'wish'))*evMul())};if(Math.random()<.1)r.g=1;
  give(p,r);d.bond=clamp(d.bond+3);d.happy=clamp(d.happy+10);addXp(p,6,ws);d.wish=null;d.wishNext=Date.now()+rnd(90,200)*1000;dirty();
  bump(name,'wish',1,ws);toView(name,{t:'fx',e:'💖',dog:d.id});if(ws)send(ws,{t:'wish_done',dog:d.id,name:d.name,r})}
 setInterval(safe('wishes',()=>{const now=Date.now();
@@ -74,7 +74,11 @@ function doSpin(ws,c){const p=player(c.name),sp=spinState(p);if(sp.n>=SPINMAX)re
 // =====================================================================  starter missions
 const STARTER=[{k:'feed',n:1,r:{c:30},t:'Feed a dog'},{k:'pet',n:5,r:{c:30},t:'Pet your dogs 5 times'},{k:'buy',n:1,r:{tk:1},t:'Buy something in the Shop'},{k:'place',n:1,r:{c:40},t:'Place a furniture item'},
  {k:'train',n:1,r:{c:40},t:'Train a trick'},{k:'caps',n:1,r:{g:2},t:'Open a capsule'},{k:'wish',n:1,r:{c:50},t:'Grant a dog wish'},{k:'parkjoin',n:1,r:{c:40},t:'Visit the dog park'},
- {k:'visit',n:1,r:{c:40},t:"Visit a friend's house"},{k:'mp',n:1,r:{g:3},t:'Play an online mini-game'}];
+ {k:'visit',n:1,r:{c:40},t:"Visit a friend's house"},{k:'mp',n:1,r:{g:3},t:'Play an online mini-game'},
+ // v7.2: the "explorer" missions - one-time, they walk a player through the v7 features and pay a few free gems (the only free gem source besides achievements, the daily wheel and the 7th login day)
+ {k:'hatch',n:1,r:{g:2},t:'Hatch your first dog egg'},{k:'breed',n:1,r:{g:3},t:'Breed two dogs in the Nursery'},{k:'show',n:1,r:{g:2},t:'Enter a dog in the Dog Show'},
+ {k:'vote',n:1,r:{g:1,c:50},t:'Vote in a Dog Show'},{k:'buydog',n:1,r:{g:2,c:100},t:'Adopt a dog from the Pet Shop'},{k:'dm',n:1,r:{g:1},t:'Send a private message to a friend'}];
+const WN=72;          // "what's new" version: a player who has not seen it (p.wn<WN) gets the one-time tour; new players learn it in the tutorial instead
 const STBONUS={g:10,tk:3,c:300};
 const starterList=p=>STARTER.map((s,i)=>({i,t:s.t,goal:s.n,prog:Math.min(s.n,st(p,s.k)),r:s.r,claimed:!!p.starter.claimed[i]}));
 const starterMsg=p=>{const l=starterList(p);return{t:'starter',list:l,bonus:{ready:l.every(x=>x.claimed),claimed:!!p.starter.bonus,r:STBONUS}}};
@@ -140,7 +144,8 @@ HND.spin=(ws,c)=>doSpin(ws,c);
 HND.starter=(ws,c)=>send(ws,starterMsg(player(c.name)));
 HND.starter_claim=(ws,c,m)=>{const p=player(c.name),l=starterList(p),e=l[m.i|0];if(!e||e.claimed||e.prog<e.goal)return;p.starter.claimed[e.i]=true;give(p,e.r);dirty();toast(ws,'🎁 +'+X.rtxt(e.r));send(ws,starterMsg(p));sendMe(ws)};
 HND.starter_bonus=(ws,c)=>{const p=player(c.name);if(p.starter.bonus||!starterList(p).every(x=>x.claimed))return;p.starter.bonus=true;give(p,STBONUS);dirty();toast(ws,'🎉 ภารกิจมือใหม่ครบแล้ว! +'+X.rtxt(STBONUS));send(ws,starterMsg(p));sendMe(ws)};
-HND.tutorial=(ws,c)=>{player(c.name).tut=1;dirty()};
+HND.tutorial=(ws,c)=>{const p=player(c.name);p.tut=1;p.wn=WN;dirty()};
+HND.whatsnew=(ws,c)=>{const p=player(c.name);if((p.wn|0)<WN){p.wn=WN;dirty()}};
 HND.house_info=(ws,c)=>send(ws,houseInfo(player(c.name)));
 HND.house_up=(ws,c)=>houseUp(ws,c);
 HND.party_start=(ws,c)=>partyStart(ws,c);
@@ -156,6 +161,7 @@ HND.mail_claim_all=(ws,c)=>{const p=player(c.name),tot={};for(const e of p.mail)
 HND.mail_del=(ws,c,m)=>{const p=player(c.name),i=p.mail.findIndex(x=>x.id===m.id);if(i<0||(p.mail[i].r&&!p.mail[i].claimed))return;p.mail.splice(i,1);dirty();send(ws,mailMsg(p));sendMe(ws)};
 HND.mail_clear=(ws,c)=>{const p=player(c.name);p.mail=p.mail.filter(x=>x.r&&!x.claimed);dirty();send(ws,mailMsg(p));sendMe(ws)};
 if(process.env.CD_TEST){      // test-only helpers; never enabled unless the server is started with CD_TEST=1
+ HND.dbg_wn=(ws,c)=>{const p=player(c.name);p.tut=1;p.wn=0;dirty();sendMe(ws)};      // pretend to be a player from before v7.2 (finished the tutorial, never saw the tour)
  HND.dbg_give=(ws,c,m)=>{const p=player(c.name);p.xp+=m.xp|0;p.coins+=m.c|0;p.gems+=m.g|0;p.tickets+=m.tk|0;dirty();sendMe(ws)};
  HND.dbg_mail=(ws,c,m)=>mailTo(c.name,{k:'sys',from:'',r:{c:+m.c||50}});
  HND.dbg_week=(ws,c,m)=>{const o=db.players[m.n];if(o)o.lk={wk:weekId()-1,n:+m.v||1};db.contest.wk=weekId()-1;dirty();contestRoll();send(ws,{t:'toast',m:'dbg week'})};
@@ -167,7 +173,7 @@ function onEnter(ws,c,p){const now=Date.now();for(const d of p.dogs){if(d.fetch)
  const e=C.season();if(e)send(ws,{t:'ev',k:'season',id:e})}
 const onClose=()=>{};
 const meExtra=p=>{const now=Date.now(),cz=cozy(p);return{hl:hlOf(p),maxItems:maxItems(p),maxDogs:maxDogs(p),mail:mailUnread(p),tut:!!p.tut,cozy:cz.score,sets:cz.sets,perks:[...perks(p)],likes:p.likes|0,ev:C.season()||null,
- party:p.party&&p.party.until>now?p.party.until-now:0,spinFree:!(p.spin&&p.spin.date==today()&&p.spin.n>0),stReady:starterReady(p),stDone:p.starter.bonus&&1||0}};
+ party:p.party&&p.party.until>now?p.party.until-now:0,spinFree:!(p.spin&&p.spin.date==today()&&p.spin.n>0),stReady:starterReady(p),stDone:p.starter.bonus&&starterList(p).every(x=>x.claimed)?1:0,wn:p.wn|0}};
 
 return{handle,onEnter,onClose,onVisit,wish,perks,cozy,setsDone,meExtra,mailTo,contestRoll,houseInfo,evMul,WHEEL,STARTER};
 };

@@ -52,7 +52,9 @@ try:
         gain=int(re.search(r'\+(\d+)',out).group(1))
         ck(gain in (0,3,15),f'[{name}] result screen shows a bot-sized reward (+{gain}: win 15 / draw 3 / lose 0)')
         pg.wait_for_timeout(400)
-        ck(pg.evaluate("S.me.coins")-coins0==gain,f'[{name}] coins really went up by {gain} ({coins0} -> {pg.evaluate("S.me.coins")})')
+        lb=pg.evaluate("(document.querySelector('#rpsb .lossbox')||{textContent:''}).textContent");loss=int((re.search(r'(\d+)',lb) or [0,0])[1])      # v7: a lost round costs a few coins (bot: 8) - the screen shows it in a red box
+        ck(gain==0 or loss==0,f'[{name}] a win/draw costs nothing; only a lost round shows the red fee box (+{gain}, fee {loss})')
+        ck(pg.evaluate("S.me.coins")-coins0==gain-loss,f'[{name}] coins really changed by {gain-loss} ({coins0} -> {pg.evaluate("S.me.coins")})')
         pg.screenshot(path=f'{D}/{TAG}_{name}_4result.png')
         # play again
         tap('#rpsb [data-do=gstart]');pg.wait_for_selector('#rpsb .rps button',timeout=9000)

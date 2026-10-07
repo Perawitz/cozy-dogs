@@ -1,0 +1,84 @@
+/* Cozy Dogs v7.1 - announcements: the banner everybody sees + the "write an announcement" window. Prefixed an- so nothing else is touched. */
+#anb{position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:80;width:min(560px,calc(100vw - 20px));pointer-events:none;display:flex;justify-content:center}
+.an-w{width:100%;animation:anin .65s cubic-bezier(.2,1.25,.4,1) both}
+.an-w.out{animation:anout .45s ease-in both}
+@keyframes anin{0%{transform:translateY(-140%) scale(.9);opacity:0}60%{transform:translateY(7px) scale(1.02);opacity:1}100%{transform:none;opacity:1}}
+@keyframes anout{to{transform:translateY(-140%) scale(.95);opacity:0}}
+.an{position:relative;display:flex;align-items:center;gap:10px;padding:9px 42px 15px 10px;border:3px solid var(--ink);border-radius:20px;overflow:hidden;min-width:0;text-align:left;
+ box-shadow:0 5px 0 var(--ink),0 12px 26px rgba(70,40,30,.35)}
+.an-fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
+.an-p{position:absolute;left:var(--x);bottom:-16px;font-style:normal;font-size:var(--s);opacity:0;animation:anrise var(--du) ease-in infinite;animation-delay:var(--dl)}
+@keyframes anrise{0%{transform:translateY(0) rotate(-8deg) scale(.8);opacity:0}18%{opacity:.95}100%{transform:translateY(-92px) rotate(18deg) scale(1.15);opacity:0}}
+.an-ico{flex:none;position:relative;width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid var(--ink);display:grid;place-items:center;font-size:23px;box-shadow:0 3px 0 rgba(90,61,51,.35)}
+.an-ico span{display:inline-block;animation:anwob 1.1s ease-in-out infinite;transform-origin:50% 70%}
+@keyframes anwob{0%,100%{transform:rotate(-14deg) scale(1)}50%{transform:rotate(12deg) scale(1.12)}}
+.an-bd{position:relative;min-width:0;flex:1}
+.an-by{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:11.5px;font-weight:900;color:var(--ink2);line-height:1.25}
+.an-by b{color:var(--ink);font-size:13px;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.an-by em{font-style:normal}
+.an-tx{font-size:16.5px;font-weight:900;line-height:1.3;color:var(--ink);word-break:break-word;overflow-wrap:anywhere;margin-top:1px}
+.an-x{position:absolute;right:7px;top:7px;width:26px;height:26px;padding:0;border-radius:50%;border:2px solid var(--ink);background:#fff;font-size:12px;font-weight:900;line-height:1;display:grid;place-items:center;pointer-events:auto;cursor:pointer;z-index:3}
+.an-x::after{content:'';position:absolute;inset:-9px}
+.an-bar{position:absolute;left:0;right:0;bottom:0;height:7px;background:rgba(90,61,51,.14)}
+.an-bar i{display:block;height:100%;width:100%;transform-origin:left center;animation:anbar linear forwards;border-radius:0 4px 4px 0}
+@keyframes anbar{to{transform:scaleX(0)}}
+/* ---- heart: soft pink */
+.an-heart{background:linear-gradient(135deg,#fff6f9,#ffd9e8);box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5px #ff9fbd,0 5px 0 var(--ink),0 12px 26px rgba(255,120,160,.38)}
+.an-heart .an-bar i{background:linear-gradient(90deg,#ffb3cc,#ff7aa8)}
+/* ---- star: golden, twinkling in place */
+.an-star{background:linear-gradient(135deg,#fffbe4,#ffe9a6);box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5px #ffc94d,0 5px 0 var(--ink),0 12px 30px rgba(255,190,50,.5)}
+.an-star .an-bar i{background:linear-gradient(90deg,#ffe28a,#ffb52e)}
+.an-star .an-p{bottom:auto;top:var(--y);animation:antw var(--du) ease-in-out infinite;animation-delay:var(--dl)}
+@keyframes antw{0%,100%{transform:scale(.4) rotate(0);opacity:0}50%{transform:scale(1.2) rotate(20deg);opacity:1}}
+.an-star .an-ico{background:#fff8d6}
+/* ---- rainbow: the rich one - a running rainbow frame, confetti falling */
+.an-rainbow{background:linear-gradient(135deg,#fffdf9,#fff4ff);box-shadow:0 0 0 0 transparent,0 5px 0 var(--ink),0 12px 34px rgba(183,155,255,.65)}
+.an-rainbow::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:5px;pointer-events:none;z-index:2;background:linear-gradient(90deg,#ff8fb0,#ffc94d,#6fd1a5,#6fb8ff,#b79bff,#ff8fb0,#ffc94d,#6fd1a5);background-size:200% 100%;animation:anrb 2.6s linear infinite;
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+@keyframes anrb{to{background-position:200% 0}}
+.an-rainbow .an-bar i{background:linear-gradient(90deg,#ff8fb0,#ffc94d,#6fd1a5,#6fb8ff,#b79bff)}
+.an-rainbow .an-p{bottom:auto;top:-18px;animation:anfall var(--du) linear infinite;animation-delay:var(--dl)}
+@keyframes anfall{0%{transform:translateY(0) rotate(0);opacity:0}12%{opacity:1}100%{transform:translateY(100px) rotate(240deg);opacity:0}}
+.an-rainbow .an-tx{font-size:17.5px}
+.an-rainbow .an-ico{background:linear-gradient(135deg,#fff,#ffeaf6)}
+.an-prev{padding-bottom:12px}
+/* ---- the window */
+.anmod{width:min(440px,96vw)}
+.anm{min-width:0}
+.an-hint{font-size:12.5px;font-weight:800;color:var(--ink2);margin:0 0 10px;line-height:1.45}
+.an-sts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.an-st{border:3px solid var(--ink);border-radius:14px;padding:8px 3px 6px;background:var(--paper);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;position:relative;transition:transform .08s,box-shadow .08s,background .12s}
+.an-st .e{font-size:27px;line-height:1.1}
+.an-st b{font-size:13px;line-height:1.2}
+.an-st .pr{display:inline-flex;align-items:center;gap:3px;font-size:14px;font-weight:900}
+.an-st small{font-size:10.5px;font-weight:800;color:var(--ink2)}
+.an-st.on{transform:translateY(-2px);box-shadow:0 4px 0 var(--ink)}
+.an-st.on::after{content:'✓';position:absolute;right:-6px;top:-8px;width:20px;height:20px;border-radius:50%;background:var(--mint);border:2px solid var(--ink);font-size:11px;font-weight:900;display:grid;place-items:center;color:var(--ink)}
+.an-st-heart.on{background:#ffe3ee}.an-st-star.on{background:#fff2b8}.an-st-rainbow.on{background:linear-gradient(135deg,#ffe3ee,#e8f3ff,#e8ffe9)}
+.an-edit{position:relative}
+.an-in{display:block;width:100%;min-height:68px;border:3px solid var(--ink);border-radius:12px;padding:8px 10px 20px;font:800 15px/1.35 var(--ui);background:#fff;resize:none;color:var(--ink);user-select:text;-webkit-user-select:text;outline:none}
+.an-in:focus{box-shadow:0 0 0 3px var(--pink2)}
+.an-cnt{position:absolute;right:11px;bottom:6px;font-size:11px;font-weight:900;color:var(--ink2)}.an-cnt.full{color:var(--red)}
+.an-pvl{font-size:11.5px;font-weight:900;color:var(--ink2);margin:10px 0 4px}
+.an-pv{background:repeating-linear-gradient(45deg,#f8eddc,#f8eddc 9px,#f2e3ca 9px,#f2e3ca 18px);border-radius:12px;padding:10px 8px 12px;border:2px dashed var(--line);overflow:hidden}
+.an-pv .an{width:100%}
+.an-stat{margin:10px 0 8px;font-size:12.5px;font-weight:800;text-align:center;min-height:20px;line-height:1.35}
+.an-stat .good{color:#2f8f68}.an-stat .warn{color:#b9741a}.an-stat .bad{color:#c0303c}
+.an-go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-size:16px;padding:10px 12px}
+.an-go .pr{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.65);border-radius:9px;padding:0 8px;font-size:14px}
+.an-go.an-off{filter:grayscale(.5);opacity:.72}
+.an-rules{margin:10px 0 0;padding:0 0 0 18px;font-size:11.5px;font-weight:700;color:var(--ink2);line-height:1.55}
+.an-hl{display:flex;flex-direction:column;gap:7px}
+.an-hr{display:flex;gap:9px;align-items:flex-start;border:3px solid var(--ink);border-radius:14px;padding:6px 10px;min-width:0}
+.an-hr .e{font-size:22px;line-height:1.2;flex:none}
+.an-hr>div{min-width:0;flex:1}
+.an-hr .by{display:flex;gap:8px;align-items:baseline;justify-content:space-between}.an-hr .by b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.an-hr .by small{font-size:11px;font-weight:800;color:var(--ink2);flex:none}
+.an-hr .tx{font-size:14px;font-weight:800;line-height:1.35;word-break:break-word;overflow-wrap:anywhere}
+.an-h-heart{background:#fff1f6}.an-h-star{background:#fff8d9}.an-h-rainbow{background:linear-gradient(100deg,#fff1f6,#eef6ff 55%,#eefff2)}
+@media(max-width:480px){.an-tx{font-size:14.5px}.an-rainbow .an-tx{font-size:15.5px}.an-ico{width:40px;height:40px;font-size:20px}.an{gap:8px;padding:8px 40px 14px 8px}.an-st .e{font-size:24px}}
+@media(max-height:480px){#anb{top:calc(4px + env(safe-area-inset-top,0px))}.an{padding:5px 38px 12px 8px;border-radius:16px}.an-ico{width:34px;height:34px;font-size:17px}.an-tx,.an-rainbow .an-tx{font-size:13.5px}.an-by{font-size:10.5px}.an-by b{font-size:12px}.an-p{display:none}}
+@media(prefers-reduced-motion:reduce){.an-w,.an-w.out{animation-duration:.01s}.an-p,.an-ico span,.an-rainbow::before{animation:none!important}.an-p{display:none}}
+/* little corner decorations on the megaphone bubble: a bow / sparkles / a crown */
+.an-ico::after{position:absolute;left:-7px;top:-9px;font-size:18px;line-height:1;transform:rotate(-18deg);pointer-events:none;filter:drop-shadow(0 1px 0 rgba(90,61,51,.35))}
+.an-heart .an-ico::after{content:'🎀'}.an-star .an-ico::after{content:'🌟'}.an-rainbow .an-ico::after{content:'👑'}
+@media(max-width:480px),(max-height:480px){.an-ico::after{font-size:14px;left:-6px;top:-7px}}

@@ -20,7 +20,7 @@ const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.par
 // ---------------- state ----------------
 const S={scr:'login',ws:null,me:{coins:0,gems:0,tickets:0,xp:0,lvl:1,owned:[],total:0,pity:0,wins:0,inv:{},unlock:{wall:[],floor:[],light:[]},ready:0,stats:{}},name:'',owner:'',deco:{wall:'cream',floor:'wood',light:'warm'},items:[],dogs:{},players:[],
  cat:null,welcome:null,sel:null,edit:false,token:LS.get('cd_token',null),loaded:false,chat:[],notes:[],fx:[],
- set:Object.assign({sound:true,music:true,vol:.6,names:true,particles:true,lang:'th',weather:'auto',time:'auto'},LS.get('cd_set',{}))};
+ set:Object.assign({sound:true,music:true,vol:.6,names:true,particles:true,lang:'th',weather:'auto',time:'auto',ann:true,barks:true},LS.get('cd_set',{}))};
 const saveSet=()=>LS.set('cd_set',S.set);
 const RN={C:'Common',R:'Rare',E:'Epic',L:'Legendary',M:'Mythic'},RCOL={C:'#b8a99a',R:'#5aa8ff',E:'#b06aff',L:'#ffb52e',M:'#ff5cc0'},RORD={M:0,L:1,E:2,R:3,C:4};
 const PERS_EM={PLAYFUL:'🎾',LAZY:'😴',ENERGETIC:'⚡',SHY:'🙈',FRIENDLY:'🤗',FOODIE:'🍖',CURIOUS:'🔍',CLINGY:'🥺',BRAVE:'🦁',SLEEPY:'💤',MISCHIEVOUS:'😈'};
@@ -28,7 +28,7 @@ const PERS_EM={PLAYFUL:'🎾',LAZY:'😴',ENERGETIC:'⚡',SHY:'🙈',FRIENDLY:'�
 // ---------------- i18n (English keys -> Thai) ----------------
 const TH={'Shop':'ร้านค้า','Dogs':'น้องหมา','Capsule':'กาชา','Collection':'สะสม','Quests':'ภารกิจ','Ranks':'อันดับ','Friends':'เพื่อน','Games':'เกม','Decorate':'ตกแต่ง','Photo':'ถ่ายรูป','Settings':'ตั้งค่า','Chat':'แชท',
  'Pet':'ลูบหัว','Feed':'ให้อาหาร','Play':'เล่น','Brush':'หวีขน','Bath':'อาบน้ำ','Train':'เทรน','Info':'ข้อมูล','Wear':'แต่งตัว','Hunger':'หิว','Energy':'พลัง','Happy':'สุข','Clean':'สะอาด','Bond':'ความผูกพัน',
- 'Login':'เข้าสู่ระบบ','Register':'สมัครสมาชิก','Guest':'เล่นแบบ Guest','Username':'ชื่อผู้ใช้','Password':'รหัสผ่าน','Email':'อีเมล','Play as Guest':'เล่นแบบ Guest','Create account':'สร้างบัญชี','Forgot password?':'ลืมรหัสผ่าน?','Recovery code':'รหัสกู้คืน','New password':'รหัสผ่านใหม่','Set new password':'ตั้งรหัสผ่านใหม่','Back to login':'กลับไปหน้าเข้าสู่ระบบ','Enter your username, the recovery code you saved when you signed up, and a new password.':'ใส่ชื่อผู้ใช้ รหัสกู้คืนที่จดไว้ตอนสมัคร และรหัสผ่านใหม่ที่ต้องการ',
+ 'Login':'เข้าสู่ระบบ','Register':'สมัครสมาชิก','Guest':'เล่นแบบ Guest','Username':'ชื่อผู้ใช้','Password':'รหัสผ่าน','Email':'อีเมล','Play as Guest':'เล่นแบบ Guest','Create account':'สร้างบัญชี','Forgot password?':'ลืมรหัสผ่าน?','or':'หรือ','Recovery code':'รหัสกู้คืน','New password':'รหัสผ่านใหม่','Set new password':'ตั้งรหัสผ่านใหม่','Back to login':'กลับไปหน้าเข้าสู่ระบบ','Enter your username, the recovery code you saved when you signed up, and a new password.':'ใส่ชื่อผู้ใช้ รหัสกู้คืนที่จดไว้ตอนสมัคร และรหัสผ่านใหม่ที่ต้องการ',
  'Buy':'ซื้อ','Owned':'มีอยู่','Close':'ปิด','Done':'เสร็จ','Cancel':'ยกเลิก','Confirm':'ยืนยัน','Claim':'รับ','Claimed':'รับแล้ว','Locked':'ล็อก','Visit':'เยี่ยมบ้าน','Go Home':'กลับบ้าน','Gift':'ส่งของขวัญ','Remove':'ลบ','Add':'เพิ่ม','Accept':'ตอบรับ','Decline':'ปฏิเสธ',
  'Food':'อาหาร','Toys':'ของเล่น','Furniture':'เฟอร์นิเจอร์','Rugs':'พรม','Wall':'ผนัง','Accessories':'เครื่องแต่งตัว','Styles':'ธีมห้อง','Season':'เทศกาล','Wallpaper':'วอลเปเปอร์','Floor':'พื้น','Lighting':'แสงไฟ',
  'All':'ทั้งหมด','At home':'อยู่บ้าน','Away':'ไม่อยู่บ้าน','Favorites':'ตัวโปรด','Release':'ปล่อยกลับธรรมชาติ','Rename':'เปลี่ยนชื่อ','Tricks':'ลูกเล่น','Personality':'นิสัย','Favorite food':'อาหารโปรด','Favorite toy':'ของเล่นโปรด',

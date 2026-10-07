@@ -42,7 +42,7 @@ const Wardrobe=(()=>{
  const dirty=()=>!!(W.draft&&W.base&&JSON.stringify(W.draft)!=JSON.stringify(W.base));
  const priceOf=()=>D.price(W.draft,S.me.avOwn||[]);
  // the dog that comes along in the preview
- function myDog(){const d=(S.owner==S.name?Object.values(S.dogs)[0]:null)||(S.allDogs&&S.allDogs[0]);if(d)return{breed:d.breed,variant:d.variant,acc:d.acc};const pm=Park.on&&Park.m[Park.me];if(pm)return{breed:pm.breed,variant:pm.variant,acc:pm.acc};return S.avatarBreed?{breed:S.avatarBreed,variant:'Normal',acc:null}:null}
+ function myDog(){const d=(S.owner==S.name?Object.values(S.dogs)[0]:null)||(S.allDogs&&S.allDogs[0]);if(d)return{breed:DOGS.k(d),variant:d.variant,acc:d.acc};const pm=Park.on&&Park.m[Park.me];if(pm)return{breed:DOGS.k(pm),variant:pm.variant,acc:pm.acc};return S.avatarBreed?{breed:S.avatarBreed,variant:'Normal',acc:null}:null}
  // ---------- pieces of the screen ----------
  const colBtn=(k,i,c)=>`<button class="swb ${W.draft[k]==i?'on':''} ${c=='rainbow'?'rb':''}" data-do="wcol" data-k="${k}" data-v="${i}" style="--c:${c=='rainbow'?'#fff':c}"></button>`;
  function cardHTML(s,it){const d=W.draft,on=d[s.k]===it.id,owned=!it.p||own().has(s.k+':'+it.id),av2=Object.assign({},d,{[s.k]:it.id}),dis=s.needs&&!s.needs(d);

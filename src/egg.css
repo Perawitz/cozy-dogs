@@ -1,0 +1,34 @@
+/* Cozy Dogs v7 - egg reveal (gacha + nursery + shop). Prefixed eg- so it cannot touch other windows. */
+.eg-stage{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:96vw}
+.eg-hint{font-weight:900;color:#fff;opacity:.75;font-size:12px;text-shadow:0 1px 0 rgba(0,0,0,.4)}
+.eg-eggs{display:flex;flex-wrap:wrap;gap:16px 14px;justify-content:center;max-width:min(600px,94vw);padding:10px 6px}
+.eg-eggs.many{display:grid;grid-template-columns:repeat(5,auto);justify-content:center;gap:16px 18px}
+.eg-eggs .nu-egg{--w:84px}
+.eg-eggs.one .nu-egg{--w:118px}
+.eg-eggw{position:relative;transform-origin:50% 100%;animation:egwob .55s ease-in-out infinite;filter:drop-shadow(0 8px 10px rgba(0,0,0,.28))}
+.eg-eggw.crk{animation:egshk .14s linear infinite}
+.eg-eggw.rdy .nu-egg .nu-crack{display:block}
+.eg-eggw.rdy .nu-egg{animation:eggl .5s ease-in-out infinite alternate}
+.eg-sp{position:absolute;font-style:normal;font-size:16px;animation:nutw 1.6s ease-in-out infinite;pointer-events:none}
+.eg-sp.a{left:-10px;top:6px}.eg-sp.b{right:-8px;top:34%;animation-delay:.7s}
+@keyframes egwob{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes egshk{0%{transform:translateX(-3px) rotate(-8deg)}50%{transform:translateX(3px) rotate(8deg)}100%{transform:translateX(-3px) rotate(-8deg)}}
+@keyframes eggl{from{filter:brightness(1)}to{filter:brightness(1.25) saturate(1.2)}}
+.eg-flash{position:fixed;inset:0;z-index:75;pointer-events:none;background:radial-gradient(circle,#fff 0,rgba(255,255,255,.85) 25%,rgba(255,255,255,0) 70%);animation:egflash .65s ease-out forwards}
+@keyframes egflash{0%{opacity:0;transform:scale(.4)}25%{opacity:1}100%{opacity:0;transform:scale(1.6)}}
+.eg-box{width:min(380px,94vw);padding:14px 12px 12px;background:linear-gradient(#fffdf6,#fff1f6);max-height:94vh;overflow:auto;animation:flipin .55s cubic-bezier(.2,1.2,.4,1)}
+.eg-acts{display:flex;gap:8px;width:100%;margin-top:8px}.eg-acts .btn{flex:1;font-size:16px;padding:9px 12px}
+.eg-gift{display:flex;flex-direction:column;align-items:center;gap:8px;color:#fff;font-weight:900}
+.eg-gift .g1{font-size:92px;display:inline-block;animation:egwob .5s ease-in-out infinite;filter:drop-shadow(0 8px 10px rgba(0,0,0,.3))}
+.eg-gift.open .g1{animation:egshk .12s linear infinite}
+/* 10-pull result cards */
+.eg-mini .eg-line{font-size:15px;min-height:20px;margin-top:2px;display:flex;gap:3px;justify-content:center;align-items:center}
+.eg-new{position:absolute;left:0;top:0;background:var(--pink);border:2px solid var(--ink);border-radius:8px;font-size:11px;font-weight:900;padding:0 6px;color:#fff;z-index:2}
+.eg-tr{display:inline-grid;place-items:center;width:20px;height:20px;border:2px solid var(--ink);border-radius:50%;font-size:11px;background:#fff;line-height:1}
+.eg-tr.t2{background:#e8f3ff}.eg-tr.t3{background:#fff2b8;box-shadow:0 0 6px #ffd25a}
+.rc10 .eg-mini{animation:flipin .5s cubic-bezier(.2,1.2,.4,1) both}
+@media(max-width:700px){.eg-eggs.many{gap:12px 10px}.eg-eggs .nu-egg{--w:54px}.eg-eggs.one .nu-egg{--w:104px}.eg-eggs{gap:12px 8px}}
+@media(max-height:560px){.eg-eggs.one .nu-egg{--w:84px}.eg-box{max-height:calc(100vh - 56px);padding:8px 10px}.eg-res .pic{width:92px;height:92px;box-shadow:0 3px 0 var(--ink)}.eg-res .pic canvas{width:84px;height:84px}.eg-res h3{font-size:17px}.eg-res .bn{font-size:12px}.eg-res .par,.eg-res .burst{display:none}.eg-res{gap:4px}.eg-acts{margin-top:4px}.eg-acts .btn{padding:6px 10px;font-size:14px}.eg-res .tri{padding:3px 8px}}
+@media(prefers-reduced-motion:reduce){.eg-eggw,.eg-eggw.crk,.eg-gift .g1,.eg-sp,.eg-flash{animation:none!important}}
+
+.eg-res .rb{right:4px;top:6px;transform:rotate(6deg)}

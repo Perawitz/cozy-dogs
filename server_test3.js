@@ -40,7 +40,7 @@ const startMsg=c=>c.wait('mp_start',8000);
  async function runTaps(cl,gap,idx){let side=0;for(let i=0;i<120;i++){if(cl.last('mp_end'))return;cl.send({t:'mp_tap',s:side});side^=1;await sleep(gap)}}
  const t1=runTaps(b,80),t2=runTaps(c,140);await Promise.all([t1,t2]);
  const eb=await b.wait('mp_end',8000),ec=await c.wait('mp_end',12000);
- ok(eb.me.rank==1&&ec.me.rank==2,'faster human wins');ok(eb.me.coins==60&&ec.me.coins==38,'full rewards vs human ('+eb.me.coins+'/'+ec.me.coins+')');
+ ok(eb.me.rank==1&&ec.me.rank==2,'faster human wins');ok(eb.me.coins==60&&ec.me.coins==0&&(ec.me.loss===0||ec.me.loss===20),'winner paid, loser gets no prize but a fee (v7) ('+eb.me.coins+'/'+ec.me.coins+' loss '+ec.me.loss+')');
  ok(eb.res[0].ft>0,'finish time reported');
  // regression: the player who joined SECOND but crosses the line first must be ranked 1st (rank used to follow join order)
  const rd=await reg("raceD"),re=await reg("raceE");
@@ -111,7 +111,7 @@ const startMsg=c=>c.wait('mp_start',8000);
  ok(sp.me.tickets>=0&&sp.me.stats.spin==4,'spin stat');
 
  // ---------- 10. starter missions
- const sm=await reg('starty');sm.send({t:'starter'});let sl=await sm.wait('starter');ok(sl.list.length==10&&!sl.bonus.ready,'10 starter missions');
+ const sm=await reg('starty');sm.send({t:'starter'});let sl=await sm.wait('starter');ok(sl.list.length==16&&!sl.bonus.ready,'16 starter missions (10 + 6 explorer missions of v7.2)');
  sm.send({t:'starter_claim',i:0});await sleep(250);ok(sm.me.coins==300,'cannot claim an unfinished mission');
  sm.send({t:'feed',dog:sm.dog,food:'kibble'});await sleep(250);sm.send({t:'starter_claim',i:0});await sleep(300);ok(sm.me.coins==300-10+30,'claim after feeding (+30, kibble cost 10)');
  sm.send({t:'starter_claim',i:0});await sleep(250);ok(sm.me.coins==320,'no double claim');sm.send({t:'starter_bonus'});await sleep(150);ok(true,'bonus blocked until all done');

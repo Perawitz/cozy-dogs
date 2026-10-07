@@ -21,7 +21,7 @@ function wishLine(){const el=$('#care'),d=S.dogs[S.sel];if(!d||el.classList.cont
  if(!w){w=document.createElement('div');w.className='wishline';const top=$('.top',el);if(top)top.after(w)}w.innerHTML=html}
 setInterval(wishLine,1000);
 H.wish_new=m=>{if(S.owner!=S.name)return;sfx('notify');ticker('💭 '+m.name+' '+wishText(m.w))};
-H.wish_done=m=>{sfx('level');const d=S.dogs[m.dog];toast('💖 '+m.name+' '+TT('is so happy!','มีความสุขมาก!')+' +'+(m.r.c||0)+'💰'+(m.r.g?' +'+m.r.g+'💎':''),3800);
+H.wish_done=m=>{sfx('level');const d=S.dogs[m.dog];window.Bark&&Bark.say('happy',d,true);toast('💖 '+m.name+' '+TT('is so happy!','มีความสุขมาก!')+' +'+(m.r.c||0)+'💰'+(m.r.g?' +'+m.r.g+'💎':''),3800);
  if(d&&d._pos){const[x,y,L]=d._pos;burst(x,y-L-d._top,'💖',6);sparkle(x,y-30,16,'#ffb3c7');floatText(x,y-L-d._top-30,'+'+(m.r.c||0)+'💰'+(m.r.g?' +'+m.r.g+'💎':''),'#ffe27a')}if(S.sel==m.dog)UI.care()};
 // ================= fetch =================
 S.fetchMode=false;
@@ -32,7 +32,7 @@ function tball(c,x,y,r){c.fillStyle='#d9ee4a';c.strokeStyle='#5a3d33';c.lineWidt
 function fetchOverlay(c,t,now){for(const d of Object.values(S.dogs)){const f=d.fetch;if(!f)continue;const el=now-d.fetchAt;c.save();
  if(f.st==1){const k=Math.min(1,el/650),bx=400+(f.bx-400)*k,gy=572+(f.by-572)*k,h=Math.sin(k*Math.PI)*130,bounce=k>=1?Math.abs(Math.sin((el-650)/110))*9*Math.exp(-(el-650)/420):0;
   c.fillStyle='rgba(60,32,22,.25)';c.beginPath();c.ellipse(bx,gy,Math.max(5,11-h*.03),4,0,0,7);c.fill();tball(c,bx,gy-9-h-bounce,8)}
- else if(d._pos){const b=DOGS.BR[d.breed],sc=b?b.size*.9:1,[x,y,L]=d._pos;tball(c,x+d.face*30*sc,y-L-d._top*.34+Math.sin(t*10)*1.5,7)}c.restore()}}
+ else if(d._pos){const b=DOGS.b(d),sc=b?b.size*.9:1,[x,y,L]=d._pos;tball(c,x+d.face*30*sc,y-L-d._top*.34+Math.sin(t*10)*1.5,7)}c.restore()}}
 // ================= party overlay =================
 function partyOverlay(c,t,now){if(!S.party)return;if(now>S.party){S.party=0;return}
  c.save();for(let i=0;i<5;i++){const a=t*.9+i*1.26,x=400+Math.sin(a)*330,hue=(t*60+i*72)%360,gr=c.createLinearGradient(400,0,x,470);gr.addColorStop(0,`hsla(${hue},95%,72%,.30)`);gr.addColorStop(1,`hsla(${hue},95%,72%,0)`);c.fillStyle=gr;c.beginPath();c.moveTo(394,0);c.lineTo(406,0);c.lineTo(x+80,480);c.lineTo(x-80,480);c.closePath();c.fill()}
@@ -76,14 +76,16 @@ DO.stclaim=d=>send({t:'starter_claim',i:+d.i});DO.stbonus=()=>send({t:'starter_b
 const TUT=[{e:'🐶',tx:['Welcome to Cozy Dogs! This is your home — your dogs live here.','ยินดีต้อนรับสู่ Cozy Dogs! นี่คือบ้านของคุณ น้องหมาอาศัยอยู่ที่นี่'],hl:null},
  {e:'👆',tx:['Tap a dog to open its care card: pet, feed, play, brush, bath and train to grow Bond ❤️.','แตะที่น้องหมาเพื่อเปิดการ์ดดูแล: ลูบหัว ให้อาหาร เล่น หวีขน อาบน้ำ เทรน เพื่อเพิ่ม Bond ❤️'],hl:'#cv'},
  {e:'💭',tx:['Dogs sometimes make a wish 💭 — grant it for bonus coins! The 🎾 button lets you throw a ball for fetch.','บางครั้งน้องหมาจะขอของ 💭 ทำตามเพื่อรับเหรียญโบนัส! ปุ่ม 🎾 ใช้โยนบอลให้คาบกลับมา'],hl:'#fetchbtn'},
- {e:'🧭',tx:['The dock has everything: Shop, Capsules, Friends, the Dog Park 🌳, online Games 🎮 and your House 🏡.','แถบด้านล่างมีทุกอย่าง: ร้านค้า กาชา เพื่อน สวนหมา 🌳 เกมออนไลน์ 🎮 และบ้าน 🏡'],hl:'#dock'},
+ {e:'🍼',tx:['Dogs GROW UP: baby 🍼 → puppy 🐶 → teen 🐕 → adult 🦮. Some are born with cute traits ✨ — and a Growth Candy 🍬 makes them grow faster!','น้องหมาจะโตตามวัย: เบบี๋ 🍼 → ลูกหมา 🐶 → วัยรุ่น 🐕 → โตเต็มวัย 🦮 บางตัวเกิดมามีลักษณะพิเศษสุดน่ารัก ✨ และลูกอมโตเร็ว 🍬 ช่วยให้โตไวขึ้นได้!'],hl:null},
+ {e:'🧭',tx:['The bottom bar holds your everyday buttons. Tap ☰ Menu to find EVERYTHING else: Egg Gacha 🥚, Breeding 🧬, Pet Shop 🐾, Dog Show 👑, private chat 💌, announcements 📣 and more.','แถบด้านล่างมีปุ่มที่ใช้บ่อย ส่วนที่เหลือทั้งหมดอยู่ที่ปุ่ม ☰ เมนู: สุ่มไข่ 🥚 ผสมพันธุ์ 🧬 ร้านหมา 🐾 ประกวดหมา 👑 แชทส่วนตัว 💌 ประกาศ 📣 และอีกเพียบ'],hl:'#dock'},
+ {e:'🥚',tx:['Try the new things: crack an Egg 🥚, breed two dogs 🧬 and enter the hourly Dog Show 👑. Each first try pays free gems 💎 in the Starter missions!','ลองของใหม่: สุ่มไข่ 🥚 ผสมพันธุ์หมา 🧬 และส่งหมาเข้าประกวดทุกชั่วโมง 👑 ลองครั้งแรกแต่ละอย่างได้ 💎 ฟรีจากภารกิจมือใหม่!'],hl:'.dk.mnb'},
  {e:'🌱',tx:['Finish the Starter missions for easy rewards. Have fun!','ทำภารกิจมือใหม่เพื่อรับรางวัลง่าย ๆ สนุกนะ!'],hl:'#starterpill'}];
 function tutStart(){if(S.me.tut||S.tutOn||S.scr!='game')return;if(S.owner!=S.name||Park.on||MP.g||S.edit){setTimeout(tutStart,2000);return}if(modOpen('daily')||modOpen('help')||$('#mods .ov')){setTimeout(tutStart,1500);return}S.tutOn=true;S.tutI=0;tutShow()}
 function tutShow(){const el=$('#coach'),s=TUT[S.tutI];$$('.hl').forEach(e=>e.classList.remove('hl'));if(!s){return tutEnd()}
  el.classList.remove('hidden');el.innerHTML=`<div class="ce">${s.e}</div><div class="ct">${TT(s.tx[0],s.tx[1])}<div class="cn">${S.tutI+1}/${TUT.length}</div></div><div class="cb"><button class="btn sm ghost" data-do="tutskip">${TT('Skip','ข้าม')}</button><button class="btn sm mint" data-do="tutnext">${S.tutI==TUT.length-1?TT('Got it!','เข้าใจแล้ว!'):TT('Next','ต่อไป')} ▶</button></div>`;
  const h=s.hl&&$(s.hl);if(h&&!h.classList.contains('hidden'))h.classList.add('hl')}
 DO.tutnext=()=>{S.tutI++;tutShow()};DO.tutskip=()=>tutEnd();
-function tutEnd(){S.tutOn=false;$('#coach').classList.add('hidden');$$('.hl').forEach(e=>e.classList.remove('hl'));if(!S.me.tut){S.me.tut=true;send({t:'tutorial'})}}
+function tutEnd(){S.tutOn=false;$('#coach').classList.add('hidden');$$('.hl').forEach(e=>e.classList.remove('hl'));if(!S.me.tut){S.me.tut=true;S.me.wn=72;/* the tutorial already told a new player what the tour would say */send({t:'tutorial'})}}
 // ================= house: level, sets, contest =================
 H.house_info=m=>{S.hinfo=m;if(modOpen('house'))renderHouse()};
 H.contest=m=>{S.contest=m;if(modOpen('house'))renderHouse()};
@@ -91,6 +93,10 @@ DO.house=()=>{send({t:'house_info'});send({t:'contest_get'});S.houseTab=S.houseT
 DO.htab=d=>{S.houseTab=d.k;renderHouse()};
 DO.houseup=()=>send({t:'house_up'});
 DO.partygo=()=>send({t:'party_start'});
+// v7: who may visit my house (0 everyone / 1 friends only / 2 nobody) - the server keeps everybody else out and sends guests home when it gets stricter
+const PRIV=[['🔓','Open to everyone','เปิดรับทุกคน','Anybody can visit your house.','ใครก็แวะมาเยี่ยมบ้านได้'],['👥','Friends only','เฉพาะเพื่อน','Only your friends can come in.','เฉพาะเพื่อนของคุณเท่านั้นที่เข้าได้'],['🔒','Private','ปิดบ้าน','Nobody can visit. Your dogs relax in peace.','ไม่รับแขกเลย น้องหมาได้พักผ่อนเงียบ ๆ']];
+function privHTML(){const v=S.me.priv|0,p=PRIV[v]||PRIV[0];return`<div class="sel-row privrow">${PRIV.map((x,i)=>`<button class="opt ${v==i?'on':''}" data-do="setpriv" data-v="${i}">${x[0]} ${TT(x[1],x[2])}</button>`).join('')}</div><div class="muted" style="margin-top:5px">${p[0]} ${TT(p[3],p[4])}</div>`}
+DO.setpriv=d=>{const v=+d.v;if(![0,1,2].includes(v)||v===(S.me.priv|0))return;send({t:'set_priv',v})};
 function renderHouse(){const hi=S.hinfo,tab=S.houseTab||'h',th=S.set.lang=='th';
  const tabs=`<div class="tabs2">${[['h','🏡 '+TT('House','บ้าน')],['s','🧩 '+TT('Sets','ชุดเฟอร์')],['c','🏅 '+TT('Contest','ประกวด')]].map(([k,l])=>`<button class="${tab==k?'on':''}" data-do="htab" data-k="${k}">${l}</button>`).join('')}</div>`;
  if(!hi)return modal('house','🏡 '+TT('My House','บ้านของฉัน'),tabs+'<div class="muted center">…</div>','sm');
@@ -100,6 +106,7 @@ function renderHouse(){const hi=S.hinfo,tab=S.houseTab||'h',th=S.set.lang=='th';
    <div class="stats4"><div><b>${hi.cozy.score}</b><small>🛋️ ${TT('Cozy score','คะแนนความอบอุ่น')}</small></div><div><b>${hi.likes}</b><small>❤️ ${TT('Likes','ถูกใจ')}</small></div><div><b>${hi.cozy.sets.length}/${W?W.sets.length:7}</b><small>🧩 ${TT('Sets','ชุดเฟอร์')}</small></div></div>
    ${nx?`<div class="list" style="margin-top:10px"><div class="li"><div class="g"><b>⬆️ ${TT('Upgrade to level','อัปเกรดเป็นระดับ')} ${hi.hl+2}</b><small>${TT('Furniture','เฟอร์')} ${hi.maxItems}→<b>${nx.items}</b> · ${TT('Dogs','หมา')} ${hi.maxDogs}→<b>${nx.dogs}</b></small><small>${TT('Needs player level','ต้องเลเวล')} ${nx.lvl}${S.me.lvl>=nx.lvl?' ✔':' ✖'}</small></div><span class="rw">${nx.c} ${ic('coin','sm')}${nx.g?'<br>'+nx.g+' '+ic('gem','sm'):''}</span><button class="btn sm ${canUp?'mint':'dis'}" data-do="houseup">${TT('Upgrade','อัปเกรด')}</button></div></div>`:`<div class="list" style="margin-top:10px"><div class="li" style="background:#fff3c4"><div class="g"><b>🏆 ${TT('Max level reached!','อัปเกรดสูงสุดแล้ว!')}</b></div></div></div>`}
    ${perks.length?`<h4 style="margin:12px 0 6px">✨ ${TT('Active perks','โบนัสที่ใช้งานอยู่')}</h4><div class="sel-row">${perks.map(p=>`<span class="opt on">${esc(t(W.perks[p]))}</span>`).join('')}</div>`:`<div class="muted" style="margin-top:10px">🧩 ${TT('Complete furniture sets to unlock perks!','จัดเฟอร์ให้ครบชุดเพื่อรับโบนัสพิเศษ!')}</div>`}
+   <h4 style="margin:12px 0 6px">🔒 ${TT('House privacy','ความเป็นส่วนตัวของบ้าน')}</h4>${privHTML()}
    <h4 style="margin:12px 0 6px">🎉 ${TT('Party','ปาร์ตี้')}</h4><div class="list"><div class="li"><div class="g"><b>${pty>0?TT('Party in progress!','ปาร์ตี้กำลังสนุก!')+' ⏳ '+mmss(pty):TT('Throw a party','จัดปาร์ตี้')}</b><small>${TT('5 minutes · friends are invited · guests earn coins · dogs go wild','5 นาที · เชิญเพื่อนอัตโนมัติ · แขกได้เหรียญ · น้องหมาเต้นกันสนุก')}</small></div><button class="btn sm ${pty>0||S.owner!=S.name?'dis':'pink'}" data-do="partygo">🎉 40💰</button></div></div>
    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn sky" data-do="gbopen" data-n="${esc(S.name)}">📖 ${TT('Guestbook','สมุดเยี่ยม')}</button><button class="btn lav" data-do="mail">✉️ ${TT('Mailbox','กล่องจดหมาย')}</button></div>`}
  else if(tab=='s'){const W=S.welcome,placed=new Set(S.owner==S.name?S.items.map(i=>i.type):[]);
@@ -129,7 +136,9 @@ H.mail=m=>{S.mail=m.list;if(modOpen('mail'))renderMail()};
 DO.mail=()=>{send({t:'mail_get'});renderMail()};
 function mailText(m){const f=esc(m.from||'');switch(m.k){case'gift':return`🎁 <b>${f}</b> ${TT('sent you a gift','ส่งของขวัญให้คุณ')}`;case'like':return`❤️ <b>${f}</b> ${TT('liked your house','กดถูกใจบ้านของคุณ')}`;
  case'gb':return`📖 <b>${f}</b> ${TT('signed your guestbook','เขียนสมุดเยี่ยมบ้านคุณ')}${m.text?': “'+esc(m.text)+'”':''}`;case'visit':return`👋 <b>${f}</b> ${TT('visited while you were away','มาเยี่ยมตอนคุณไม่อยู่')}`;
- case'contest':return`🏆 ${TT('Weekly house contest — you placed','ประกวดบ้านประจำสัปดาห์ — คุณได้อันดับ')} #${m.rank}!`;default:return`🎁 ${TT('A present from Cozy Dogs','ของขวัญจาก Cozy Dogs')}`}}
+ case'contest':return`🏆 ${TT('Weekly house contest — you placed','ประกวดบ้านประจำสัปดาห์ — คุณได้อันดับ')} #${m.rank}!`;
+ case'mk_sold':return`💰 <b>${f}</b> ${TT('bought your dog','ซื้อหมาของคุณแล้ว:')} <b>${esc(m.dn||'')}</b> ${TT('(5% market fee already taken)','(หักค่าธรรมเนียมตลาด 5% แล้ว)')}`;case'mk_back':return`📦 ${TT('Nobody bought','ไม่มีใครซื้อ')} <b>${esc(m.dn||'')}</b> ${TT('in time - the dog is back home!','ทันเวลา น้องหมากลับบ้านแล้ว!')}`;
+ case'show':return`👑 ${TT('Dog show - ','ประกวดหมา — ')}<b>${esc(m.dn||'')}</b> ${TT('placed','ได้อันดับ')} #${m.rank|0}${m.rank==1?' 🏆':''}`;default:return`🎁 ${TT('A present from Cozy Dogs','ของขวัญจาก Cozy Dogs')}`}}
 function renderMail(){const list=S.mail;if(!list)return modal('mail','✉️ '+TT('Mailbox','กล่องจดหมาย'),'<div class="muted center">…</div>','sm');const has=list.some(m=>m.r&&!m.claimed);
  modal('mail','✉️ '+TT('Mailbox','กล่องจดหมาย'),`<div class="row" style="margin-bottom:8px"><button class="btn sm ${has?'mint':'dis'}" data-do="mailall">🎁 ${TT('Claim all','รับทั้งหมด')}</button><button class="btn sm ghost" data-do="mailclear">🗑️ ${TT('Clear read','ล้างที่อ่านแล้ว')}</button></div>
   <div class="list">${list.map(m=>`<div class="li"><div class="g"><div style="font-weight:700;font-size:14px">${mailText(m)}</div><small>${ago(m.t)}</small></div>${m.r?`<span class="rw">${rewardTxt(m.r)}</span><button class="btn sm ${m.claimed?'dis':'mint'}" data-do="mailclaim" data-id="${m.id}">${m.claimed?'✔':t('Claim')}</button>`:`<button class="btn sm ghost" data-do="maildel" data-id="${m.id}">✕</button>`}</div>`).join('')||emptyState('กล่องจดหมายว่างเปล่า — ถ้ามีข่าวใหม่จะมาที่นี่นะ','Your mailbox is empty — news will show up here','💌')}</div>`,'sm')}

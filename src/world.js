@@ -22,7 +22,7 @@ function setDog(d){const o=S.dogs[d.id]||{};const pn=performance.now();S.dogs[d.
 const posOf=(d,now)=>{const k=clamp((now-d.t0)/d.dur,0,1);return[d.fx+(d.tx-d.fx)*k,d.fy+(d.ty-d.fy)*k,k<1]};
 function liftOf(d,now){if(d.state!='SLEEP'||!S.ritems)return 0;const[x,y,mv]=posOf(d,now);if(mv)return 0;for(const it of S.ritems)if(it.lift&&Math.abs(it.x-x)<14&&Math.abs(it.y+1-y)<8)return it.lift;return 0}
 // ---------- drawing ----------
-function drawDogBody(c,d,t,now,item){const b=DOGS.BR[d.breed];if(!b)return null;const[x,y,mv]=posOf(d,now);if(mv&&Math.abs(d.tx-d.fx)>2)d.face=d.tx>d.fx?1:-1;
+function drawDogBody(c,d,t,now,item){const b=DOGS.b(d);if(!b)return null;const[x,y,mv]=posOf(d,now);if(mv&&Math.abs(d.tx-d.fx)>2)d.face=d.tx>d.fx?1:-1;
  const sc=b.size*.9,run=mv&&d.state=='RUN',bob=mv?Math.abs(Math.sin(t*(run?17:10)))*(run?6:2.5):(d.state=='PLAY'?Math.abs(Math.sin(t*8))*9:0);
  const lt=liftOf(d,now);d._lift=(d._lift||0)+(lt-(d._lift||0))*.18;const L=d._lift;
  let trickK=null;if(d.state=='TRICK'&&d.trick&&!mv){const k=(now-d.t0-d.dur)/DOGS.TRICK_MS;if(k>=0&&k<=1)trickK=k}
@@ -33,13 +33,13 @@ function drawDogBody(c,d,t,now,item){const b=DOGS.BR[d.breed];if(!b)return null;
  const info=DOGS.sprite(c,b,d.variant,t,{state:d.state,mv,run,seed:d.seed,pet:now-(d.petAt||0)<1800,happy:d.happy>80,sad:d.happy<30,acc:d.acc,trick:d.trick,trickK});
  c.restore();
  d._pos=[x,y,L,mv,trickK];d._top=info.top*sc;d._hit=[x,y-L-d._top*.45,Math.max(26,d._top*.55)];return d}
-function drawLabels(c,d,t,now,sel){const b=DOGS.BR[d.breed];if(!b||!d._pos)return;const[x,y,L,mv,tk]=d._pos,top=d._top;
+function drawLabels(c,d,t,now,sel){const b=DOGS.b(d);if(!b||!d._pos)return;const[x,y,L,mv,tk]=d._pos,top=d._top;
  if(sel){c.save();c.strokeStyle='#ff8fb0';c.lineWidth=3;c.setLineDash([6,5]);c.lineDashOffset=-t*14;c.beginPath();c.ellipse(x,y+1,46*b.size*.9,10*b.size*.9,0,0,7);c.stroke();c.restore();
   c.fillStyle='#ff8fb0';c.strokeStyle='#5a3d33';c.lineWidth=2;const ay=y-L-top-26+Math.sin(t*4)*3;c.beginPath();c.moveTo(x-7,ay);c.lineTo(x+7,ay);c.lineTo(x,ay+9);c.closePath();c.fill();c.stroke()}
  let em=null;if(tk!=null)em=DOGS.TEM[d.trick];else if(!mv&&DOGS.EM[d.state])em=DOGS.EM[d.state];
  if(S.hungry&&S.hungry[d.id])em='🍖';
  if(em){c.font='20px sans-serif';c.textAlign='center';c.fillText(em,x,y-L-top-8-Math.sin(t*3)*3)}
- if((S.set.names||sel)&&d.name){c.font='bold 11px '+UIF();c.textAlign='center';const w=c.measureText(d.name).width+16,r=b.r;c.fillStyle=sel?'#ff8fb0':'rgba(255,250,241,.92)';c.strokeStyle=r&&r!='C'?RCOL[r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=sel?'#fff':'#5a3d33';c.fillText(d.name,x,y+21)}
+ if((S.set.names||sel)&&d.name){c.font='bold 11px '+UIF();c.textAlign='center';const w=c.measureText(d.name).width+16,r=b.r;c.fillStyle=sel?'#ff8fb0':'rgba(255,250,241,.92)';c.strokeStyle=r&&r!='C'?RCOL[r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=sel?'#fff':'#5a3d33';c.fillText(d.name,x,y+21);if(d.cr){c.font='15px sans-serif';c.fillText('👑',x-w/2-9,y+23)}}
  if(d.wish&&S.owner==S.name&&typeof drawWish=='function')drawWish(c,d,t,now,x,y-L-top)}
 function fxDraw(c,t,dt){for(let i=World.fxs.length-1;i>=0;i--){const f=World.fxs[i];f.life-=dt;if(f.life<=0){World.fxs.splice(i,1);continue}f.x+=f.vx*dt;f.y+=f.vy*dt;f.vy+=(f.g||0)*dt;const a=Math.min(1,f.life/(f.max*.4));
   c.save();c.globalAlpha=a;c.translate(f.x,f.y);if(f.type=='text'){c.font='bold '+(f.size||18)+'px '+UIF();c.textAlign='center';c.lineWidth=4;c.strokeStyle='#5a3d33';c.strokeText(f.txt,0,0);c.fillStyle=f.col||'#fff';c.fillText(f.txt,0,0)}
@@ -98,7 +98,7 @@ function startPlace(id,ev){if(!S.edit)return;const def=S.cat.items[id];const d={
 cv.addEventListener('pointerdown',e=>{if(Park.on)return;const[x,y]=toWorld(e);
  if(S.edit&&S.owner==S.name){const it=pickItem(x,y);if(it){selectItem(it.uid);World.drag={mode:'item',uid:it.uid,ox:it.x-x,oy:it.y-y,moved:false};cv.setPointerCapture(e.pointerId);sfx('click')}else{selectItem(null)}return}
  if(S.fetchMode&&S.owner==S.name){fetchThrow(clamp(x,70,730),clamp(y,350,556));return}
- const d=pickDog(x,y);if(d){if(S.sel==d.id){send({t:'act',a:'pet',dog:d.id});d.petAt=performance.now();sfx('pet')}else{S.sel=d.id;sfx('pop');UI.care()}}else if(AVA.pickHome(x,y)){avatarTap()}else if(S.sel){S.sel=null;UI.care()}});
+ const d=pickDog(x,y);if(d){if(S.sel==d.id){send({t:'act',a:'pet',dog:d.id});d.petAt=performance.now();sfx('pet');window.Bark&&Bark.maybe('yip',d,.4)}else{S.sel=d.id;sfx('pop');UI.care();window.Bark&&Bark.maybe('woof',d,.5)}}else if(AVA.pickHome(x,y)){avatarTap()}else if(S.sel){S.sel=null;UI.care()}});
 function avatarTap(){S.avTap=performance.now()+1900;sfx('pop');if(S.owner==S.name)setTimeout(()=>DO.wardrobe(),260);else{const a=AVA.homeAvatar(performance.now());if(a)floatText(a.x,a.y-(a.top||90)-8,'👋 '+S.owner,'#fff')}}
 cv.addEventListener('pointermove',e=>{if(Park.on){cv.style.cursor='crosshair';return}const[x,y]=toWorld(e);const d=World.drag;
  if(d&&d.mode=='item'){const it=(S.ritems||[]).find(i=>i.uid==d.uid);if(!it)return;const def=S.cat.items[it.type],p=fitLocal(def,x+d.ox,y+d.oy);if(p){if(p[0]!=it.x||p[1]!=it.y)d.moved=true;it.x=p[0];it.y=p[1]}return}

@@ -17,7 +17,7 @@ const EMOTES=['👋','❤️','😂','🎉','😴','❓','😋','👍'],POSES=['
 const bcast=(o,except)=>{for(const w of park.m.keys())if(w!==except)send(w,o)};
 function dogOf(p,id){return p.dogs.find(d=>d.id===id)||p.dogs.find(d=>!d.away)||p.dogs[0]}
 function entry(m){const p=player(m.n),d=dogOf(p,m.dog);if(!d)return null;m.dog=d.id;
- return{n:m.n,lvl:lvl(p),breed:d.breed,variant:d.variant,acc:d.acc,dn:d.name,av:p.av||null,tricks:d.tricks||[],x:+m.x.toFixed(1),y:+m.y.toFixed(1),tx:m.tx|0,ty:m.ty|0,st:m.st,run:m.run?1:0,pose:m.pose||''}}
+ return{n:m.n,lvl:lvl(p),breed:d.breed,mix:d.mix||null,ms:d.ms|0,tr:d.tr||[],born:d.born,cr:d.crown>Date.now()?1:0,variant:d.variant,acc:d.acc,dn:d.name,av:p.av||null,ti:X.titleOf?X.titleOf(p):null,tricks:d.tricks||[],x:+m.x.toFixed(1),y:+m.y.toFixed(1),tx:m.tx|0,ty:m.ty|0,st:m.st,run:m.run?1:0,pose:m.pose||''}}
 function parkJoin(ws,c,dogId){
  if(park.m.has(ws)) return; if(c.mp) return toast(ws,'จบเกมออนไลน์ก่อนถึงจะเข้าสวนได้'); if(park.m.size>=PK.MAX) return toast(ws,'สวนสาธารณะเต็มแล้ว (สูงสุด '+PK.MAX+' คน)');
  const p=player(c.name);if(!p.dogs.length) return;
@@ -27,7 +27,7 @@ function parkJoin(ws,c,dogId){
  send(ws,{t:'park_init',me:c.name,members:[...park.m.values()].map(entry).filter(Boolean),ball:{x:+park.ball.x.toFixed(1),y:+park.ball.y.toFixed(1),vx:park.ball.vx|0,vy:park.ball.vy|0},items:park.items.map(i=>({id:i.id,x:i.x,y:i.y,k:i.k})),tr:park.tr?1:0,fb:park.fb&&Date.now()<park.fb.exp?{x:park.fb.x,y:park.fb.y,ms:Math.max(0,park.fb.t-Date.now())}:null,cfg:{x0:PK.x0,y0:PK.y0,x1:PK.x1,y1:PK.y1,walk:PK.WALK,run:PK.RUN,tick:PK.TICK,emotes:EMOTES}});
  bcast({t:'park_in',m:e},ws);bump(c.name,'parkjoin',1,ws);X.sendPlayers();
 }
-function parkLeave(ws,quiet){const m=park.m.get(ws);if(!m)return;park.m.delete(ws);const c=conns.get(ws);if(c)c.park=null;bcast({t:'park_out',n:m.n});if(!quiet)X.sendPlayers()}
+function parkLeave(ws,quiet){const m=park.m.get(ws);if(!m)return;park.m.delete(ws);const c=conns.get(ws);if(c)c.park=null;bcast({t:'park_out',n:m.n});if(!quiet)X.sendPlayers();for(const f of(X.hooks&&X.hooks.parkLeave)||[]){try{f(ws,m.n)}catch(e){console.error('[parkLeave hook]',e&&e.stack||e)}}}
 function spawnTreat(now){let x=0,y=0;for(let i=0;i<8;i++){x=rnd(PK.x0+30,PK.x1-30);y=rnd(PK.y0+20,PK.y1-10);if(!(x>520&&x<700&&y>380&&y<480))break}   // keep treats off the pond
  let r=Math.random()*100,k='cookie';for(const t of TREATS){r-=t.w;if(r<=0){k=t.k;break}}
  const it={id:park.id++,x:Math.round(x),y:Math.round(y),k,exp:now+45000};park.items.push(it);bcast({t:'park_item',add:{id:it.id,x:it.x,y:it.y,k:it.k}})}
@@ -140,8 +140,8 @@ const CAPS=id=>own(C.FOOD,id)?99:own(C.ACC,id)?1:10;
 const known=id=>own(C.ITEMS,id)||own(C.FOOD,id)||own(C.ACC,id);
 const placedN=(p,id)=>p.items.filter(i=>i.type==id).length;
 function avail(p){const o={};for(const id of Object.keys(p.inv)){if(!known(id))continue;let n=+p.inv[id]||0;if(own(C.ITEMS,id))n-=placedN(p,id);else if(own(C.ACC,id))n-=p.dogs.filter(d=>d.acc==id).length;if(n>0)o[id]=n}return o}
-const tradableDogs=p=>p.dogs.length>1?p.dogs.filter(d=>!d.fav).map(d=>({id:d.id,breed:d.breed,variant:d.variant,name:d.name,acc:d.acc,away:!!d.away,bond:d.bond|0})):[];
-const dogCard=d=>({id:d.id,breed:d.breed,variant:d.variant,name:d.name,bond:d.bond|0,pers:d.pers});
+const tradableDogs=p=>p.dogs.length>1?p.dogs.filter(d=>!d.fav).map(d=>({id:d.id,breed:d.breed,mix:d.mix||null,ms:d.ms|0,tr:d.tr||[],born:d.born,variant:d.variant,name:d.name,acc:d.acc,away:!!d.away,bond:d.bond|0})):[];
+const dogCard=d=>({id:d.id,breed:d.breed,mix:d.mix||null,ms:d.ms|0,tr:d.tr||[],born:d.born,variant:d.variant,name:d.name,bond:d.bond|0,pers:d.pers});
 function sideOf(t,ws){return t.a.ws===ws?t.a:t.b.ws===ws?t.b:null}
 function view(t,me){const o=me===t.a?t.b:t.a,mp=player(me.name),op=player(o.name),dd=(s,p)=>s.off.dogs.map(id=>p.dogs.find(d=>d.id===id)).filter(Boolean).map(dogCard);
  return{t:'trade',id:t.id,with:o.name,wlvl:lvl(op),ver:t.ver,mine:{inv:me.off.inv,coins:me.off.coins,dogs:dd(me,mp)},theirs:{inv:o.off.inv,coins:o.off.coins,dogs:dd(o,op)},
@@ -201,5 +201,6 @@ function onClose(ws){parkLeave(ws,true);for(const t of [...trades.values()]){con
 function touch(name){player(name).seen=Date.now()}
 // a player changed their look: tell everybody in the park (the owner's own client included)
 function avChanged(ws,name,av){if(park.m.has(ws))bcast({t:'park_av',n:name,av})}
-return{handle,onClose,goalAdd,goalMsg,touch,avChanged,leavePark:parkLeave,inPark:ws=>park.m.has(ws)};
+function tiChanged(ws,name,ti){if(park.m.has(ws))bcast({t:'park_ti',n:name,ti})}
+return{handle,onClose,goalAdd,goalMsg,touch,avChanged,tiChanged,leavePark:parkLeave,inPark:ws=>park.m.has(ws),parkName:ws=>{const m=park.m.get(ws);return m?m.n:null}};
 };

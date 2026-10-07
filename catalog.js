@@ -55,6 +55,7 @@ const FOOD={
   bone:{n:'Bone',p:18,h:25,hp:6,b:1,e:'🦴'},
   meat:{n:'Steak',p:30,h:45,hp:5,e:'🍖'},
   cake:{n:'Cake',p:45,h:30,hp:18,e:'🎂'},
+  candy:{n:'Growth Candy',p:90,h:3,hp:6,e:'🍬',gr:6},      // v7: +6 hours of growth (a baby needs 72h to grow up) - max 6 a day per dog, not for grown-ups
 };
 const ACC={
   bow:{n:'Pink Bow',p:50,e:'🎀'},bandana:{n:'Bandana',p:60,e:'🧣'},scarf:{n:'Warm Scarf',p:80,e:'🧶'},

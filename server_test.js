@@ -48,7 +48,7 @@ let a0;(async()=>{
  a.send({t:'deco',k:'wall',v:'mint'});let dc=await a.wait('deco');ok(dc.deco.wall=='mint','deco free');
  // quests / ach / coll
  a.send({t:'quests'});let q=await a.wait('quests');ok(q.list.length==4,'4 quests');
- a.send({t:'ach'});let ac=await a.wait('ach');ok(ac.list.length==38&&ac.coll.length==10,'ach+coll lists ('+ac.list.length+')');
+ a.send({t:'ach'});let ac=await a.wait('ach');ok(ac.list.length==48&&ac.coll.length==10,'ach+coll lists ('+ac.list.length+')');
  // capsule x1 with ticket
  a.send({t:'capsule',n:1,ticket:true});let cp=await a.wait('capsule');ok(cp.res.length==1,'capsule');
  // dogs_all, fav, home, release

@@ -65,7 +65,7 @@ function find(ws,c,m){if(typeof m.g!='string'||!own(GAMES,m.g))return;const now=
  L.pl.push(mkPl(ws,c,m.dog));c.mp={lobby:L};for(const p of L.pl)send(p.ws,lobbyMsg(L));sendInfo(ws,c)}
 function leaveLobby(ws,c){const L=c.mp&&c.mp.lobby;if(!L)return false;L.pl=L.pl.filter(p=>p.ws!==ws);c.mp=null;if(!L.pl.length){if(lobbies[L.g]===L)lobbies[L.g]=null}else for(const p of L.pl)send(p.ws,lobbyMsg(L));return true}
 function sendInfo(ws,c){const p=player(c.name);if(!p.mp||p.mp.date!=today())p.mp={date:today(),coins:0};
- send(ws,{t:'mp_info',cap:CAP,used:p.mp.coins,wait:{...Object.fromEntries(Object.keys(GAMES).map(g=>[g,lobbies[g]?lobbies[g].pl.length:0])),rps:X.rpsWaiting?X.rpsWaiting():0}})}
+ send(ws,{t:'mp_info',cap:CAP,used:p.mp.coins,lost:p.mp.lost|0,lossDay:LOSS_DAY,lossSafe:LOSS_SAFE,wait:{...Object.fromEntries(Object.keys(GAMES).map(g=>[g,lobbies[g]?lobbies[g].pl.length:0])),rps:X.rpsWaiting?X.rpsWaiting():0}})}
 
 // ---------------------------------------------------------------- rooms
 function startRoom(L){if(lobbies[L.g]===L)lobbies[L.g]=null;const G=GAMES[L.g],now=Date.now(),pl=L.pl.filter(p=>p.ws&&p.ws.readyState==1);if(!pl.length)return;
@@ -87,14 +87,22 @@ function destroy(room){if(room.over)return;room.over=true;rooms.delete(room.id);
 
 // ---------------------------------------------------------------- results & rewards
 const REW=[60,38,22,10];
+// v7 LOSING COSTS COINS: the lower half of a finished game pays a fee (and gets no prize). 2 players: last place -20 · 3 players: last -25 · 4 players: 3rd -15, 4th -30.
+// Against bots only the fee is halved (like the prizes). Safety nets: nobody below LOSS_SAFE coins is charged, a fee never takes more than the player owns,
+// and at most LOSS_DAY coins can be lost per day in total (so a bad evening cannot ruin anybody).  Leaving a game that already started counts as losing (LOSS_LEAVE).
+const LOSS_DEF={2:{2:20},3:{3:25},4:{3:15,4:30}},LOSS_SAFE=30,LOSS_DAY=400,LOSS_LEAVE=20;
+function takeLoss(pl,L){L=Math.round(L);if(!(L>0)||pl.coins<LOSS_SAFE)return 0;if(!pl.mp||pl.mp.date!=today())pl.mp={date:today(),coins:0};
+ L=Math.min(L,pl.coins,Math.max(0,LOSS_DAY-(pl.mp.lost|0)));if(L<=0)return 0;pl.mp.lost=(pl.mp.lost|0)+L;pl.coins-=L;dirty();return L}
+const lossFor=(n,rank,human)=>{const L=(LOSS_DEF[n]||{})[rank]||0;return human?L:Math.round(L/2)};
 function finish(room,ranks,extra){if(room.over)return;
  const n=room.pl.length,res=room.pl.map((p,i)=>({n:p.name,bot:p.bot,score:Math.round(p.score*10)/10,rank:ranks[i],left:p.left,ft:p.fin?Math.round((p.fin-room.playT0)/10)/100:0,breed:p.breed,variant:p.variant}));
  for(const p of room.pl){if(p.bot||p.left||!p.ws)continue;const c=conns.get(p.ws);if(!c)continue;const pl=player(c.name),rank=ranks[p.i];
   if(!pl.mp||pl.mp.date!=today())pl.mp={date:today(),coins:0};
-  let base=room.g=='grab'?(rank==1?50:12):REW[Math.min(3,rank-1)];if(!room.vsHuman)base=Math.round(base/2);
-  const coins=clamp(base,0,Math.max(0,CAP-pl.mp.coins));pl.mp.coins+=coins;pl.coins+=coins;const xp=rank==1?12:5;addXp(pl,xp,p.ws);
+  const fee=lossFor(n,rank,room.vsHuman);      // in the losing half: no prize, but a fee
+  let base=fee?0:room.g=='grab'?(rank==1?50:12):REW[Math.min(3,rank-1)];if(!room.vsHuman)base=Math.round(base/2);
+  const coins=clamp(base,0,Math.max(0,CAP-pl.mp.coins));pl.mp.coins+=coins;pl.coins+=coins;const xp=rank==1?12:5;addXp(pl,xp,p.ws);const loss=takeLoss(pl,fee);
   bump(c.name,'mp',1,p.ws);bump(c.name,room.g,1,p.ws);const win=rank==1&&n>1;if(win){bump(c.name,'mpwin',1,p.ws);bump(c.name,room.g+'win',1,p.ws)}
-  dirty();c.mp=null;send(p.ws,{t:'mp_end',g:room.g,res,me:{rank,coins,xp,win,capLeft:Math.max(0,CAP-pl.mp.coins),vsHuman:room.vsHuman,...(extra||{})}});sendMe(p.ws)}
+  dirty();c.mp=null;send(p.ws,{t:'mp_end',g:room.g,res,me:{rank,coins,loss,xp,win,capLeft:Math.max(0,CAP-pl.mp.coins),vsHuman:room.vsHuman,...(extra||{})}});sendMe(p.ws)}
  room.over=true;rooms.delete(room.id)}
 // key() takes a PLAYER object (it used to be called with the index, so every game ranked players in join order)
 const rankBy=(pl,key)=>{const idx=pl.map((_,i)=>i).sort((a,b)=>key(pl[b])-key(pl[a]));const r=[];idx.forEach((i,k)=>r[i]=k+1);return r};
@@ -188,7 +196,7 @@ function oddPick(ws,c,m){const room=c.mp&&c.mp.room;if(!room||room.g!='odd'||roo
 // ---------------------------------------------------------------- DOG BRAWL
 // Turn-based, simultaneous moves. Round = 'ask' (everybody secretly picks a move, 7 s) -> 'res' (server resolves, clients animate the events).
 // Move on the wire = {t:'mp_bp', r:round, a:'atk'|'grd'|'s0'|'s1', to:target index} ('t' is already the message type). Rules, stats and skills live in brawl.js / brawl_data.js; this part only does the networking.
-function brawlInit(room){room.rn=0;room.picks={};room.F=room.pl.map(p=>{const row=BREEDS.find(b=>b[0]==p.breed)||BREEDS[0];return p.f=BRW.mkFighter(row[0],row[2],row[6])});room.F.seq=0}
+function brawlInit(room){room.rn=0;room.picks={};room.F=room.pl.map(p=>{const row=(X.BR&&X.BR[p.breed])||BREEDS.find(b=>b[0]==p.breed)||BREEDS[0];return p.f=BRW.mkFighter(row[0],row[2],row[6])});room.F.seq=0}
 function brawlAsk(room,now){room.rn++;room.state='ask';room.qAt=now;room.picks={};
  for(const p of room.pl)if(p.bot&&p.f.alive)p.botAt=now+rnd(900,3600)/BRFAST;
  bcast(room,{t:'mp_ba',r:room.rn,n:BRN,ms:BRASK,...BRW.snap(room.F)})}
@@ -217,6 +225,7 @@ function brawlPick(ws,c,m){const room=c.mp&&c.mp.room;if(!room||room.g!='brawl'|
 
 // ---------------------------------------------------------------- leaving
 function leave(ws,c){if(leaveLobby(ws,c))return;const room=c.mp&&c.mp.room;if(!room)return;const p=room.pl.find(x=>x.ws===ws);c.mp=null;if(!p)return;p.left=true;
+ if(!room.over&&!p.bot){const L=takeLoss(player(c.name),LOSS_LEAVE*(room.vsHuman?1:.5));if(L&&ws.readyState==1){send(ws,{t:'toast',m:'🏃 ออกกลางเกม ถือว่าแพ้ โดนหัก '+L+'💰'});sendMe(ws)}}      // walking out of a running game counts as a loss
  const hs=humans(room);if(!hs.length)return destroy(room);
  if(room.g=='grab'&&!room.over){const o=room.pl.find(x=>x!==p);o.score=Math.max(o.score,3);finish(room,rankBy(room.pl,x=>x.left?-1:x.score),{forfeit:true})}
  else{if(room.g=='brawl'&&p.f&&p.f.alive){p.f.alive=false;p.f.hp=0;p.f.ko=++room.F.seq}bcast(room,{t:'mp_gone',n:p.name})}}
@@ -244,5 +253,5 @@ HND.mp_bp=(ws,c,m)=>brawlPick(ws,c,m);
 HND.mp_pr=(ws,c,m)=>{const room=c.mp&&c.mp.room;if(!room)return;const p=room.pl.find(x=>x.ws===ws),k=m.k|0;if(!p||!p.pk||!p.pk[k])return;const r=Date.now()-p.pk[k];p.pk[k]=0;p.samples.push(r);p.rtt=Math.min(...p.samples)};
 const handle=(ws,c,m)=>{const f=HND[m.t];if(!f)return false;f(ws,c,m);return true};
 const onClose=ws=>{const c=conns.get(ws);if(c&&c.mp)leave(ws,c)};
-return{handle,onClose,rooms,lobbies};
+return{handle,onClose,rooms,lobbies,takeLoss,LOSS_DEF,LOSS_SAFE,LOSS_DAY};
 };

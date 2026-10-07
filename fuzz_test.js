@@ -10,7 +10,8 @@ const TYPES=['visit','chat','emoji','deco','rename','daily','act','feed','equip'
  'park_join','park_leave','park_move','park_pose','park_emote','park_trick','park_dog','goal','goal_claim','trade_req','trade_ans','trade_set','trade_ok','trade_cancel','ping','hb',
  'mp_find','mp_cancel','mp_leave','mp_get','mp_tap','mp_act','mp_ans','mp_hit','mp_pick','mp_bp','mp_bp','mp_bp','mp_pr','wish_get','wish_skip','spin','spin_get','starter','starter_claim','house_up','house_info','party','party_end','gb_get','gb_post','gb_del','like','contest_get','contest_enter','contest_vote','mail_get','mail_claim','park_throw','park_dig','lb2','tutorial'];
 const FIELDS=['r','id','dog','food','acc','k','v','n','m','e','a','x','y','f','uid','name','ids','i','score','g','from','ok','ver','inv','coins','dogs','p','c','ticket','on','token','game','pick','choice','to','msg','text','d','who','owner','slot','kind','idx','tap','side'];
-TYPES.push('rec_new','rec_new');TYPES.push('av_save','av_get','av_save','av_save','av_save');FIELDS.push('av','h','hc','ht','sk','hm','t','b','s','g','x','e','bl','fr','ls','tc','bc','sc','hk','xk','pt','ec');   // wardrobe messages are fuzzed too
+TYPES.push('ann_info','ann_send','whatsnew','ann_send','nur_get','nur_pair','nur_hatch','nur_fast','pet_shop','pet_buy','pet_sell','mk_get','mk_put','mk_buy','mk_cancel','sh_get','sh_enter','sh_unenter','sh_vote','set_priv','dm_list','dm_open','dm_get','dm_send','dm_read','dm_room_new','dm_room_add','dm_room_kick','dm_room_rename','dm_room_leave','dm_room_del','dm_mute','voice_join','voice_leave','voice_mute','voice_sig','nur_pair','pet_buy','mk_put','sh_vote','set_priv');FIELDS.push('b','with','title','members','sdp','kind','ev','type','mix','tr');   // v7 messages
+TYPES.push('rec_new','rec_new');TYPES.push('ach_title','ach_title','google_link','google_name','google');FIELDS.push('credential','user');TYPES.push('av_save','av_get','av_save','av_save','av_save');FIELDS.push('av','h','hc','ht','sk','hm','t','b','s','g','x','e','bl','fr','ls','tc','bc','sc','hk','xk','pt','ec');   // wardrobe messages are fuzzed too
 const AVD=require('./avatar_data');
 const lookOK=av=>{if(!av||typeof av!='object')return false;for(const k in AVD.KINDS)if(!AVD.find(k,av[k]))return false;for(const k in AVD.NCOL)if(!(Number.isInteger(av[k])&&av[k]>=0&&av[k]<AVD.NCOL[k]))return false;return(av.bl===0||av.bl===1)&&(av.fr===0||av.fr===1)&&AVD.HOME.some(h=>h.id===av.hm)};
 (async()=>{
@@ -22,6 +23,7 @@ const lookOK=av=>{if(!av||typeof av!='object')return false;for(const k in AVD.KI
  // 2) hostile logins before auth
  const x=await cli();for(const u of ['constructor','__proto__','toString','hasOwnProperty','CONSTRUCTOR'])x.send({t:'login',user:u,pass:'abcdefg'});
  x.send({t:'login',user:{a:1},pass:[1]});x.send({t:'register',user:'__proto__',email:'a@b.co',pass:'abcdefg'});x.send({t:'resume',token:{}});for(const code of [null,{x:1},[1],'x'.repeat(300),'AAAA-BBBB-CCCC-DDDD','__proto__'])for(const user of ['fuzzer','constructor',{a:1},null])x.send({t:'reset',user,code,pass:'abcdefg'});x.send({t:'register',user:'admin',email:'a@b.co',pass:'abcdefg'});
+ for(const cr of [null,{a:1},[1],'x'.repeat(5000),'a.b.c','..','__proto__','a.'.repeat(1800)+'b',{toString:1}]){x.send({t:'google',credential:cr});x.send({t:'google_name',user:cr});x.send({t:'google_name',user:'ok_name',credential:cr})}      // v6.3: Google messages before login
  await sleep(500);ok(true,'hostile auth messages did not crash');
  // 3) random fuzz of every type, with and without a real dog id
  let n=0;const b=await cli();
@@ -57,6 +59,7 @@ const lookOK=av=>{if(!av||typeof av!='object')return false;for(const k in AVD.KI
  await c.wait('welcome');const me=await c.wait('me');ok(Number.isFinite(me.coins)&&Number.isFinite(me.gems)&&me.coins==300,'fresh player intact');
  a.send({t:'quests'});await sleep(300);
  const m1=a.last('me');ok(m1&&['coins','gems','tickets','xp'].every(k=>Number.isFinite(m1[k])&&m1[k]>=0),'fuzzed player values finite & non-negative '+JSON.stringify(m1&&[m1.coins,m1.gems,m1.tickets,m1.xp]));
+ ok(m1&&[0,1,2].includes(m1.priv)&&Number.isFinite(m1.total)&&m1.total<=100&&Number.isFinite(m1.eggsAll),'v7: privacy value, dog count and egg count stay sane after the fuzz ('+JSON.stringify(m1&&[m1.priv,m1.total,m1.eggsAll])+')');
  ok(m1&&lookOK(m1.av)&&Array.isArray(m1.avOwn)&&m1.avOwn.every(k=>AVD.priceOf(k)>0),'fuzzed player still has a valid look + owned list');
  const m2=b.last('me');ok(m2&&['coins','gems','tickets','xp'].every(k=>Number.isFinite(m2[k])&&m2[k]>=0),'second fuzzed player finite');
  ok(({}).gems===undefined&&({}).coins===undefined&&({}).inv===undefined,'Object.prototype not polluted (client side check is meaningless; see /healthz below)');

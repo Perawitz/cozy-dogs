@@ -88,7 +88,7 @@ function gen(avIn,view,pose,fr,opt){
  const SK=hexc(D.SKIN[av.sk]||D.SKIN[2]),HC=hexc(D.HAIRC[av.hc]||D.HAIRC[0]),IR=hexc(D.EYEC[av.ec]||D.EYEC[0]),
   TC=hexc(D.TOPC[av.tc]||D.TOPC[0]),BC=hexc(D.BOTC[av.bc]||D.BOTC[0]),SC=hexc(D.SHOEC[av.sc]||D.SHOEC[0]),HK=hexc(D.TOPC[av.hk]||D.TOPC[0]),XK=hexc(D.TOPC[av.xk]||D.TOPC[0]);
  const BLUSH=mix(SK,[255,96,132],.55),MOUTH=[128,44,58],TONG=[255,122,146],FRK=mix(SK,[150,80,50],.45);
- const P=pose,FRN=fr|0,side=!FRONT[pose];
+ const P=pose,FRN=Math.abs(fr|0),side=!FRONT[pose];   // abs: a frame number can come out negative for a split second at login (clock offset) and [..][FRN%4] was undefined
  const info={hand:{x:AX,y:34},top:2};
  // ---- pose ----
  let up=0,blink=false,wave=false,happy=false;const hold=opt.hold||null;

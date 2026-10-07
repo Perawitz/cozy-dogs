@@ -15,7 +15,7 @@ playwright install chromium
 |---|---|---|
 | `brawl.py` | หมากัดกัน: การ์ดในหน้าเกม → เลือกนักสู้ → ล็อบบี้ → สู้กับบอทจนจบด้วยการกดจริง → หน้าสรุปผล | `python3 browser_tests/brawl.py . t1 3141 4 desk,portrait,land` |
 | `brawl_syn.py` | หมากัดกัน: ส่งข้อความจำลองจากเซิร์ฟเวอร์ (4 ตัว/2 ตัว ทุกชนิดเหตุการณ์ หมาเราสลบ คนออกกลางเกม ท่าถูกปฏิเสธ ข้อความภาษาอังกฤษ) | `python3 browser_tests/brawl_syn.py . t2 3142 desk,portrait,land` |
-| `smoke.py` | ทัวร์ทั้งเกม: กดทุกปุ่มบนแถบล่าง (ร้านค้า น้องหมา ตู้เสื้อผ้า กาชา ฯลฯ) ทั้ง 3 ขนาดจอ + สลับภาษา + ไปสวนแล้วกลับบ้าน ต้องไม่มี JavaScript error | `python3 browser_tests/smoke.py . t0 3140 desk,portrait,land` |
+| `smoke.py` | ทัวร์ทั้งเกม: กดทุกปุ่มบนแถบล่าง (ร้านค้า น้องหมา ตู้เสื้อผ้า กาชา ฯลฯ) + กดทุกการ์ดในหน้าเกม (ต้องเปิดอะไรสักอย่าง) ทั้ง 3 ขนาดจอ + สลับภาษา + ไปสวนแล้วกลับบ้าน ต้องไม่มี JavaScript error | `python3 browser_tests/smoke.py . t0 3140 desk,portrait,land` |
 | `brawl_leave.py` | หมากัดกัน: ออกกลางแมตช์ (ปุ่มออก/ปุ่ม ✕ + ยืนยัน/ยกเลิก), ยกเลิกล็อบบี้ แล้วเริ่มแมตช์ใหม่ได้ทันที | `python3 browser_tests/brawl_leave.py . t8 3148 desk,portrait` |
 | `capsule.py` | กาชา: กดสุ่มรัว ๆ ขณะเซิร์ฟเวอร์ตอบช้า แล้วปุ่ม OK ทุกหน้าต้องกดปิดได้ทีละหน้า | `python3 browser_tests/capsule.py . t3 3143` |
 | `chat.py` | แชทในสวนบนมือถือ: เปิด พิมพ์ภาษาไทย ข้อความเข้าระหว่างพิมพ์ (ต้องไม่เสียโฟกัส/ข้อความ) ส่งด้วยปุ่มและ Enter ฟองคำพูด | `python3 browser_tests/chat.py . t4 3144 portrait,land,desk` |
@@ -26,5 +26,11 @@ playwright install chromium
 | `thai_canvas.py` | ข้อความไทยบน Canvas (บอลลูนแชต): จำลองบั๊ก iPhone ที่ไม่ยอมจัดกลาง แล้วเช็กว่าตัวแก้ทำให้ข้อความอยู่กลางกรอบ + ตัดข้อความไม่ผ่ากลางอีโมจิ | `python3 browser_tests/thai_canvas.py . t10 3150` |
 | `reconnect.py` | การเชื่อมต่อ: Guest หลุดแล้วกลับมาเป็นคนเดิม, สายตาย, เปิดสองเครื่องไม่รีโหลดวน, token, แตะพื้นหลังหน้าต่าง, ปุ่ม ✕ แลกของ, แปลข้อความอีเวนต์ | `python3 browser_tests/reconnect.py . t11 3151` |
 | `mobile_layout.py` | หน้าตามือถือ: หน้า login แนวนอน, แถบบน 6 ความกว้าง, แถบตกแต่ง, เครื่องที่ไม่มี roundRect | `python3 browser_tests/mobile_layout.py . t12 3152` |
+| `google.py` | v6.3: ปุ่มล็อกอิน Google (ใช้ Google ปลอมในเครื่อง `google_stub.js` เซ็นโทเคนให้ — เซิร์ฟเวอร์ตรวจของจริง) → ตั้งชื่อในเกม → ผูกบัญชีใน Settings → ป้าย Achievement เหนือหัว (บ้าน/สวน) → ตัวนับลูบหัว/ลิมิตต่อวัน → เซิร์ฟเวอร์ที่ไม่มี Client ID ต้องไม่มีปุ่ม (4 ขนาดจอ) | `python3 browser_tests/google.py . t13 3400 desk,portrait,land,tiny` |
+| `dm.py` | v7 แชทส่วนตัว: เปิดห้องคุยจากรายชื่อเพื่อน, ห้องกลุ่ม, ข้อความเข้าระหว่างพิมพ์, ตัวเลขยังไม่อ่าน, จอ 3 ขนาด | `python3 browser_tests/dm.py . a1 3350 desk,portrait,land` |
+| `voice.py` | v7 ไมค์ในสวน (ใช้ไมค์ปลอมของ Chromium): เข้า/ออกช่อง, 2 คนเชื่อมกัน, ปิดไมค์, ปิดเสียงรายคน | `python3 browser_tests/voice.py . a2 3360 desk,portrait,land` |
+| `nursery.py` | v7 ผสมพันธุ์: เลือกพ่อแม่ → ตัวอย่างไข่ → วางไข่ → นับถอยหลัง → ฟัก → การ์ดลูกหมา, เร่งด้วยเพชร, เหตุผลที่ปุ่มกดไม่ได้ (เปิด `CD_HATCH` ให้ไข่ฟักไว) | `python3 browser_tests/nursery.py . a3 3430 desk,portrait,land` |
+| `petshop.py` | v7 ร้านหมา + ตลาด: ซื้อพรีเมียมด้วยเหรียญ/เพชร, ลงขาย → อีกคนซื้อ (กดยืนยันรัว ๆ ต้องถูกหักครั้งเดียว), ขายให้ร้าน, ของหมด/ครบโควต้า, ข้อความอังกฤษไม่มีไทยหลุด | `python3 browser_tests/petshop.py . a4 3410 desk,portrait,land` |
+| `show.py` | v7 ประกวดหมา: ผู้เล่น 4 คน ส่งหมา → โหวต → โพเดียม/หอเกียรติยศ, ตัวนับเวลา, จดหมายรางวัล (ตั้ง `CD_SHOW_MS=12000`) | `python3 browser_tests/show.py . a5 3421 desk,portrait,land` |
 
 หมายเหตุ: ทดสอบด้วย Chromium เท่านั้น (ไม่ได้ลอง Safari/iOS และเครื่องมือถือจริง) · ก่อนรันให้ `node build.js` เพื่อให้ `public/index.html` ตรงกับซอร์สล่าสุด

@@ -44,11 +44,14 @@ UI.pcard=function(){const m=S.me,el=$('#pcard');const dog=S.avatarBreed||(S.owne
  else if(dog){pc.getContext('2d').drawImage(DOGS.thumb(dog,'Normal',48,{noShadow:1,noGlow:1}),-4,-2,104,104)}}
 UI.loc=function(){if(Park.on){$('#loc').innerHTML='🌳 '+t('Dog Park')+'<small></small>';return}const own=S.owner==S.name,e=env(),w={sunny:'☀️',cloudy:'☁️',rain:'🌧️',snow:'❄️'}[e.weather]||'☀️',h=Math.floor(e.hour),mn=Math.floor((e.hour%1)*60);
  const ic2=e.hour<5||e.hour>=20?'🌙':'';$('#loc').innerHTML=`${own?'🏠 '+t('Home'):'🏡 '+esc(S.owner)}<small>${w}${ic2} ${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}</small>`}
-UI.dock=function(){const m=S.me,fr=S.fr?S.fr.inReq.length:0;
- const B=[['shop','🛍️','Shop'],['dogs','🐶','Dogs'],['wardrobe','👕','Outfit'],['capsule','🎰','Capsule'],['coll','📖','Collection'],['quests','📜','Quests',(m.ready||0)+(m.stReady||0)],['friends','👥','Friends',fr],['ranks','🏆','Ranks'],['park','🌳','Park'],['community','🌍','Community',typeof goalReady=='function'?goalReady():0],['games','🎮','Games',m.spinFree?1:0],['house','🏡','House'],['mail','✉️','Mail',m.mail],['decor','🛋️','Decorate'],['photo','📷','Photo'],['settings','⚙️','Settings']];
- $('#dock').innerHTML=B.map(([k,e,l,b])=>`<button class="dk ${S.edit&&k=='decor'?'on':''}" data-do="${k}"><span class="e">${e}</span><span class="l">${t(l)}</span>${b?`<span class="bd">${b}</span>`:''}</button>`).join('');
- $('#dock').classList.toggle('hidden',S.edit)}
-UI.online=function(){const l=S.players.filter(p=>p.name!=S.name);$('#online').innerHTML=`<h5 data-do="togonline">🟢 ${t('Online players')} (${S.players.length})</h5>`+(l.length?l.map(p=>`<div class="pl" data-do="visit" data-n="${esc(p.name)}"><i></i><span>${esc(p.name)}${p.park?' 🌳':''}</span><small>Lv${p.lvl}</small><b class="tb" data-do="tradereq" data-n="${esc(p.name)}" title="Trade">🔁</b></div>`).join(''):`<div class="muted" style="font-size:11px">—</div>`)}
+UI.dock=function(){const bd=UI.bd(),mb=UI.menuBadge();
+ // v7.2: only the buttons used all the time live here; everything else (and the NEW features) is in the ☰ Menu window - see menu.js
+ const B=[['dogs','🐶','Dogs'],['shop','🛍️','Shop'],['quests','📜','Quests',bd.quests],['friends','👥','Friends',bd.friends],['park','🌳','Park'],['games','🎮','Games',bd.games],['menu','☰','Menu',0,mb]];
+ $('#dock').classList.add('dk7');
+ $('#dock').innerHTML=B.map(([k,e,l,b,x])=>`<button class="dk ${k=='menu'?'mnb':''}" data-do="${k}"><span class="e">${e}</span><span class="l">${t(l)}</span>${x?`<span class="bd${x.cls}">${x.txt}</span>`:b?`<span class="bd">${b}</span>`:''}</button>`).join('');
+ $('#dock').classList.toggle('hidden',S.edit);
+ if(window.MN)MN.refresh()}
+UI.online=function(){const l=S.players.filter(p=>p.name!=S.name);$('#online').innerHTML=`<h5 data-do="togonline">🟢 ${t('Online players')} (${S.players.length})</h5>`+(l.length?l.map(p=>`<div class="pl" data-do="visit" data-n="${esc(p.name)}"><i></i><span>${esc(p.name)}${p.park?' 🌳':''}${p.lk==2?' 🔒':p.lk==1&&!(S.fr&&S.fr.friends.some(f=>f.name==p.name))?' 🔒':''}</span><small>Lv${p.lvl}</small><b class="tb" data-do="tradereq" data-n="${esc(p.name)}" title="Trade">🔁</b></div>`).join(''):`<div class="muted" style="font-size:11px">—</div>`)}
 UI.chat=function(){const el=$('#chat'),min=el.classList.contains('min');const log=S.chat.slice(-30).map(c=>`<div><b>${esc(c.from)}</b> ${esc(c.m)}</div>`).join('');
  let lg=$('.log',el);
  if(!lg||!$('#chatf',el)){   // build the panel once
@@ -78,13 +81,13 @@ DO.flip=flipItem;DO.store=storeItem;DO.discard=discardItem;
 addEventListener('keydown',e=>{if(!S.edit||Park.on||!World.selItem)return;const g=e.target,n=g&&g.tagName;if(n=='INPUT'||n=='TEXTAREA'||n=='SELECT'||(g&&g.isContentEditable))return;
  if(e.key=='Delete'||e.key=='Backspace'){e.preventDefault();storeItem()}else if(e.key=='Escape')selectItem(null)});
 // ---- care card
-const FOODS=['kibble','treat','fruit','cookie','bone','meat','cake'];
-UI.care=function(){const el=$('#care'),d=S.dogs[S.sel];if(!d){el.classList.add('hidden');return}el.classList.remove('hidden');const b=DOGS.BR[d.breed],own=S.owner==S.name,F=S.cat.food;
+const FOODS=['kibble','treat','fruit','cookie','bone','meat','cake','candy'];
+UI.care=function(){const el=$('#care'),d=S.dogs[S.sel];if(!d){el.classList.add('hidden');return}el.classList.remove('hidden');const b=DOGS.b(d),own=S.owner==S.name,F=S.cat.food;
  const hearts=Array.from({length:10},(_,i)=>ic(i<Math.floor(d.bond/10)?'heart':'hearte','sm')).join('');
  const bar=(k,l,v,col)=>`<div class="bar"><b>${t(l)}</b><i><u data-bar="${k}" style="width:${v}%;background:${v<30?'#ff6b6b':col}"></u></i></div>`;
- el.innerHTML=`<button class="xbtn" data-do="desel">✕</button><div class="top"><div class="th">${thumbHTML(d.breed,d.variant,31,d.acc)}</div><div style="flex:1;min-width:0"><h4>${esc(d.name)} ${rarTag(b.r)}</h4><div class="sub">${esc(b.name)}${d.variant!='Normal'?' · '+t(d.variant):''}</div><div class="sub">${PERS_EM[d.pers]||''} ${nice(d.pers)}</div><div class="hearts" data-bondh>${hearts}</div></div></div>
+ el.innerHTML=`<button class="xbtn" data-do="desel">✕</button><div class="top"><div class="th">${thumbHTML(DOGS.k(d),d.variant,31,d.acc)}</div><div style="flex:1;min-width:0"><h4>${esc(d.name)} ${rarTag(b.r)}</h4><div class="sub">${esc(b.name)}${d.variant!='Normal'?' · '+t(d.variant):''}</div><div class="sub">${PERS_EM[d.pers]||''} ${nice(d.pers)}</div><div class="sub dvb">${DV.badges(d)}</div><div class="hearts" data-bondh>${hearts}</div></div></div>
  <div class="bars">${bar('hunger','Hunger',d.hunger,'#ffb36b')}${bar('energy','Energy',d.energy,'#6fb8ff')}${bar('happy','Happy',d.happy,'#ff8fb0')}${bar('clean','Clean',d.clean,'#6fd1a5')}</div>
- <div class="acts"><button class="btn pink" data-do="act" data-a="pet"><span>🤚</span>${t('Pet')}</button><button class="btn ${own?'':'dis'}" data-do="feedtog"><span>🍖</span>${t('Feed')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="play"><span>🎾</span>${t('Play')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="brush"><span>🧹</span>${t('Brush')}</button>
+ <div class="acts"><button class="btn pink" data-do="act" data-a="pet"><span>🤚</span>${t('Pet')}${own&&S.me.pets?` <small data-petn title="${TT('Hearts counted today','ลูบที่นับวันนี้')}">${S.me.pets.n}/${S.me.pets.max}</small>`:''}</button><button class="btn ${own?'':'dis'}" data-do="feedtog"><span>🍖</span>${t('Feed')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="play"><span>🎾</span>${t('Play')}</button><button class="btn ${own?'':'dis'}" data-do="act" data-a="brush"><span>🧹</span>${t('Brush')}</button>
  <button class="btn sky ${own?'':'dis'}" data-do="act" data-a="bath"><span>🛁</span>${t('Bath')} <small>5💰</small></button><button class="btn mint ${own?'':'dis'}" data-do="act" data-a="train"><span>🎓</span>${t('Train')}</button><button class="btn lav ${own?'':'dis'}" data-do="dogprof" data-id="${d.id}"><span>🎀</span>${t('Wear')}</button><button class="btn ghost" data-do="dogprof" data-id="${d.id}"><span>ℹ️</span>${t('Info')}</button></div>
  <div class="foodpick ${S.feedOpen?'on':''}">${FOODS.map(k=>{const f=F[k],n=S.me.inv[k]||0,fav=String(d.favFood).toLowerCase()==k,can=n>0||(k=='kibble'&&S.me.coins>=f.p);return`<div class="fp ${can?'':'dis'} ${fav?'fav':''}" data-do="feed" data-f="${k}" title="${f.n}"><span class="e">${f.e}</span>${f.n}<br><small>${n>0?'':f.p+'💰'}</small>${n>0?`<em>${n}</em>`:''}</div>`}).join('')}</div>`;
  paintThumbs(el)}
@@ -92,5 +95,5 @@ UI.careBars=function(){const d=S.dogs[S.sel];if(!d||$('#care').classList.contain
  const h=$('#care [data-bondh]');if(h){const n=Math.floor(d.bond/10);if(h.dataset.n!=n){h.dataset.n=n;h.innerHTML=Array.from({length:10},(_,i)=>ic(i<n?'heart':'hearte','sm')).join('')}}}
 DO.desel=()=>{S.sel=null;UI.care()};
 DO.feedtog=()=>{S.feedOpen=!S.feedOpen;UI.care()};
-DO.act=d=>{if(!S.sel)return;send({t:'act',a:d.a,dog:S.sel});const dg=S.dogs[S.sel];if(d.a=='pet'&&dg){dg.petAt=performance.now();sfx('pet')}else if(d.a=='play')sfx('bark');else if(d.a=='brush'||d.a=='bath')sfx('shake');else if(d.a=='train')sfx('ok')};
+DO.act=d=>{if(!S.sel)return;send({t:'act',a:d.a,dog:S.sel});const dg=S.dogs[S.sel];if(d.a=='pet'&&dg){dg.petAt=performance.now();sfx('pet');window.Bark&&Bark.maybe('yip',dg,.35)}else if(d.a=='play')sfx('bark');else if(d.a=='brush'||d.a=='bath')sfx('shake');else if(d.a=='train')sfx('ok')};
 DO.feed=d=>{if(!S.sel)return;const n=S.me.inv[d.f]||0,f=S.cat.food[d.f];if(n<=0&&!(d.f=='kibble'&&S.me.coins>=f.p)){toast((S.set.lang=='th'?'ไม่มี ':'No ')+f.n);S.shopTab='food';DO.shop();return}send({t:'feed',dog:S.sel,food:d.f});sfx('eat')};

@@ -4,7 +4,7 @@ const Park={on:false,m:{},me:null,ball:{x:400,y:430,vx:0,vy:0,rot:0},items:{},cf
 const PA=PARKART;
 function parkSeason(){const m=new Date().getMonth();return m>=9&&m<=10?'autumn':m==11||m<=1?'winter':m<=4?'spring':'summer'}
 // ---------- members
-function addMember(e){const old=Park.m[e.n]||{};Park.m[e.n]=Object.assign(old,{n:e.n,lvl:e.lvl,breed:e.breed,variant:e.variant,acc:e.acc,dn:e.dn,av:e.av||old.av||null,tricks:e.tricks,run:!!e.run,pose:e.pose||null,
+function addMember(e){const old=Park.m[e.n]||{};Park.m[e.n]=Object.assign(old,{n:e.n,lvl:e.lvl,breed:e.breed,mix:e.mix||null,ms:e.ms|0,tr:e.tr||[],born:e.born||0,cr:e.cr||0,variant:e.variant,acc:e.acc,dn:e.dn,av:e.av||old.av||null,ti:e.ti!==undefined?e.ti:(old.ti||null),tricks:e.tricks,run:!!e.run,pose:e.pose||null,
   tx:e.tx,ty:e.ty,ax:old.ax!=null?old.ax:e.x,ay:old.ay!=null?old.ay:e.y,rx:old.rx!=null?old.rx:e.x,ry:old.ry!=null?old.ry:e.y,face:old.face||1,seed:old.seed||[...e.n].reduce((a,c)=>a+c.charCodeAt(0),0)%7,me:e.n==Park.me});
  return Park.m[e.n]}
 function snap(a){const m=Park.m[a[0]];if(!m)return;const[x,y,tx,ty,st,run,pose]=[a[1],a[2],a[3],a[4],a[5],a[6],a[7]];
@@ -53,11 +53,11 @@ DO.ptrick=d=>{send({t:'park_trick',k:d.k})};
 DO.parkrun=()=>{Park.run=!Park.run;UI.parkbar();toast(Park.run?'🏃 Run':'🚶 Walk',900)};
 DO.parkdig=()=>{const m=Park.m[Park.me];if(!m)return;if(performance.now()-(Park.digT||0)<4000)return toast('⛏️ '+TT('Wait a moment…','รอสักครู่…'),900);Park.digT=performance.now();m.pose=null;m.tx=m.ax;m.ty=m.ay;send({t:'park_dig'})};
 DO.parkdog=()=>{send({t:'dogs_get'});renderParkDogs()};
-function renderParkDogs(){const all=S.allDogs||[],cur=Park.m[Park.me];modal('pdogs','🐶 '+(S.set.lang=='th'?'เลือกน้องหมาที่จะพาไปสวน':'Choose your park dog'),`<div class="grid">${all.map(d=>`<div class="gc ${cur&&cur.dn==d.name&&cur.breed==d.breed?'sel':''}" data-do="pickpdog" data-id="${d.id}">${thumbHTML(d.breed,d.variant,42,d.acc)}<div class="nm">${esc(d.name)}</div></div>`).join('')||'<div class="muted">…</div>'}</div>`,'lg');paintThumbs(modOpen('pdogs'))}
+function renderParkDogs(){const all=S.allDogs||[],cur=Park.m[Park.me];modal('pdogs','🐶 '+(S.set.lang=='th'?'เลือกน้องหมาที่จะพาไปสวน':'Choose your park dog'),`<div class="grid">${all.map(d=>`<div class="gc ${cur&&cur.dn==d.name&&cur.breed==d.breed?'sel':''}" data-do="pickpdog" data-id="${d.id}">${thumbHTML(DOGS.k(d),d.variant,42,d.acc)}<div class="nm">${esc(d.name)}</div></div>`).join('')||'<div class="muted">…</div>'}</div>`,'lg');paintThumbs(modOpen('pdogs'))}
 DO.pickpdog=d=>{LS.set('cd_pdog',d.id);send({t:'park_dog',dog:d.id});closeMod('pdogs')};
 // ---------- player card (tap another dog)
 function playerCard(m){const fr=S.fr&&S.fr.friends.some(f=>f.name==m.n),th=S.set.lang=='th';
- modal('pc',esc(m.n),`<div class="center"><div class="duo">${m.av?`<div class="ph">${AVA.html(m.av,64,{crop:'full',shadow:1,bottom:1})}</div>`:''}<div class="ph dg">${thumbHTML(m.breed,m.variant,m.av?46:60,m.acc)}</div></div><div class="big" style="margin-top:6px">${esc(m.n)}</div><div class="muted">Lv${m.lvl} · 🐶 ${esc(m.dn)}</div></div>
+ modal('pc',esc(m.n),`<div class="center"><div class="duo">${m.av?`<div class="ph">${AVA.html(m.av,64,{crop:'full',shadow:1,bottom:1})}</div>`:''}<div class="ph dg">${thumbHTML(DOGS.k(m),m.variant,m.av?46:60,m.acc)}</div></div><div class="big" style="margin-top:6px">${esc(m.n)}</div><div class="muted">Lv${m.lvl} · 🐶 ${esc(m.dn)}</div></div>
  <div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn sky" data-do="pvisit" data-n="${esc(m.n)}">🏡 ${t('Visit')}</button>${fr?'':`<button class="btn mint" data-do="fadd" data-n="${esc(m.n)}">➕ ${t('Add')}</button>`}<button class="btn pink" data-do="tradereq" data-n="${esc(m.n)}">🔁 ${t('Trade')}</button></div>`,'sm');paintThumbs(modOpen('pc'));AVA.paint(modOpen('pc'))}
 DO.pvisit=d=>{closeMod('pc');Park.leaveLocal();send({t:'park_leave'});send({t:'visit',id:d.n})};
 // ---------- input
@@ -84,7 +84,7 @@ function stepPark(dt,now){const C=Park.cfg;
   const f=Math.pow(.1,dt);b.vx*=f;b.vy*=f;b.rot+=(b.vx+b.vy)*dt*.05;if(Math.hypot(b.vx,b.vy)<9)b.vx=b.vy=0}
  if(now-Park.pingT>2000){Park.pingT=now;send({t:'ping',c:now});Park.rxs=Math.round(Park.rx/2);Park.rx=0}}
 // ---------- drawing
-function drawPDog(c,m,t,now){const b=DOGS.BR[m.breed];if(!b)return;const sc=b.size*.9,mv=m.moving&&!m.pose,run=mv&&m.run,bob=mv?Math.abs(Math.sin(t*(run?17:10)))*(run?6:2.5):0;
+function drawPDog(c,m,t,now){const b=DOGS.b(m);if(!b)return;const sc=b.size*.9,mv=m.moving&&!m.pose,run=mv&&m.run,bob=mv?Math.abs(Math.sin(t*(run?17:10)))*(run?6:2.5):0;
  let trickK=null,trick=null;if(m.trick&&now-m.trickAt<DOGS.TRICK_MS){trickK=(now-m.trickAt)/DOGS.TRICK_MS;trick=m.trick}
  const state=m.pose=='sit'?'SIT':m.pose=='sleep'?'SLEEP':m.pose=='bark'?'BARK':'IDLE',sink=m.wade?5:0;
  c.save();c.translate(m.rx,m.ry);c.fillStyle='rgba(60,32,22,.24)';c.beginPath();c.ellipse(0,0,38*sc,7*sc,0,0,7);c.fill();
@@ -92,11 +92,12 @@ function drawPDog(c,m,t,now){const b=DOGS.BR[m.breed];if(!b)return;const sc=b.si
  const info=DOGS.sprite(c,b,m.variant,t,{state,mv,run,seed:m.seed,acc:m.acc,happy:true,trick,trickK,pet:m.emote&&now-m.emote.at<1500&&m.emote.e=='❤️'});c.restore();
  if(m.wade){c.save();c.translate(m.rx,m.ry+1);c.fillStyle='rgba(90,175,225,.5)';c.beginPath();c.ellipse(0,0,30*sc,8*sc,0,0,7);c.fill();c.strokeStyle='rgba(255,255,255,'+(.55+.3*Math.sin(t*6))+')';c.lineWidth=2;c.beginPath();c.ellipse(0,1,(26+Math.sin(t*4)*4)*sc,(6+Math.sin(t*4)*1.5)*sc,0,0,7);c.stroke();c.restore()}
  m._top=info.top*sc;m._w=info.w;m._hit=[m.rx,m.ry-m._top*.45,Math.max(28,m._top*.55)]}
-function drawPTag(c,m,t,now){const b=DOGS.BR[m.breed];if(!b||m._top==null)return;const x=m.rx,y=m.ry,top=m._top;
+function drawPTag(c,m,t,now){const b=DOGS.b(m);if(!b||m._top==null)return;const x=m.rx,y=m.ry,top=m._top;
  c.font='bold 11px '+UIF();c.textAlign='center';const label=m.n+' · Lv'+m.lvl,w=c.measureText(label).width+16;
- c.fillStyle=m.me?'#ff8fb0':'rgba(255,250,241,.94)';c.strokeStyle=b.r&&b.r!='C'?RCOL[b.r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=m.me?'#fff':'#5a3d33';c.fillText(label,x,y+21);
+ c.fillStyle=m.me?'#ff8fb0':'rgba(255,250,241,.94)';c.strokeStyle=b.r&&b.r!='C'?RCOL[b.r]:'#5a3d33';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y+9,w,17,8);c.fill();c.stroke();c.fillStyle=m.me?'#fff':'#5a3d33';c.fillText(label,x,y+21);if(m.cr){c.font='15px sans-serif';c.fillText('👑',x-w/2-9,y+23);c.font='bold 11px '+UIF()}
  const bub=Park.bubbles[m.n];let by=y-top-12;
  if(bub&&now-bub.at<4500){const a=Math.min(1,(4500-(now-bub.at))/600);if(m.av&&m._htop!=null&&m.hx!=null)AVA.bubble(c,m.hx,m.hy-m._htop-8,bub.m,a);else{AVA.bubble(c,x,by,bub.m,a);by-=30}}
+ else if(m.ti&&m.av&&m._htop!=null&&m.hx!=null)AVA.titlePill(c,m.hx,m.hy-m._htop-24,m.ti)
  if(m.emote&&now-m.emote.at<2200){const k=(now-m.emote.at)/2200,a=k>.75?(1-k)*4:1;c.globalAlpha=a;c.font='26px sans-serif';c.fillText(m.emote.e,x,by-6-k*14);c.globalAlpha=1}
  else if(m.dig&&now-m.dig<1200){c.font='22px sans-serif';c.save();c.translate(x+14,by-4);c.rotate(Math.sin(now/90)*.5);c.fillText('⛏️',0,0);c.restore()}
  else if(m.pose=='sleep'){c.font='20px sans-serif';c.fillText('💤',x+16,by-4-Math.sin(t*2)*3)}}

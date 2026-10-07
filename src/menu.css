@@ -1,0 +1,38 @@
+/* Cozy Dogs v7.2 - the Menu window (every feature in groups) and the slimmer bottom dock. Prefixed mn- so nothing else is touched. */
+.mnmod{width:min(560px,100%)}
+.mnmod .mb{padding:8px 12px 14px}
+.mn-g{margin:0 0 12px;padding:8px 8px 10px;border:3px solid var(--ink);border-radius:16px;background:var(--mc,#fff1dc);box-shadow:0 3px 0 var(--ink)}
+.mn-g h4{margin:0 0 8px;display:flex;align-items:center;gap:7px;font-size:15px;color:var(--ink)}
+.mn-g h4 span{font-size:20px}
+.mn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.mn-t{position:relative;display:flex;align-items:center;gap:8px;text-align:left;padding:7px 9px;border:3px solid var(--ink);border-radius:13px;background:var(--paper);color:var(--ink);box-shadow:0 3px 0 var(--ink);transition:transform .08s,background .15s;min-height:54px}
+@media(hover:hover){.mn-t:hover{background:#fff;transform:translateY(-2px)}}
+.mn-t:active{transform:translateY(1px);box-shadow:0 1px 0 var(--ink)}
+.mn-t.isnew{background:#fffbe6}
+.mn-e{font-size:27px;line-height:1;flex:none}
+.mn-x{display:flex;flex-direction:column;min-width:0}
+.mn-x b{font-size:13px;line-height:1.15}
+.mn-x small{font-size:10.5px;line-height:1.2;font-weight:800;color:var(--ink2);margin-top:1px}
+.mn-t .bd{right:-5px;top:-8px}
+.mn-nw{position:absolute;left:-5px;top:-9px;padding:0 6px;height:16px;line-height:12px;font-style:normal;font-size:10px;font-weight:900;color:var(--ink);background:var(--sun);border:2px solid var(--ink);border-radius:9px;transform:rotate(-6deg);animation:mnwig 2.2s ease-in-out infinite}
+@keyframes mnwig{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(3deg) scale(1.08)}}
+/* the dock: 7 buttons share the width, so nothing is cut off on a phone */
+.dock.dk7{gap:5px;padding:6px 7px;width:min(470px,calc(100vw - 12px));box-sizing:border-box;justify-content:center}
+.dock.dk7 .dk{flex:1 1 0;width:auto;min-width:0;max-width:66px}
+.dk .bd.nw{background:var(--sun);color:var(--ink);font-size:9px;min-width:0;padding:0 4px;right:-8px;animation:mnwig 2.2s ease-in-out infinite}
+.dk.mnb .e{font-weight:900}
+@media(max-width:420px){.dock.dk7{gap:3px;padding:5px 5px}.dock.dk7 .dk{min-width:0}.dock.dk7 .dk .e{font-size:22px}.dock.dk7 .dk .l{font-size:9.5px}}
+@media(max-width:360px){.dock.dk7 .dk .l{font-size:9px}}
+@media(max-width:380px){.mn-grid{grid-template-columns:1fr 1fr}.mn-x small{font-size:9.5px}.mn-e{font-size:24px}}
+@media(max-height:480px){.mn-x small{display:none}.mn-t{min-height:44px}.mn-g{margin-bottom:8px}}
+@media(prefers-reduced-motion:reduce){.mn-nw,.dk .bd.nw{animation:none}}
+/* ---- menu footer + the "what's new" tour */
+.mn-ft{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:2px}
+.wnmod .mb{padding:10px 12px 14px}
+.wn-l{display:flex;flex-direction:column;gap:6px}
+.wn-r{display:flex;align-items:center;gap:9px;padding:6px 8px;border:3px solid var(--ink);border-radius:13px;background:var(--paper);box-shadow:0 3px 0 var(--ink)}
+.wn-e{font-size:26px;flex:none;width:34px;text-align:center}
+.wn-x{display:flex;flex-direction:column;min-width:0;flex:1}
+.wn-x b{font-size:14px;line-height:1.15}
+.wn-x small{font-size:11px;font-weight:800;color:var(--ink2);line-height:1.25;margin-top:1px}
+.wn-r .btn{flex:none}

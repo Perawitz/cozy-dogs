@@ -1,0 +1,82 @@
+/* Cozy Dogs - private chat (v7): friend DMs + friends-only rooms. Phones: ONE pane at a time (list -> chat, ← goes back); wide + tall screens: both panes side by side. */
+.ov[data-mod="dm"]{padding:8px}
+.mod.dm{width:min(940px,100%);height:min(720px,100%);max-height:none}
+@media(max-width:719px){.mod.dm{height:100%}}      /* phones: use the whole screen */
+html[lang="th"] .dk[data-do="dm"] .l{white-space:nowrap;font-size:9px;letter-spacing:-.2px}
+html[lang="en"] .dk[data-do="dm"] .l{white-space:nowrap;font-size:8.5px;letter-spacing:-.4px}      /* the dock labels "แชทส่วนตัว" / "Private chat" are the longest ones: one line (a second line would make the whole dock taller), slightly smaller so they stay inside the button */
+.mod.dm .mb{padding:0;overflow:hidden;display:flex;flex-direction:column;background:var(--paper)}
+.dmw{flex:1;min-height:0;position:relative}
+.dml,.dmc{position:absolute;inset:0;min-height:0;min-width:0;display:flex;flex-direction:column}
+.dml{background:var(--paper2)}
+.dmw[data-p=list] .dmc,.dmw[data-p=chat] .dml{display:none}
+@media(min-width:720px) and (min-height:561px){
+ .dmw{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+ .dml,.dmc{position:static}.dml{border-right:3px solid var(--ink)}
+ .dmw[data-p] .dml,.dmw[data-p] .dmc{display:flex}
+ .dmbk{display:none!important}}
+/* ---- list pane ---- */
+.dmlh{flex:none;display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:3px solid var(--line);font-weight:900;font-size:14px}.dmlh span{flex:1}
+.dmls{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:8px 8px 2px}
+.dmsl{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;color:var(--ink2);margin:10px 2px 6px}
+.dmr{display:flex;align-items:center;gap:9px;width:100%;min-width:0;text-align:left;font:inherit;padding:7px 9px;margin:0 0 8px;border:3px solid var(--ink);border-radius:12px;background:#fff;box-shadow:0 3px 0 rgba(90,61,51,.25);transition:transform .06s,background .12s}
+.dmr:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(90,61,51,.25)}@media(hover:hover){.dmr:hover{background:var(--pink2)}}
+.dmr.on{background:var(--sun)}.dmr.dmfx{padding:5px 9px}
+.dmr .g{flex:1;min-width:0}.dmr .g b{display:block;font-size:14px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dmr .g small{display:block;font-size:12px;font-weight:700;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dmr.un .g small{color:var(--ink);font-weight:900}
+.dmt{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:11px;font-weight:800;color:var(--ink2)}
+.dmbd{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;border:2px solid var(--ink);font-size:11px;font-weight:900;display:grid;place-items:center}.dmbd.q{background:#b8a99a}
+.dmmu{font-size:11px;font-weight:400}.dmgo{flex:none;font-size:18px}
+.dma{position:relative;flex:none;line-height:0}
+.dmo{position:absolute;left:-3px;bottom:-2px;width:13px;height:13px;border-radius:50%;border:2.5px solid var(--ink);background:#c9c1b8;box-sizing:border-box}.dmo.on{background:var(--mint)}
+.dmra{border:3px solid var(--ink);border-radius:50%;background:linear-gradient(#ece4ff,#cdbcff);display:grid;place-items:center;line-height:1;box-sizing:border-box}
+/* ---- chat pane ---- */
+.dmc>*{display:none;flex:1;min-height:0;min-width:0;flex-direction:column}
+.dmc[data-v=none]>.dmnone{display:flex;align-items:center;justify-content:center;padding:12px}
+.dmc[data-v=chat]>.dmcv,.dmc[data-v=info]>.dmx,.dmc[data-v=new]>.dmx,.dmc[data-v=pick]>.dmx{display:flex}
+.dmh,.dmxh{flex:none;display:flex;align-items:center;gap:9px;padding:6px 10px;min-height:54px;background:var(--paper2);border-bottom:3px solid var(--ink)}
+.dmh .g{flex:1;min-width:0}.dmh .g b{display:block;font-size:15px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dmh .g small{display:block;font-size:12px;font-weight:800;color:var(--ink2)}
+.dmbk,.dmbk2,.dmib{flex:none;min-width:38px;font-size:16px}
+.dmxh b{flex:1;font-size:15px}
+.dmlw{flex:1;min-height:0;position:relative}
+.dmlog{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px 10px 8px;display:flex;flex-direction:column;gap:3px;background:linear-gradient(180deg,#fff7e8,#fff0dc)}
+.dmlog>:first-child{margin-top:auto}.dmlog>.empty{margin:auto}
+.dmds{align-self:center;margin:8px 0 5px;padding:2px 12px;border:2px solid var(--ink);border-radius:12px;background:#fff;font-size:11px;font-weight:900;color:var(--ink2)}
+.dmm{display:flex;align-items:flex-end;gap:6px;min-width:0}.dmm.f{margin-top:5px}.dmm.me{justify-content:flex-end}
+.dmav{flex:none;width:30px;height:30px;line-height:0}
+.dmb{max-width:min(80%,440px);min-width:0;padding:5px 10px 4px;border:2.5px solid var(--ink);border-radius:15px;background:#fff;font-weight:700;font-size:15px;line-height:1.4;overflow-wrap:anywhere;box-shadow:0 2px 0 rgba(90,61,51,.2);user-select:text;-webkit-user-select:text}
+.dmm.me .dmb{background:var(--pink2);border-bottom-right-radius:5px}.dmm.ot .dmb{border-bottom-left-radius:5px}
+.dmn{display:block;font-size:11px;font-weight:900;line-height:1.3}
+.dmtm{margin-left:9px;font-size:10px;font-weight:800;color:var(--ink2);white-space:nowrap;vertical-align:-1px}
+.dmpill{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);border:3px solid var(--ink);border-radius:16px;background:var(--sun);font-weight:900;font-size:12px;padding:4px 14px;box-shadow:0 3px 0 var(--ink);animation:dmup .2s}@keyframes dmup{from{transform:translate(-50%,8px);opacity:0}}
+.dmrof{display:none;flex:none;padding:10px 12px;border-top:3px solid var(--ink);background:var(--paper2);font-weight:800;font-size:13px;text-align:center;color:var(--ink2)}
+.dmcv[data-ro="1"] .dmrof{display:block}.dmcv[data-ro="1"] .dmf{display:none}
+.dmf{flex:none;padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px));border-top:3px solid var(--ink);background:var(--paper)}
+.dmem{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.dmem .eml{flex:1;min-width:0;display:flex;gap:1px;overflow-x:auto;scrollbar-width:none}.dmem .eml::-webkit-scrollbar{display:none}
+.dmem button{flex:none;border:0;background:transparent;font-size:21px;line-height:1;padding:2px 4px;border-radius:8px;transition:transform .1s}@media(hover:hover){.dmem button:hover{transform:scale(1.25)}}.dmem button:active{transform:scale(.9)}
+.dmct{flex:none;font-size:11px;font-weight:900;color:var(--ink2)}.dmct.warn{color:#d13c4c}
+.dmin{display:flex;gap:8px;align-items:stretch}
+.dmi{flex:1;min-width:0;padding:8px 11px;border:3px solid var(--ink);border-radius:12px;font-size:16px;font-weight:700;background:#fff;outline:none;user-select:text;-webkit-user-select:text}      /* 16px: iOS zooms the page in on anything smaller */
+.dmi:focus{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink2)}
+.dmsend{flex:none;min-width:58px;opacity:.6;transition:opacity .12s}.dmsend.rdy{opacity:1}
+/* ---- room settings / new room / add a friend ---- */
+.dmxb{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px 12px 12px}
+form.dmxb{display:flex;flex-direction:column}form.dmxb>*{flex:none}form.dmxb>.dmfl{flex:1 1 auto;min-height:90px;overflow-y:auto}
+.dmrt{font-size:18px;font-weight:900;margin-bottom:6px}
+.dmrn input,.dmnf .fld input{flex:1;min-width:0;padding:8px 11px;border:3px solid var(--ink);border-radius:10px;font-size:16px;font-weight:800;background:#fff;outline:none;user-select:text;-webkit-user-select:text}.dmrn input:focus,.dmnf .fld input:focus{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink2)}
+.dmpk{cursor:pointer;width:100%;text-align:left;font:inherit}.dmpk input{flex:none;width:22px;height:22px;accent-color:var(--pink)}
+.dmx .list .li{margin-bottom:6px}
+.dmact{margin-top:8px;padding-top:2px;gap:8px}.dmact .btn{padding:7px 10px}
+.dmx .toggle{margin-top:4px}
+/* ---- short screens (phone on its side): everything a little tighter ---- */
+@media(max-height:560px){
+ .ov[data-mod="dm"]{padding:4px}.mod.dm .mh{padding:5px 10px;font-size:16px}.mod.dm .mh .x{width:28px;height:28px}
+ .dmh,.dmxh{min-height:44px;padding:4px 8px}.dmlh{padding:5px 8px}.dmls{padding:6px 6px 0}.dmr{margin-bottom:6px}
+ .dmlog{padding:6px 8px 4px}.dmb{font-size:14px;padding:4px 9px 3px}.dmf{padding:4px 8px 6px}.dmem{margin-bottom:3px}.dmem button{font-size:18px}.dmi{padding:5px 10px}.dmxb{padding:6px 10px 8px}
+ form.dmxb>.dmfl{min-height:70px}.dmnf .fld{margin-bottom:2px}.dmsl{margin:6px 2px 4px}
+ .dmx .list:not(.dmfl){display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px}.dmx .list:not(.dmfl) .li{margin:0}}      /* members side by side: the room menu fits without much scrolling */
+/* ---- the friends window gets one more button (💬): wider on screens that have room, buttons under the name on phones ---- */
+.ov[data-mod="friends"] .mod.sm{width:min(560px,100%)}
+@media(max-width:599px){
+ .ov[data-mod="friends"] .li:has(>[data-do="dmopen"]){flex-wrap:wrap;justify-content:flex-end;row-gap:7px}
+ .ov[data-mod="friends"] .li:has(>[data-do="dmopen"])>.g{flex:1 0 calc(100% - 64px);min-width:0}}

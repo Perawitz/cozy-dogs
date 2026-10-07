@@ -38,7 +38,7 @@ try:
             if touch: pg.touchscreen.tap(box[0],box[1])
             else: pg.mouse.click(box[0],box[1])
             pg.wait_for_timeout(60)
-        pg.wait_for_timeout(2600)   # answers + 900 ms egg animation
+        pg.wait_for_timeout(3500)   # answers + 1550 ms egg animation (v7)
         n_ov=pg.evaluate("document.querySelectorAll('.reveal').length")
         print(f'[{name}] result screens on the page after mashing: {n_ov}')
         pg.screenshot(path=f'{D}/{TAG}_{name}_mash.png')
@@ -66,21 +66,21 @@ try:
             pg.screenshot(path=f'{D}/{TAG}_{name}_stuck.png');ctx.close();continue
         # --- and a normal single pull still works end to end
         pg.evaluate(LAT%1)
-        c2=pg.evaluate("S.me.coins");pg.evaluate("[...document.querySelectorAll('#mods [data-do=gacha]')].find(b=>b.dataset.n=='1'&&!b.dataset.tk).click()");pg.wait_for_timeout(1700)
+        c2=pg.evaluate("S.me.coins");pg.evaluate("[...document.querySelectorAll('#mods [data-do=gacha]')].find(b=>b.dataset.n=='1'&&!b.dataset.tk).click()");pg.wait_for_timeout(2500)
         ck(pg.evaluate("document.querySelectorAll('.reveal').length")==1,f'[{name}] a single pull opens one result screen')
         pg.screenshot(path=f'{D}/{TAG}_{name}_single.png')
         pg.evaluate("document.querySelector('.reveal .rclose').click()");pg.wait_for_timeout(300)
         ck(pg.evaluate("document.querySelectorAll('.reveal').length")==0 and pg.evaluate("S.me.coins")==c2-100,f'[{name}] ...closes with OK and cost exactly 100 coins')
         # --- defensive path: three answers arrive together (requests sent behind the UI's back) -> shown one by one, never stacked
         pg.evaluate(LAT%250)
-        pg.evaluate("for(let i=0;i<3;i++)send({t:'capsule',n:1})");pg.wait_for_timeout(2300)
+        pg.evaluate("for(let i=0;i<3;i++)send({t:'capsule',n:1})");pg.wait_for_timeout(3300)
         ck(pg.evaluate("document.querySelectorAll('.reveal').length")==1,f'[{name}] three answers at once: only one result screen is on top')
         label=pg.evaluate("(document.querySelector('.reveal .rclose')||{}).textContent")
         ck(label and '2' in label,f'[{name}] ...and its OK button says how many are still waiting ({label})')
         pg.screenshot(path=f'{D}/{TAG}_{name}_queue.png')
         seq=[]
         for k in range(3):
-            pg.evaluate("document.querySelector('.reveal .rclose').click()");pg.wait_for_timeout(1300)
+            pg.evaluate("document.querySelector('.reveal .rclose').click()");pg.wait_for_timeout(2200)
             seq.append(pg.evaluate("document.querySelectorAll('.reveal').length"))
         ck(seq==[1,1,0],f'[{name}] OK walks through the 3 results one by one, then everything is closed {seq}')
         ck(pg.evaluate("S.me.coins")>0 and not errs,f'[{name}] still no console errors {errs[:2]}')

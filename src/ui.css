@@ -331,3 +331,9 @@ canvas#cv.throw{cursor:crosshair}
 @media(max-height:480px){#editbar{padding:4px 8px;gap:2px;bottom:4px}#editbar .hd{gap:5px}#editbar .hd b{font-size:13px}.drawer{padding:2px 2px 4px;gap:4px}.inv{width:52px;padding:1px}.inv canvas{width:42px;height:32px}.inv b{display:none}.inv em{font-size:10px;right:-4px;top:-5px}}
 /* v6.2.1: the beginner tutorial panel waits while the room is being decorated (it used to sit on top of the item buttons) */
 body.editing .coach{display:none!important}
+/* v6.3: sign in with Google */
+.gbox{margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.gbox.hidden{display:none}
+.gor{width:100%;display:flex;align-items:center;gap:10px;font-weight:800;font-size:12px;opacity:.7}.gor:before,.gor:after{content:"";flex:1;height:2px;background:currentColor;opacity:.35}
+.gnote{font-size:12px;font-weight:700;line-height:1.4;text-align:center}
+#gBtn{min-height:44px;display:flex;justify-content:center;max-width:100%}

@@ -1,6 +1,6 @@
 {
  "name": "cozy-dogs",
- "version": "6.2.1",
+ "version": "7.2.0",
  "description": "2D cozy multiplayer dog game (networking course project)",
  "main": "server.js",
  "scripts": {

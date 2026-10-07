@@ -84,8 +84,8 @@ function scenery(env,t){const h=env.hour,n=nightF(h),[top,bot]=skyAt(h),wea=env.
  // far hills / house / tree
  const dayK=1-n*.78,gcol=snow?'#eef5ff':hal?'#6a5a4a':'#7ccb8a',gcol2=snow?'#dfe9f6':hal?'#4e4236':'#5cbc6e';
  for(let x=0;x<WW;x++){const y=Math.round(50+Math.sin(x*.07+1)*5+Math.sin(x*.19)*2);sd.r(x,y,1,WH-y,mix('#07101a',gcol,dayK))}
- sd.r(54,44,12,9,mix('#1a1020',snow?'#e8dccb':'#f2e0c0',dayK));for(let k=0;k<7;k++)sd.r(53+k,38+k+(k>3?0:0),14-2*k,1,mix('#10101a',snow?'#f4f8ff':'#c8604a',dayK));sd.r(62,36,3,6,mix('#10101a','#a85a48',dayK));sd.r(57,47,3,5,n>.4?'#ffd870':mix('#3a2a2a','#7a5a3a',dayK));if(n>.4)sd.r(57,47,3,5,'#ffd870');
- if(n<.8&&!(wea=='rain')){for(let i=0;i<3;i++){const k=((t*6+i*9)%27)/27;scc.globalAlpha=(1-k)*.5*(1-n);sd.e(64+Math.round(k*7+i%2),Math.round(34-k*14),1+(k*2|0),1+(k*2|0),'#fff');scc.globalAlpha=1}}
+ sd.r(54,48,12,9,mix('#1a1020',snow?'#e8dccb':'#f2e0c0',dayK));for(let k=0;k<7;k++)sd.r(53+k,47-k,14-2*k,1,mix('#10101a',snow?'#f4f8ff':'#c8604a',dayK));sd.r(62,39,3,6,mix('#10101a','#a85a48',dayK));sd.r(57,51,3,5,n>.4?'#ffd870':mix('#3a2a2a','#7a5a3a',dayK));if(n>.4)sd.r(57,51,3,5,'#ffd870');
+ if(n<.8&&!(wea=='rain')){for(let i=0;i<3;i++){const k=((t*6+i*9)%27)/27;scc.globalAlpha=(1-k)*.5*(1-n);sd.e(64+Math.round(k*7+i%2),Math.round(37-k*14),1+(k*2|0),1+(k*2|0),'#fff');scc.globalAlpha=1}}
  for(let x=0;x<WW;x++){const y=Math.round(61+Math.sin(x*.05+2)*4);sd.r(x,y,1,WH-y,mix('#05101a',gcol2,dayK))}
  // tree
  const tc=snow?'#e8f2ff':hal?'#3a2a20':env.hour>0?'#4aa858':'#4aa858';sd.r(13,48,4,26,mix('#10080a','#7a5030',dayK));

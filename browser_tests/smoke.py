@@ -30,19 +30,28 @@ try:
         pg.evaluate("document.querySelectorAll('.coach,.tut').forEach(o=>o.classList.add('hidden'));document.querySelectorAll('#mods .ov').forEach(o=>o.remove())")
         acts=pg.evaluate("[...document.querySelectorAll('#dock [data-do]')].map(e=>e.dataset.do)")
         print(f'[{name}] dock buttons:',acts)
-        ck(len(acts)>=10,f'[{name}] the dock has its buttons ({len(acts)})')
+        ck(len(acts)>=6 and 'menu' in acts,f'[{name}] the dock has its buttons and the ☰ Menu ({len(acts)})')
+        # v7.2: the Menu window lists EVERY feature (the old long dock): press all of those tiles too
+        pg.evaluate("DO.menu()");pg.wait_for_timeout(400)
+        tiles=pg.evaluate("[...document.querySelectorAll('#mods [data-mod=menu] .mn-t')].map(e=>e.dataset.k)")
+        pg.evaluate("document.querySelectorAll('#mods .ov').forEach(o=>o.remove())")
+        print(f'[{name}] menu tiles:',tiles)
+        want={'dogs','nursery','wardrobe','coll','show','announce','friends','dm','park','ranks','community','shop','capsule','petshop','house','decor','games','quests','mail','photo','settings'}
+        ck(want<=set(tiles),f'[{name}] the Menu lists every feature (missing: {sorted(want-set(tiles))})')
         opened=[];dead=[]
-        for a in acts:
+        for a in [('d',x) for x in acts]+[('m',x) for x in tiles]:
+            src,a=a
             pg.evaluate("document.querySelectorAll('#mods .ov').forEach(o=>o.remove())")
             if pg.evaluate("Park.on"): pg.evaluate("DO.home&&DO.home()");pg.wait_for_timeout(300)
             if pg.evaluate("S.edit"): pg.evaluate("DO.decor()");pg.wait_for_timeout(200)
             before=len(errs)
-            pg.evaluate("(a)=>{const e=document.querySelector('#dock [data-do=\"'+a+'\"]');if(e)e.click()}",a);pg.wait_for_timeout(450)
+            if src=='m': pg.evaluate("DO.menu()");pg.wait_for_timeout(250)
+            pg.evaluate("([s,a])=>{const e=document.querySelector(s=='d'?'#dock [data-do=\"'+a+'\"]':'#mods [data-mod=menu] .mn-t[data-k=\"'+a+'\"]');if(e)e.click()}",[src,a]);pg.wait_for_timeout(450)
             n=pg.evaluate("document.querySelectorAll('#mods .ov').length");st=pg.evaluate("({park:Park.on,edit:S.edit})")
             if n>0 or st['park'] or st['edit']: opened.append(a)
             elif a!='photo': dead.append(a)         # 'photo' only flashes the screen and saves a picture: no window to look for
             if len(errs)>before: print('  errors after',a,errs[before:before+2])
-            if name=='portrait': pg.screenshot(path=f'{D}/{TAG}_{name}_dock_{a}.png')
+            if name=='portrait': pg.screenshot(path=f'{D}/{TAG}_{name}_{src}_{a}.png')
         ck(not dead,f'[{name}] every dock button opens a window or a mode (nothing happened for: {dead})')
         pg.evaluate("document.querySelectorAll('#mods .ov').forEach(o=>o.remove())")
         if pg.evaluate("Park.on"): pg.evaluate("DO.home()");pg.wait_for_timeout(300)
@@ -54,6 +63,17 @@ try:
                 pg.evaluate("document.querySelectorAll('#mods .ov').forEach(o=>o.remove())")
                 pg.evaluate("(a)=>{const e=document.querySelector('%s[data-do=\"'+a+'\"]');if(e)e.click()}"%sel,a);pg.wait_for_timeout(350)
         pg.evaluate("document.querySelectorAll('#mods .ov').forEach(o=>o.remove())")
+        # the mini-game hub: EVERY card must do something (v6.3: a new button once reused the name "gstart" and silently disabled all the solo games and RPS)
+        pg.evaluate("document.querySelectorAll('#mods .ov').forEach(o=>o.remove())");pg.evaluate("DO.games()");pg.wait_for_timeout(500)
+        cards=pg.evaluate("[...document.querySelectorAll('#mods [data-mod=games] .gmcard')].map(c=>[c.dataset.do,c.dataset.g||''])")
+        dead=[];before=len(errs)
+        for (do,g) in cards:
+            pg.evaluate("document.querySelectorAll('#mods .ov,.reveal').forEach(o=>o.remove());if(MP.g)DO.mpcancel()");pg.evaluate("DO.games()");pg.wait_for_timeout(300)
+            pg.evaluate("([d,g])=>{document.querySelector('#mods [data-mod=games] .gmcard[data-do=\"'+d+'\"]'+(g?'[data-g=\"'+g+'\"]':'')).click()}",[do,g]);pg.wait_for_timeout(500)
+            if not [m for m in pg.evaluate("[...document.querySelectorAll('#mods .ov')].map(o=>o.dataset.mod)") if m!='games']: dead.append(do+':'+g)
+        pg.evaluate("document.querySelectorAll('#mods .ov,.reveal').forEach(o=>o.remove());if(MP.g)DO.mpcancel()");pg.wait_for_timeout(300)
+        ck(len(cards)>=8 and not dead,f'[{name}] every card of the games hub opens something ({len(cards)} cards; nothing happened for: {dead})')
+        ck(len(errs)==before,f'[{name}] ...without JavaScript errors {errs[before:before+2]}')
         # language switch: Thai <-> English, then every window text must still render (open a few)
         lang0=pg.evaluate("S.set.lang")
         pg.evaluate("S.set.lang=S.set.lang=='th'?'en':'th';UI.all&&UI.all()")
