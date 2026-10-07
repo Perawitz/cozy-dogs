@@ -1,6 +1,6 @@
 // Cozy Dogs v3 - authoritative WebSocket server
 // (auth, gacha, shop, house items, quests, achievements, friends, tricks, mini-game rewards, RPS). npm start / node server.js
-const http=require('http'),fs=require('fs'),path=require('path'),crypto=require('crypto');
+const http=require('http'),fs=require('fs'),path=require('path'),crypto=require('crypto'),zlib=require('zlib');
 let WebSocketServer;try{({WebSocketServer}=require('ws'))}catch{({WebSocketServer}=require('./miniws'))}  // built-in fallback when `ws` is not installed
 const BREEDS=require('./breeds'),C=require('./catalog'),AVD=require('./avatar_data'),TRD=require('./traits'),PREM=require('./premium');
 let V=null,CH=null,VC=null,PT=null,SH=null,AN=null;   // wardrobe / private chat / park voice modules (created below, after the shared helpers exist)
@@ -113,15 +113,24 @@ async function remoteLoad(){                 // returns normally only if the rea
     catch(e){console.error('Supabase load failed ('+i+'/5):',e.message);if(i>=5){console.error('giving up - not starting, so real data is never overwritten');process.exit(1)}await sleep(3000*i)}
   }}
 let rSaving=false,rPending=false;
-async function remoteSave(){
+// Bandwidth: the whole database is re-sent on every remote save, and hosts bill outbound traffic (Render free = 5 GB/month).
+// So remote saves are throttled to one per REMOTE_SAVE_MS (default 60 s), skipped when nothing changed, and always flushed on shutdown.
+const REMOTE_MS=Math.max(5000,+process.env.REMOTE_SAVE_MS||60000);
+let lastRemote=0,rLater=false,lastSent='';
+setInterval(()=>{if(rLater&&Date.now()-lastRemote>=REMOTE_MS){rLater=false;remoteSave()}},5000);
+async function remoteSave(force){
   if(!loaded)return;
+  if(!force&&Date.now()-lastRemote<REMOTE_MS){rLater=true;return}
   if(rSaving){rPending=true;return}
+  const snap=JSON.stringify(db);
+  if(snap===lastSent){lastRemote=Date.now();return}          // nothing changed since the last successful upload
   rSaving=true;
   try{const r=await fetch(SB_URL+'/rest/v1/game_data?on_conflict=id',{method:'POST',headers:{...SB_H,Prefer:'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify({id:'main',data:db,updated_at:new Date().toISOString()}),signal:AbortSignal.timeout(15000)});
-    if(!r.ok)throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,200))}
-  catch(e){console.error('Supabase save failed (will retry):',e.message);dirty=true}
-  finally{rSaving=false;if(rPending){rPending=false;remoteSave()}}}
+      body:'{"id":"main","updated_at":"'+new Date().toISOString()+'","data":'+snap+'}',signal:AbortSignal.timeout(15000)});
+    if(!r.ok)throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,200));
+    lastSent=snap;lastRemote=Date.now()}
+  catch(e){console.error('Supabase save failed (will retry):',e.message);rLater=true;lastRemote=Date.now()-REMOTE_MS+15000}   // retry in ~15 s
+  finally{rSaving=false;if(rPending){rPending=false;remoteSave(force)}}}
 let dirty=false,lastBak=0;
 function save(){                       // atomic: write a temp file, then rename (a crash mid-write can never leave a half-written data.json)
   if(!loaded)return;
@@ -131,7 +140,7 @@ function save(){                       // atomic: write a temp file, then rename
   if(REMOTE)remoteSave()}
 const safe=(name,f)=>(...a)=>{try{return f(...a)}catch(e){console.error('['+name+']',e&&e.stack||e)}};
 setInterval(safe('save',()=>{if(dirty)save()}),5000);
-for(const sg of ['SIGINT','SIGTERM'])process.on(sg,async()=>{save();if(REMOTE&&loaded){await sleep(100);for(let i=0;i<40&&rSaving;i++)await sleep(100)}process.exit(0)});
+for(const sg of ['SIGINT','SIGTERM'])process.on(sg,async()=>{save();if(REMOTE&&loaded){remoteSave(true);await sleep(100);for(let i=0;i<40&&rSaving;i++)await sleep(100)}process.exit(0)});
 process.on('uncaughtException',e=>console.error('uncaught:',e&&e.stack||e));
 process.on('unhandledRejection',e=>console.error('unhandled:',e));
 
@@ -294,11 +303,19 @@ const A=require('./arcade')({...XF,F}),ARC=A;      // (endRps has its own local 
 V=require('./wardrobe')(XF);
 CH=require('./chat')(XF);VC=require('./voice')(XF);
 PT=require('./pets')({...XF,F});SH=require('./show')({...XF,F,PT});AN=require('./announce')(XF);
+// the page is large: compress it once at start-up and let browsers revalidate with an ETag (304 = almost no bandwidth)
+let PAGE=null,PAGE_GZ=null,PAGE_TAG='';
+try{PAGE=fs.readFileSync(INDEX);PAGE_GZ=zlib.gzipSync(PAGE,{level:9});PAGE_TAG='"'+crypto.createHash('md5').update(PAGE).digest('hex').slice(0,16)+'"'}catch(e){console.error('page not preloaded:',e.message)}
 const server=http.createServer((q,r)=>{
   if(q.url=='/healthz'){r.writeHead(200,{'Content-Type':'text/plain'});return r.end('ok '+conns.size)}
   if(q.method!='GET'&&q.method!='HEAD'){r.writeHead(405);return r.end()}
   if(q.url=='/config.json'){r.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'});return r.end(q.method=='HEAD'?undefined:JSON.stringify({google:GOOGLE_ID||null,ice:VC.ice()}))}
-  r.writeHead(200,{'Content-Type':'text/html; charset=utf-8','X-Content-Type-Options':'nosniff','Cache-Control':'no-cache'});
+  const H={'Content-Type':'text/html; charset=utf-8','X-Content-Type-Options':'nosniff','Cache-Control':'no-cache',Vary:'Accept-Encoding'};
+  if(PAGE){
+    H.ETag=PAGE_TAG; if(q.headers['if-none-match']===PAGE_TAG){r.writeHead(304,H);return r.end()}
+    const gz=/\bgzip\b/.test(q.headers['accept-encoding']||''), body=gz?PAGE_GZ:PAGE; if(gz)H['Content-Encoding']='gzip'; H['Content-Length']=body.length;
+    r.writeHead(200,H); return q.method=='HEAD'?r.end():r.end(body)}
+  r.writeHead(200,H);
   if(q.method=='HEAD')return r.end();const f=fs.createReadStream(INDEX);f.on('error',()=>r.end('index.html missing'));f.pipe(r)});
 const wss=new WebSocketServer({server,maxPayload:8192});
 
